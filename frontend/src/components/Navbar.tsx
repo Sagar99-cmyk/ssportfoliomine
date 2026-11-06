@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SoundButton } from './BackgroundMusic';
 
@@ -90,6 +90,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2.5 shrink-0">
+          {/* Admin Portal Gateway */}
+          <a
+            href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : 'https://chimerical-entremet-dc12c3.netlify.app/'}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Sagar Admin Portal"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-semibold rounded-lg text-rose-300 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 hover:border-rose-500/50 transition-all cursor-pointer shadow-sm"
+          >
+            <Shield className="w-3.5 h-3.5 text-rose-400" />
+            <span>Admin</span>
+          </a>
+
           {/* Background Ambient Music (Guitar & Piano) */}
           <SoundButton />
 
@@ -142,6 +154,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
                   {link.label}
                 </motion.a>
               ))}
+
+              <div className="pt-2 border-t border-white/[0.08]">
+                <a
+                  href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : 'https://chimerical-entremet-dc12c3.netlify.app/'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-mono font-semibold rounded-lg text-rose-300 bg-rose-500/10 border border-rose-500/25 transition-colors"
+                >
+                  <Shield className="w-4 h-4 text-rose-400" />
+                  <span>Admin Portal</span>
+                </a>
+              </div>
             </div>
           </motion.div>
         )}

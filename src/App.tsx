@@ -183,7 +183,8 @@ const PortfolioContent: React.FC = () => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
         const isAdminLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-        window.open(isAdminLocal ? 'http://localhost:3001' : '/admin', '_blank');
+        const adminUrl = isAdminLocal ? 'http://localhost:3001' : 'https://chimerical-entremet-dc12c3.netlify.app/';
+        window.open(adminUrl, '_blank');
       }
     };
     window.addEventListener('keydown', handleKeyDown);

@@ -148,7 +148,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ isOpen, onClose, onLoginSu
         {/* Top-Right Action: Link to User Portfolio if standalone, or Close if modal */}
         {isStandalone ? (
           <a
-            href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3000' : '/'}
+            href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3000' : 'https://ssportfoliomines.vercel.app/'}
             className="absolute top-5 right-5 sm:top-7 sm:right-7 z-30 px-3.5 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 transition-colors shadow-sm text-xs font-mono font-semibold flex items-center gap-1.5 cursor-pointer"
             title="Return to Public Portfolio"
           >

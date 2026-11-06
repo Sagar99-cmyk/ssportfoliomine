@@ -984,6 +984,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, onDataC
           </div>
 
           <div className="pt-4 border-t border-white/[0.08] space-y-2">
+            <a
+              href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3000' : 'https://ssportfoliomines.vercel.app/'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-2 px-3 text-[11px] font-mono rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-rose-300 hover:text-white border border-rose-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              title="Open Public User Portfolio"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-rose-400" />
+              <span>View Public Portfolio ↗</span>
+            </a>
             <button
               onClick={handleTestNotification}
               className="w-full py-2 px-3 text-[11px] font-mono rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-stone-300 hover:text-white border border-white/[0.08] transition-all flex items-center justify-center gap-2 cursor-pointer"
