@@ -49,22 +49,21 @@ Your repository will be live at `https://github.com/<your-username>/Myportfolio`
    - `SMTP_PASS`: Your 16-character Gmail App Password
 6. Click **Apply / Deploy**.
 7. Once deployed, Render will provide your public backend URL, e.g.:
-   `https://sagar-portfolio-backend.onrender.com`
+   `https://ssportfoliomine.onrender.com`
 
 ---
 
 ## 🎨 Step 3: Deploy Frontend to Embarko
 
-1. Go to **Embarko** and connect your GitHub repository **`Myportfolio`**.
+1. Go to **Embarko** and connect your GitHub repository **`ssportfoliomine`**.
 2. Set configuration:
    - **Framework Preset**: Vite / React
    - **Build Command**: `npm run build`
    - **Output Directory**: `dist`
 3. In **Environment Variables**, add:
    ```env
-   VITE_API_URL=https://sagar-portfolio-backend.onrender.com
+   VITE_API_URL=https://ssportfoliomine.onrender.com
    ```
-   *(Replace with your exact Render backend URL)*
 4. Click **Deploy**!
 
 ---
@@ -74,5 +73,5 @@ Your repository will be live at `https://github.com/<your-username>/Myportfolio`
 In [`src/services/api.ts`](./src/services/api.ts), `getBaseUrl()` automatically:
 - Connects to `http://localhost:3000/api` when tested locally on your machine.
 - Reads `import.meta.env.VITE_API_URL` in production (e.g., on Embarko).
-- Automatically falls back to `https://sagar-portfolio-backend.onrender.com/api` for smooth online API & SSE stream calls.
+- Automatically falls back to `https://ssportfoliomine.onrender.com/api` for smooth online API & SSE stream calls.
 

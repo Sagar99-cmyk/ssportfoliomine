@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sagar-portfolio-backend
+    name: ssportfoliomine
     runtime: node
     plan: free
     region: oregon

@@ -31,7 +31,7 @@ const getBaseUrl = (): string => {
 
     // 3. Online Production Deployment (e.g. Embarko, Vercel, Netlify)
     // Points directly to the deployed Render backend service
-    const DEFAULT_RENDER_BACKEND = 'https://sagar-portfolio-backend.onrender.com';
+    const DEFAULT_RENDER_BACKEND = 'https://ssportfoliomine.onrender.com';
     return `${DEFAULT_RENDER_BACKEND}/api`;
   }
 

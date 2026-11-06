@@ -183,11 +183,12 @@ const PortfolioContent: React.FC = () => {
   useEffect(() => {
     fetchPortfolioData();
 
-    // Global shortcut Ctrl+Shift+A or Cmd+Shift+A to open dedicated admin port
+    // Global shortcut Ctrl+Shift+A or Cmd+Shift+A to open dedicated admin panel
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
-        window.open('http://localhost:3001', '_blank');
+        const isAdminLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+        window.open(isAdminLocal ? 'http://localhost:3001' : '/admin', '_blank');
       }
     };
     window.addEventListener('keydown', handleKeyDown);

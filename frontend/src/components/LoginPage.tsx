@@ -145,12 +145,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ isOpen, onClose, onLoginSu
         className="relative z-10 w-full max-w-[980px] max-h-[92vh] overflow-y-auto bg-[#f8f9fa] rounded-[32px] sm:rounded-[44px] shadow-[0_35px_90px_-15px_rgba(45,20,15,0.45),0_0_0_1px_rgba(255,255,255,0.4)] p-4 sm:p-5 md:p-6 overflow-x-hidden text-stone-800"
         onClick={e => e.stopPropagation()}
       >
-        {/* Top-Right Action: Link to User Portfolio if standalone on Port 3001, or Close if modal */}
+        {/* Top-Right Action: Link to User Portfolio if standalone, or Close if modal */}
         {isStandalone ? (
           <a
-            href="http://localhost:3000"
+            href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3000' : '/'}
             className="absolute top-5 right-5 sm:top-7 sm:right-7 z-30 px-3.5 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 transition-colors shadow-sm text-xs font-mono font-semibold flex items-center gap-1.5 cursor-pointer"
-            title="Return to Public Portfolio (Port 3000)"
+            title="Return to Public Portfolio"
           >
             <span>← Public Portfolio</span>
           </a>
