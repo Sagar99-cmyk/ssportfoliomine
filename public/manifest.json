@@ -1,0 +1,27 @@
+{
+  "name": "Sagar Singh | Portfolio & Admin Command Center",
+  "short_name": "Sagar Portfolio",
+  "description": "Sagar Singh's Data Analytics Portfolio, Project Showcases & Real-Time Admin Command Center",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#060810",
+  "theme_color": "#e11d48",
+  "categories": ["portfolio", "analytics", "business", "productivity"],
+  "icons": [
+    {
+      "src": "/profile2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/profile2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

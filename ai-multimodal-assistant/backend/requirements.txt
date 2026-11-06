@@ -1,0 +1,28 @@
+# ==============================================================================
+# Free AI Multimodal Chatbot & Voice Assistant - Python Dependencies
+# Optimized for Windows CPU & Lightweight Local / Free-Tier Inference
+# ==============================================================================
+
+# Web Framework & Server
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.8.0
+pydantic-settings>=2.4.0
+python-multipart>=0.0.9
+websockets>=13.0
+
+# HTTP & API Clients
+httpx>=0.27.0
+requests>=2.32.0
+
+# Text-to-Speech (Free & Local)
+edge-tts>=6.1.12
+
+# Audio Processing & VAD
+numpy>=1.26.0
+soundfile>=0.12.1
+
+# Optional Local STT & TTS (Lazy-loaded, can be installed as needed):
+# faster-whisper>=1.0.0
+# kokoro-onnx>=0.3.0
+

@@ -1,0 +1,427 @@
+import React, { useEffect, useState, useMemo } from 'react';
+import { Download, ArrowRight, Linkedin, Github, Mail, Database, Award, Code2, CheckCircle2, GraduationCap, FolderGit2, Trophy, ShieldCheck } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Profile, Skill, Project, Education } from '../types';
+import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
+import { getTechLogo } from './TechLogos';
+
+interface HeroProps {
+  profile: Profile;
+  skills?: Skill[];
+  projects?: Project[];
+  education?: Education[];
+  onDownloadResume: () => void;
+}
+
+const TYPING_ROLES = [
+  'Data Analyst · Sales Dashboard & BI',
+  'Power BI & Advanced Excel Specialist',
+  'MySQL Database & Relational Analytics',
+  'Python Data Analyst (Pandas & NumPy)',
+  'BCA Graduate · Presidency College 2026',
+];
+
+const TypewriterText: React.FC<{ texts: string[] }> = ({ texts }) => {
+  const [displayed, setDisplayed] = useState('');
+  const [lineIdx, setLineIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const current = texts[lineIdx];
+    const speed = deleting ? 35 : 70;
+    const pause = !deleting && charIdx === current.length ? 1600 : 0;
+
+    const t = setTimeout(() => {
+      if (!deleting && charIdx < current.length) {
+        setDisplayed(current.slice(0, charIdx + 1));
+        setCharIdx(c => c + 1);
+      } else if (!deleting && charIdx === current.length) {
+        setDeleting(true);
+      } else if (deleting && charIdx > 0) {
+        setDisplayed(current.slice(0, charIdx - 1));
+        setCharIdx(c => c - 1);
+      } else {
+        setDeleting(false);
+        setLineIdx(i => (i + 1) % texts.length);
+      }
+    }, pause || speed);
+    return () => clearTimeout(t);
+  }, [charIdx, deleting, lineIdx, texts]);
+
+  return (
+    <span>
+      {displayed}
+      <span
+        className="inline-block w-0.5 h-5 sm:h-6 ml-1 align-middle"
+        style={{ background: '#f43f5e', animation: 'blink 1s step-end infinite' }}
+      />
+      <style>{`@keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }`}</style>
+    </span>
+  );
+};
+
+const StylishNameTitle: React.FC<{ name: string }> = ({ name }) => {
+  const parts = name.trim().split(/\s+/);
+  const firstName = parts[0] || 'Sagar';
+  const lastName = parts.slice(1).join(' ') || 'Singh';
+
+  return (
+    <div className="relative inline-block select-none group">
+      
+      {/* Liquid Gold & Radiant Red Shining Shimmer Animations */}
+      <style>{`
+        @keyframes goldShineSweep {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes redShineSweep {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes multiColorShineSweep {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .golden-shining-name {
+          background-image: linear-gradient(115deg, #f59e0b 0%, #fbbf24 22%, #ffffff 45%, #fef08a 65%, #d97706 85%, #b45309 100%);
+          background-size: 260% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: goldShineSweep 5s linear infinite;
+        }
+        .red-shining-singh {
+          background-image: linear-gradient(115deg, #e11d48 0%, #f43f5e 20%, #ffffff 42%, #fda4af 60%, #e11d48 80%, #9f1239 100%);
+          background-size: 260% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: redShineSweep 5s linear infinite 0.5s;
+        }
+      `}</style>
+
+      {/* 2-Word Distinct Luxury Styling: SAGAR in Gold, SINGH in Radiant Red with Shining Shimmer */}
+      <div className="flex flex-wrap items-baseline justify-center lg:justify-start gap-x-4 sm:gap-x-5 gap-y-1">
+        {/* WORD 1: SAGAR (Luxury Radiant Polished Gold with Continuous Light Sweep, No Hover Zoom) */}
+        <div className="inline-flex whitespace-nowrap relative">
+          {firstName.split('').map((char, cIdx) => (
+            <span
+              key={`first-${cIdx}`}
+              className="inline-block font-black tracking-tight cursor-default golden-shining-name"
+              style={{
+                fontSize: 'clamp(2.8rem, 7vw, 5.2rem)',
+                filter: 'drop-shadow(0 4px 16px rgba(245,158,11,0.3))',
+              }}
+            >
+              {char}
+            </span>
+          ))}
+        </div>
+
+        {/* WORD 2: SINGH (Radiant Shining Ruby Crimson Red with Continuous Light Sweep, No Hover Zoom) */}
+        <div className="inline-flex whitespace-nowrap relative">
+          {lastName.split('').map((char, cIdx) => (
+            <span
+              key={`last-${cIdx}`}
+              className="inline-block font-black tracking-tight cursor-default red-shining-singh"
+              style={{
+                fontSize: 'clamp(2.8rem, 7vw, 5.2rem)',
+                filter: 'drop-shadow(0 4px 16px rgba(225,29,72,0.35))',
+              }}
+            >
+              {char}
+            </span>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  );
+};
+
+export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [], education = [], onDownloadResume }) => {
+  const typingRoles = useMemo(() => {
+    return [
+      'Data Analyst · Sales Dashboard & BI',
+      'Power BI & Advanced Excel Specialist',
+      'MySQL Database & Relational Analytics',
+      'Python Data Analyst (Pandas & NumPy)',
+      'BCA Graduate · Presidency College 2026',
+    ];
+  }, []);
+
+  const heroTags = useMemo(() => {
+    // The top 4 skills as ordered dynamically from Admin panel
+    if (skills && skills.length >= 4) {
+      return skills.slice(0, 4).map((s) => ({
+        label: s.name,
+        icon: getTechLogo(s.name, s.iconUrl, 'w-4 h-4 shrink-0'),
+      }));
+    }
+    return [
+      { icon: getTechLogo('Power BI', undefined, 'w-4 h-4 shrink-0'), label: 'Power BI' },
+      { icon: getTechLogo('MySQL', undefined, 'w-4 h-4 shrink-0'), label: 'MySQL' },
+      { icon: getTechLogo('Python', undefined, 'w-4 h-4 shrink-0'), label: 'Python' },
+      { icon: getTechLogo('Advanced Excel', undefined, 'w-4 h-4 shrink-0'), label: 'Excel' },
+    ];
+  }, [skills]);
+
+  const statsList = useMemo(() => {
+    const highestDegree = education?.[0]?.degree ? (education[0].degree.includes('BCA') ? 'BCA 2026' : education[0].degree) : 'BCA 2026';
+    const institutionText = education?.[0]?.institution || 'Presidency College Degree';
+    const projectCountText = projects.length > 0 ? `${projects.length}+ Projects` : '3+ Projects';
+    const rowsText = profile.stats?.rowsProcessed || '150K+';
+    const accuracyText = profile.stats?.forecastAccuracy || '98.5%';
+
+    return [
+      { value: highestDegree, label: institutionText, color: '#e11d48', icon: <GraduationCap className="w-5 h-5 mb-2 mx-auto text-rose-500" /> },
+      { value: projectCountText, label: 'Major & Minor Capstones', color: '#38bdf8', icon: <FolderGit2 className="w-5 h-5 mb-2 mx-auto text-sky-400" /> },
+      { value: rowsText, label: 'Data Records Modeled & Analyzed', color: '#22c55e', icon: <Trophy className="w-5 h-5 mb-2 mx-auto text-emerald-400" /> },
+      { value: accuracyText, label: 'Forecast & KPI Dashboard Precision', color: '#f59e0b', icon: <ShieldCheck className="w-5 h-5 mb-2 mx-auto text-amber-400" /> },
+    ];
+  }, [education, projects, profile.stats]);
+  return (
+    <section className="relative pt-8 pb-20 md:pt-16 md:pb-28 overflow-hidden select-none">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12">
+
+        {/* ===================================================================== */}
+        {/* MOBILE & TABLET HEADER: Available Badge -> Name -> Dynamic Role Statement */}
+        {/* ===================================================================== */}
+        <div className="lg:hidden flex flex-col items-center text-center space-y-4">
+          {/* Availability Badge */}
+          {profile.isAvailable && (
+            <div
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold"
+              style={{
+                background: 'rgba(34,197,94,0.1)',
+                borderColor: 'rgba(34,197,94,0.3)',
+                color: '#22c55e',
+              }}
+            >
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{ background: '#22c55e', boxShadow: '0 0 6px #22c55e', animation: 'pulse 2s infinite' }}
+              />
+              <span>{profile.availabilityStatus || 'Available for Data Analyst & Entry-Level Tech Roles'}</span>
+            </div>
+          )}
+
+          {/* Stylish Name */}
+          <div className="space-y-2 w-full">
+            <StylishNameTitle name={profile.name} />
+
+            {/* Stable Single Container with Fixed Height & Constant Crisp Rose Color - Never Shifts Layout */}
+            <div className="h-9 sm:h-11 flex items-center justify-center w-full overflow-hidden">
+              <span className="text-lg sm:text-2xl font-bold tracking-tight text-rose-400 whitespace-nowrap">
+                <TypewriterText texts={typingRoles} />
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+
+          {/* Photo Avatar + Quick Skills Card */}
+          <div className="lg:col-span-5 flex flex-col items-center gap-5 lg:order-2">
+            {/* Professional Portrait with Natural Eye Blink Animation */}
+            <ProfessionalPhotoAvatar />
+
+            {/* Quick Skills Summary Pill Card below photo - Exact Match to Screenshot */}
+            <div
+              className="w-full max-w-sm p-4 rounded-2xl border space-y-3.5 transition-all"
+              style={{
+                background: 'rgba(12,15,24,0.5)',
+                borderColor: 'rgba(225,29,72,0.25)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+              }}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs text-white font-mono shrink-0 shadow-md"
+                    style={{ background: 'linear-gradient(135deg, #e11d48, #9f1239)' }}
+                  >
+                    SS
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <p className="font-bold text-sm text-white truncate">{profile.name}</p>
+                    <p className="text-[11px] text-stone-400 truncate">BCA Graduate · Presidency College</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 shrink-0 px-2 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-800/40">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Verified</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {heroTags.map((item, i) => (
+                  <div
+                    key={i}
+                    className="p-2.5 rounded-xl flex items-center gap-2 font-medium border text-[11px] min-w-0 transition-all hover:border-stone-700"
+                    style={{
+                      background: 'rgba(255,255,255,0.035)',
+                      borderColor: 'rgba(255,255,255,0.08)',
+                      color: '#cbd5e1',
+                    }}
+                  >
+                    {item.icon}
+                    <span className="truncate">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Text Content (Desktop: Full Left Column | Mobile: Intro, Buttons, Connect) */}
+          <div className="lg:col-span-7 space-y-6 text-center lg:text-left lg:order-1 flex flex-col items-center lg:items-start">
+            
+            {/* Desktop Only: Badge, Name & Typewriter */}
+            <div className="hidden lg:flex flex-col items-start space-y-6 w-full">
+              {profile.isAvailable && (
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold"
+                  style={{
+                    background: 'rgba(34,197,94,0.1)',
+                    borderColor: 'rgba(34,197,94,0.3)',
+                    color: '#22c55e',
+                  }}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{ background: '#22c55e', boxShadow: '0 0 6px #22c55e', animation: 'pulse 2s infinite' }}
+                  />
+                  <span>{profile.availabilityStatus || 'Available for Data Analyst & Entry-Level Tech Roles'}</span>
+                </div>
+              )}
+
+              <div className="space-y-3 w-full">
+                <StylishNameTitle name={profile.name} />
+
+                {/* Stable Single Container with Fixed Height & Constant Crisp Rose Color - Never Shifts Layout */}
+                <div className="h-10 md:h-12 flex items-center justify-start w-full overflow-hidden">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-rose-400 whitespace-nowrap">
+                    <TypewriterText texts={typingRoles} />
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Intro text */}
+            <p className="text-sm sm:text-base md:text-lg leading-relaxed max-w-xl text-stone-300">
+              {profile.intro}
+            </p>
+
+            {/* Meta line */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 text-xs sm:text-sm font-medium text-stone-400">
+              <span>{profile.location}</span>
+              <span className="text-stone-600">·</span>
+              <span>Presidency College (BCA 2026)</span>
+              <span className="text-stone-600">·</span>
+              <span>Data Analytics · Power BI · MySQL · Python</span>
+            </div>
+
+            {/* Action Buttons - Fully Responsive Mobile, Tablet & Desktop */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 w-full">
+              <a
+                href="#projects"
+                className="px-5 sm:px-6 py-3 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 group w-full sm:w-auto text-center shrink-0 cursor-pointer shadow-lg hover:brightness-110 active:scale-95 transition-all"
+                style={{
+                  background: 'linear-gradient(135deg, #e11d48, #be123c)',
+                  color: '#fff',
+                  boxShadow: '0 4px 20px rgba(225,29,72,0.3)',
+                }}
+              >
+                <span>See My Work</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </a>
+
+              <button
+                onClick={onDownloadResume}
+                className="px-5 sm:px-6 py-3 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border w-full sm:w-auto text-center shrink-0 cursor-pointer hover:bg-white/10 active:scale-95 transition-all"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  borderColor: 'rgba(255,255,255,0.15)',
+                  color: '#e2e8f0',
+                }}
+              >
+                <Download className="w-4 h-4" style={{ color: '#e11d48' }} />
+                <span>Get Resume</span>
+              </button>
+
+              <a
+                href="#contact"
+                className="px-5 sm:px-6 py-3 rounded-xl text-xs sm:text-sm font-medium border transition-all w-full sm:w-auto text-center shrink-0 cursor-pointer hover:border-white/20 active:scale-95"
+                style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}
+              >
+                Let's Connect
+              </a>
+            </div>
+
+            {/* Social Links */}
+            <div className="pt-2 flex items-center justify-center lg:justify-start gap-3">
+              <span className="text-xs uppercase tracking-widest font-mono" style={{ color: '#475569' }}>
+                Connect:
+              </span>
+              {[
+                { href: profile.linkedinUrl, icon: <Linkedin className="w-4 h-4" />, label: 'LinkedIn' },
+                { href: profile.githubUrl, icon: <Github className="w-4 h-4" />, label: 'GitHub' },
+                { href: `mailto:${profile.email}`, icon: <Mail className="w-4 h-4" />, label: 'Email' },
+              ].map(({ href, icon, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-2.5 rounded-lg border transition-all hover:scale-110 hover:text-rose-400"
+                  style={{
+                    color: '#64748b',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.04)',
+                  }}
+                  title={label}
+                >
+                  {icon}
+                </a>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Highlight Stats Strip (With Icons & Clean Grid Alignment) */}
+        <div
+          className="pt-6 grid grid-cols-2 md:grid-cols-4 gap-4"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
+        >
+          {statsList.map((stat, i) => (
+            <div
+              key={i}
+              className="p-5 rounded-2xl border text-center transition-all hover:scale-105"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                borderColor: 'rgba(255,255,255,0.08)',
+              }}
+            >
+              {stat.icon}
+              <div
+                className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight"
+                style={{ color: stat.color }}
+              >
+                {stat.value}
+              </div>
+              <div className="text-xs mt-1.5 font-medium" style={{ color: '#94a3b8' }}>
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </section>
+  );
+};
