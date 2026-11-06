@@ -131,11 +131,9 @@ class ApiService {
   private authToken: string | null = null;
 
   constructor() {
-    // Purge any legacy tokens from browser storage to ensure compliance
     if (typeof window !== 'undefined') {
       try {
-        window.sessionStorage.removeItem(this.tokenKey);
-        window.localStorage.removeItem(this.tokenKey);
+        this.authToken = window.sessionStorage.getItem(this.tokenKey) || window.localStorage.getItem(this.tokenKey) || null;
       } catch {}
     }
   }
@@ -145,16 +143,30 @@ class ApiService {
   }
 
   getAuthToken(): string | null {
-    return this.authToken;
+    if (this.authToken) return this.authToken;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = window.sessionStorage.getItem(this.tokenKey) || window.localStorage.getItem(this.tokenKey);
+        if (stored) {
+          this.authToken = stored;
+          return stored;
+        }
+      } catch {}
+    }
+    return null;
   }
 
   setAuthToken(token: string | null): void {
     this.authToken = token;
-    // Strictly keep token in memory; ensure nothing touches persistent storage
     if (typeof window !== 'undefined') {
       try {
-        window.sessionStorage.removeItem(this.tokenKey);
-        window.localStorage.removeItem(this.tokenKey);
+        if (token) {
+          window.sessionStorage.setItem(this.tokenKey, token);
+          window.localStorage.setItem(this.tokenKey, token);
+        } else {
+          window.sessionStorage.removeItem(this.tokenKey);
+          window.localStorage.removeItem(this.tokenKey);
+        }
       } catch {}
     }
   }
