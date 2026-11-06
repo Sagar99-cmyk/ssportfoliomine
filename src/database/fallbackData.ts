@@ -226,46 +226,49 @@ export const FALLBACK_EDUCATION = [
   {
     id: 'edu-bca',
     degree: 'Bachelor of Computer Applications (BCA)',
-    institution: 'Presidency College',
-    location: 'Bengaluru, Karnataka',
+    institution: 'Presidency College (Bengaluru City University)',
+    location: 'Bengaluru, Karnataka, India',
     period: '2023 – 2026',
-    grade_gpa: 'Undergraduate Degree',
-    description: 'Undergraduate studies focusing on Database Management Systems, Data Structures, Software Engineering, Python Programming, and Web Development.',
+    grade_gpa: 'Undergraduate Degree · In Progress',
+    description: 'Comprehensive undergraduate studies in Computer Applications with specialization in Database Management Systems (RDBMS), Data Analytics & Power BI, Data Structures & Algorithms, Python Programming, and Enterprise Web Development.',
     hierarchy_level: 1,
     display_order: 1,
     highlights: [
-      'Major Coursework: Relational Database Management Systems (RDBMS), SQL, Data Structures in C/C++, Web Programming',
-      'Developed PG Rental Management System (Full-Stack web project with Supabase cloud database integration)',
-      'Active participant in college coding symposiums, tech quizzes, and academic data workshops'
+      'Major Coursework: Relational Database Management Systems (RDBMS), Advanced SQL, Data Structures in C/C++, Web Programming, and Software Engineering.',
+      'Capstone Project: Developed the PG Rental Management System — a full-stack platform with real-time Supabase cloud database and multi-role access (Admin, Owner, Tenant).',
+      'Analytics Flagship: Architected the executive Sales Performance & Customer Analytics Dashboard analyzing $2.4M in transactional revenue.',
+      'Academic Activities: Active participant in inter-college coding symposiums, tech quizzes, and data analytics bootcamps.'
     ]
   },
   {
     id: 'edu-12',
     degree: 'Higher Secondary Education (NEB – Class 12)',
-    institution: 'Shree Sunlight Public School',
+    institution: 'Shree Sunlight Public School (National Examinations Board)',
     location: 'Nepal',
     period: '2020 – 2022',
-    grade_gpa: 'Percentage: 71%',
-    description: 'Completed Class 12 under National Examinations Board (NEB) with major coursework in Computer Science, Mathematics, Physics, and English.',
+    grade_gpa: 'Percentage: 71% · First Division with Distinction',
+    description: 'Completed Class 12 under the National Examinations Board (NEB) with major coursework in Computer Science, Higher Mathematics, Physics, Chemistry, and English.',
     hierarchy_level: 2,
     display_order: 2,
     highlights: [
-      'Specialized stream in Computer Science and Higher Mathematics',
-      'Foundation in C programming, database fundamentals, and boolean algebra'
+      'Specialized stream in Computer Science and Higher Mathematics.',
+      'Strong foundation in C programming syntax, memory pointers, logic gates, and database normalization fundamentals.',
+      'Graduated with First Division honors under NEB national accreditation.'
     ]
   },
   {
     id: 'edu-10',
     degree: 'Secondary Education (NEB – Class 10)',
-    institution: 'Shree Sunlight Public School',
+    institution: 'Shree Sunlight Public School (National Examinations Board)',
     location: 'Nepal',
     period: '2018 – 2020',
-    grade_gpa: 'Percentage: 78%',
-    description: 'Graduated Class 10 with strong academic performance in Mathematics, Computer Applications, and Science.',
+    grade_gpa: 'Percentage: 78% · Distinction Honours',
+    description: 'Graduated Class 10 under the National Examinations Board (NEB) with distinguished academic excellence across Mathematics, Computer Applications, and Science.',
     hierarchy_level: 3,
     display_order: 3,
     highlights: [
-      'Distinction performance in Computer Science, Mathematics, and Science'
+      'Achieved Distinction honors across Computer Applications, Mathematics, and Science.',
+      'Selected as student technology club representative and science fair contributor.'
     ]
   }
 ];
@@ -274,12 +277,13 @@ export const FALLBACK_ACHIEVEMENTS = [
   {
     id: 'ach-quiz',
     title: '2nd Place: Inter-College IT Quiz Competition',
-    issuer: 'BMSIT, Shesadripuram & Reputed Institutions',
+    issuer: 'BMSIT, Seshadripuram & Partner Tech Institutions',
     issue_date: '2025',
     credential_url: 'https://linkedin.com/in/sagarsingh2005',
     credential_id: 'IT-QUIZ-2025-2ND',
-    category: 'Competition',
-    skills_tags: ['Computer Fundamentals', 'Data Analytics', 'IT General Knowledge', 'Quick Problem Solving'],
+    category: 'Competition & Academic Honor',
+    skills_tags: ['Data Analytics', 'Computer Architecture', 'Relational Databases', 'Algorithmic Problem Solving', 'IT Fundamentals'],
+    description: 'Awarded 2nd Place among 60+ collegiate teams in a rigorous inter-college technology competition testing proficiency in database queries, data structures, and computer science innovations.',
     display_order: 1
   },
   {
@@ -289,9 +293,34 @@ export const FALLBACK_ACHIEVEMENTS = [
     issue_date: '2025',
     credential_url: 'https://linkedin.com/in/sagarsingh2005',
     credential_id: 'NCC-SGT-CERT-B-2025',
-    category: 'Defense & Leadership',
-    skills_tags: ['Leadership', 'Team Management', 'Crisis Discipline', 'Field Operations'],
+    category: 'Defense, Leadership & Discipline',
+    skills_tags: ['Contingent Leadership', 'Crisis Discipline', 'Logistics Management', 'Team Operations', 'Command & Control'],
+    description: 'Promoted to Sergeant rank after demonstrating high-stakes team command, obstacle training resilience, drill execution, and national camp participation under NCC authority.',
     display_order: 2
+  },
+  {
+    id: 'ach-pbi',
+    title: 'Power BI & Business Intelligence Specialization',
+    issuer: 'Microsoft Power BI & Industry Analytics Program',
+    issue_date: '2025',
+    credential_url: 'https://linkedin.com/in/sagarsingh2005',
+    credential_id: 'PBI-DAX-SPEC-2025',
+    category: 'Professional Certification',
+    skills_tags: ['Power BI Desktop', 'DAX Calculations', 'Power Query ETL', 'Data Modeling', 'Interactive Dashboards'],
+    description: 'Practical industry certification covering star schema dimensional modeling, dynamic DAX measures (YoY sales, margin %, cohort analysis), automated ETL workflows, and executive reporting.',
+    display_order: 3
+  },
+  {
+    id: 'ach-excel',
+    title: 'Advanced Excel & Business Analytics Masterclass',
+    issuer: 'Analytics & Business Intelligence Academy',
+    issue_date: '2025',
+    credential_url: 'https://linkedin.com/in/sagarsingh2005',
+    credential_id: 'EXCEL-ADV-2025-BI',
+    category: 'Professional Certification',
+    skills_tags: ['Advanced Excel', 'Pivot Tables & Slicers', 'XLOOKUP & INDEX/MATCH', 'Data Validation', 'Automated KPI Reports'],
+    description: 'Hands-on credential validating mastery of multi-criteria lookup formulas, dynamic array functions, financial modeling, pivot tables, and automated monthly management KPI templates.',
+    display_order: 4
   }
 ];
 

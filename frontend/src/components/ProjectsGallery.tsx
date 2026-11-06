@@ -17,7 +17,10 @@ const TYPE_COLORS: Record<string, { bg: string; text: string; border: string }> 
 
 // Extract or generate verified domain skills applied for each project
 const getProjectSkills = (project: Project): string[] => {
-  const t = (project.title + ' ' + project.shortDescription + ' ' + (project.technologies || []).join(' ')).toLowerCase();
+  const pTitle = project.title || '';
+  const pDesc = project.shortDescription || (project as any).short_description || '';
+  const pTechs = Array.isArray(project.technologies) ? project.technologies.join(' ') : '';
+  const t = (pTitle + ' ' + pDesc + ' ' + pTechs).toLowerCase();
   const skills: string[] = [];
 
   if (t.includes('power bi') || t.includes('sales') || t.includes('dashboard')) {
@@ -87,21 +90,26 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
 
   const filteredProjects = useMemo(() => {
     return projects.filter(p => {
-      const q = searchQuery.toLowerCase();
+      const q = (searchQuery || '').trim().toLowerCase();
+      const pTitle = (p.title || '').toLowerCase();
+      const pDesc = (p.shortDescription || (p as any).short_description || '').toLowerCase();
+      const pTechs = Array.isArray(p.technologies) ? p.technologies : [];
       const matchesSearch =
-        p.title.toLowerCase().includes(q) ||
-        p.shortDescription.toLowerCase().includes(q) ||
-        p.technologies.some(t => t.toLowerCase().includes(q));
+        !q ||
+        pTitle.includes(q) ||
+        pDesc.includes(q) ||
+        pTechs.some(t => (t || '').toLowerCase().includes(q));
 
       const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
 
+      const pType = p.projectType || (p as any).project_type || '';
       let matchesType = true;
       if (selectedTypeTab === 'Major') {
-        matchesType = p.projectType?.includes('Major') || p.title.toLowerCase().includes('major');
+        matchesType = pType.includes('Major') || pTitle.includes('major');
       } else if (selectedTypeTab === 'Minor') {
-        matchesType = p.projectType?.includes('Minor') || p.title.toLowerCase().includes('minor');
+        matchesType = pType.includes('Minor') || pTitle.includes('minor');
       } else if (selectedTypeTab === 'Micro/Mini') {
-        matchesType = p.projectType?.includes('Micro') || p.projectType?.includes('Mini') || (!p.projectType?.includes('Major') && !p.projectType?.includes('Minor'));
+        matchesType = pType.includes('Micro') || pType.includes('Mini') || (!pType.includes('Major') && !pType.includes('Minor'));
       }
 
       return matchesSearch && matchesCategory && matchesType;
@@ -235,9 +243,9 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
         <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-stone-900/90 border border-stone-800 w-fit">
           {[
             { id: 'All', label: 'All Projects', count: projects.length },
-            { id: 'Major', label: 'Major Projects', count: projects.filter(p => p.projectType?.includes('Major') || p.title.toLowerCase().includes('major')).length },
-            { id: 'Minor', label: 'Minor Projects', count: projects.filter(p => p.projectType?.includes('Minor') || p.title.toLowerCase().includes('minor')).length },
-            { id: 'Micro/Mini', label: 'Micro / Mini', count: projects.filter(p => p.projectType?.includes('Micro') || p.projectType?.includes('Mini')).length },
+            { id: 'Major', label: 'Major Projects', count: projects.filter(p => (p.projectType || (p as any).project_type || '').includes('Major') || (p.title || '').toLowerCase().includes('major')).length },
+            { id: 'Minor', label: 'Minor Projects', count: projects.filter(p => (p.projectType || (p as any).project_type || '').includes('Minor') || (p.title || '').toLowerCase().includes('minor')).length },
+            { id: 'Micro/Mini', label: 'Micro / Mini', count: projects.filter(p => (p.projectType || (p as any).project_type || '').includes('Micro') || (p.projectType || (p as any).project_type || '').includes('Mini')).length },
           ].map(tab => (
             <button
               key={tab.id}

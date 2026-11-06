@@ -329,6 +329,15 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 w-full">
               <a
                 href="#projects"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const target = document.getElementById('projects');
+                  if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                    window.location.hash = '#projects';
+                  }
+                }}
                 className="px-5 sm:px-6 py-3 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 group w-full sm:w-auto text-center shrink-0 cursor-pointer shadow-lg hover:brightness-110 active:scale-95 transition-all"
                 style={{
                   background: 'linear-gradient(135deg, #e11d48, #be123c)',

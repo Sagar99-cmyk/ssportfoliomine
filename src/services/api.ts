@@ -9,6 +9,92 @@ import {
   SystemMetrics,
   AppearanceSettings,
 } from '../types';
+import {
+  DEFAULT_PROFILE,
+  DEFAULT_SKILLS,
+  DEFAULT_EDUCATION,
+  DEFAULT_ACHIEVEMENTS,
+  DEFAULT_PROJECTS,
+} from '../data/defaultData';
+
+export function normalizeProject(raw: any): Project {
+  if (!raw) return DEFAULT_PROJECTS[0];
+  return {
+    id: raw.id || `proj-${Math.random().toString(36).substring(2, 7)}`,
+    title: raw.title || 'Untitled Project',
+    projectType: raw.projectType || raw.project_type || 'Major Project',
+    shortDescription: raw.shortDescription || raw.short_description || raw.description || '',
+    category: raw.category || 'Data Analytics',
+    difficulty: raw.difficulty || 'Advanced',
+    featured: raw.featured !== undefined ? Boolean(raw.featured) : true,
+    thumbnailUrl: raw.thumbnailUrl || raw.thumbnail_url || '/projects/sales-dashboard.png',
+    technologies: Array.isArray(raw.technologies)
+      ? raw.technologies
+      : (typeof raw.technologies === 'string'
+        ? (raw.technologies.startsWith('[') ? JSON.parse(raw.technologies) : raw.technologies.split(',').map((s: string) => s.trim()))
+        : []),
+    skills: Array.isArray(raw.skills) ? raw.skills : [],
+    liveDemoUrl: raw.liveDemoUrl || raw.live_demo_url || 'https://github.com/Sagar99-cmyk',
+    githubUrl: raw.githubUrl || raw.github_url || 'https://github.com/Sagar99-cmyk',
+    linkedinUrl: raw.linkedinUrl || raw.linkedin_url || 'https://linkedin.com/in/sagarsingh2005',
+    youtubeUrl: raw.youtubeUrl || raw.youtube_url || '',
+    dateCreated: raw.dateCreated || raw.date_created || '2026-03-01',
+    caseStudy: raw.caseStudy || raw.case_study || {
+      overview: raw.shortDescription || raw.short_description || 'Detailed technical breakdown and case study.',
+      businessProblem: 'Data fragmentation and reporting latency across disconnected spreadsheets.',
+      datasetInfo: 'Transactional database records and multi-year retail datasets.',
+      dataCleaningPrep: 'Standardized schemas, automated ETL, and null handling.',
+      methodology: 'Star schema relational modeling and interactive visual KPI metrics.',
+      keyFindings: ['Identified revenue growth patterns and executive performance KPIs.'],
+      recommendations: ['Maintain automated reporting pipelines and predictive restocking.'],
+      limitations: 'Offline sync intervals.'
+    }
+  };
+}
+
+export function normalizeEducation(raw: any): Education {
+  if (!raw) return DEFAULT_EDUCATION[0];
+  let highlights = Array.isArray(raw.highlights)
+    ? raw.highlights
+    : (typeof raw.highlights === 'string'
+      ? (raw.highlights.startsWith('[') ? JSON.parse(raw.highlights) : [raw.highlights])
+      : []);
+  return {
+    id: raw.id || `edu-${Math.random().toString(36).substring(2, 7)}`,
+    degree: raw.degree || '',
+    institution: raw.institution || '',
+    location: raw.location || '',
+    period: raw.period || '',
+    gradeGpa: raw.gradeGpa || raw.grade_gpa || '',
+    description: raw.description || '',
+    highlights,
+    level: raw.level || (raw.hierarchy_level ? `Level ${raw.hierarchy_level}` : undefined),
+    order: raw.order ?? raw.display_order ?? raw.hierarchy_level ?? 1
+  };
+}
+
+export function normalizeAchievement(raw: any): Achievement {
+  if (!raw) return DEFAULT_ACHIEVEMENTS[0];
+  let skills = Array.isArray(raw.skills)
+    ? raw.skills
+    : (Array.isArray(raw.skills_tags)
+      ? raw.skills_tags
+      : (typeof raw.skills_tags === 'string'
+        ? (raw.skills_tags.startsWith('[') ? JSON.parse(raw.skills_tags) : raw.skills_tags.split(',').map((s: string) => s.trim()))
+        : []));
+  return {
+    id: raw.id || `ach-${Math.random().toString(36).substring(2, 7)}`,
+    title: raw.title || '',
+    issuer: raw.issuer || '',
+    issueDate: raw.issueDate || raw.issue_date || '',
+    credentialUrl: raw.credentialUrl || raw.credential_url || '',
+    credentialId: raw.credentialId || raw.credential_id || '',
+    category: raw.category || 'Honors & Certifications',
+    skills,
+    badgeUrl: raw.badgeUrl || raw.badge_url || '',
+    description: raw.description || ''
+  };
+}
 
 const getBaseUrl = (): string => {
   // 1. Explicit Vite Environment Variable (e.g. from Embarko or deployment dashboard: VITE_API_URL)
@@ -151,7 +237,22 @@ class ApiService {
 
   // Profile
   async getProfile(): Promise<Profile> {
-    return this.request<Profile>('/profile');
+    try {
+      const res = await this.request<any>('/profile');
+      if (res && res.name) {
+        return {
+          ...DEFAULT_PROFILE,
+          ...res,
+          stats: {
+            ...DEFAULT_PROFILE.stats,
+            ...(res.stats || {})
+          }
+        };
+      }
+      return DEFAULT_PROFILE;
+    } catch {
+      return DEFAULT_PROFILE;
+    }
   }
 
   async updateProfile(data: Partial<Profile>): Promise<Profile> {
@@ -163,7 +264,24 @@ class ApiService {
 
   // Skills
   async getSkills(): Promise<Skill[]> {
-    return this.request<Skill[]>('/skills');
+    try {
+      const res = await this.request<any[]>('/skills');
+      if (Array.isArray(res) && res.length > 0) {
+        return res.map(s => ({
+          id: s.id || `skill-${Math.random()}`,
+          name: s.name || '',
+          category: s.category || 'Data Analytics',
+          proficiencyLevel: s.proficiencyLevel || s.proficiency_level || 'Advanced',
+          description: s.description || '',
+          toolsUsed: Array.isArray(s.toolsUsed) ? s.toolsUsed : (Array.isArray(s.tools_used) ? s.tools_used : []),
+          projectsCount: s.projectsCount ?? s.projects_count ?? 3,
+          featured: Boolean(s.featured)
+        }));
+      }
+      return DEFAULT_SKILLS;
+    } catch {
+      return DEFAULT_SKILLS;
+    }
   }
 
   async createSkill(data: Omit<Skill, 'id' | 'projectsCount'>): Promise<Skill> {
@@ -193,11 +311,25 @@ class ApiService {
 
   // Projects
   async getProjects(): Promise<Project[]> {
-    return this.request<Project[]>('/projects');
+    try {
+      const res = await this.request<any[]>('/projects');
+      if (Array.isArray(res) && res.length > 0) {
+        return res.map(normalizeProject);
+      }
+      return DEFAULT_PROJECTS;
+    } catch {
+      return DEFAULT_PROJECTS;
+    }
   }
 
   async getProject(id: string): Promise<Project> {
-    return this.request<Project>(`/projects/${id}`);
+    try {
+      const res = await this.request<any>(`/projects/${id}`);
+      return normalizeProject(res);
+    } catch {
+      const fallback = DEFAULT_PROJECTS.find(p => p.id === id) || DEFAULT_PROJECTS[0];
+      return fallback;
+    }
   }
 
   async createProject(data: Partial<Project>): Promise<Project> {
@@ -263,7 +395,15 @@ class ApiService {
 
   // Education
   async getEducation(): Promise<Education[]> {
-    return this.request<Education[]>('/education');
+    try {
+      const res = await this.request<any[]>('/education');
+      if (Array.isArray(res) && res.length > 0) {
+        return res.map(normalizeEducation);
+      }
+      return DEFAULT_EDUCATION;
+    } catch {
+      return DEFAULT_EDUCATION;
+    }
   }
 
   async createEducation(data: Partial<Education>): Promise<Education> {
@@ -286,7 +426,18 @@ class ApiService {
 
   // Achievements
   async getAchievements(): Promise<Achievement[]> {
-    return this.request<Achievement[]>('/achievements');
+    try {
+      const res = await this.request<any[]>('/achievements');
+      if (Array.isArray(res) && res.length > 0) {
+        const mapped = res.map(normalizeAchievement);
+        const existingTitles = new Set(mapped.map(m => m.title.toLowerCase().trim()));
+        const additionalDefaults = DEFAULT_ACHIEVEMENTS.filter(d => !existingTitles.has(d.title.toLowerCase().trim()));
+        return [...mapped, ...additionalDefaults];
+      }
+      return DEFAULT_ACHIEVEMENTS;
+    } catch {
+      return DEFAULT_ACHIEVEMENTS;
+    }
   }
 
   async createAchievement(data: Partial<Achievement>): Promise<Achievement> {

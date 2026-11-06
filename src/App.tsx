@@ -15,31 +15,13 @@ import { LoginPage } from './components/LoginPage';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { api } from './services/api';
 import { Profile, Skill, Project, Education, Achievement } from './types';
-
-const DEFAULT_PROFILE: Profile = {
-  id: 'profile-main',
-  name: 'Sagar Singh',
-  designation: 'BCA Graduate | Data Analyst & BI Specialist',
-  tagline: 'Dedicated BCA graduate specializing in Data Analytics, Power BI, Advanced Excel, MySQL, and Python.',
-  intro: 'Dedicated BCA graduate specializing in Data Analytics, Power BI, Advanced Excel, MySQL, and Python. Experienced in transforming raw transactional datasets into interactive sales dashboards, automated KPI reports, and actionable business intelligence.',
-  aboutBio: 'Focused and dedicated BCA graduate from Presidency College, Bengaluru (2026) specializing in Data Analytics, Business Intelligence, and Database Systems.',
-  avatarUrl: '/profile2.png',
-  resumeUrl: '/assets/Sagar_Singh_Resume.pdf',
-  location: 'Bengaluru, Karnataka, India',
-  email: 'sirroshan999@gmail.com',
-  phone: '+91 7892570634',
-  linkedinUrl: 'https://linkedin.com/in/sagarsingh2005',
-  githubUrl: 'https://github.com/Sagar99-cmyk',
-  kaggleUrl: 'https://kaggle.com',
-  isAvailable: true,
-  availabilityStatus: 'Available for Data Analyst & Entry-Level Tech Roles',
-  stats: {
-    yearsExperience: 1,
-    dashboardsDelivered: 6,
-    rowsProcessed: '150K+',
-    forecastAccuracy: '98.5%',
-  },
-};
+import {
+  DEFAULT_PROFILE,
+  DEFAULT_SKILLS,
+  DEFAULT_PROJECTS,
+  DEFAULT_EDUCATION,
+  DEFAULT_ACHIEVEMENTS,
+} from './data/defaultData';
 
 // Global Error Boundary to prevent any unhandled component crash from blanking the screen
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: any }> {
@@ -172,12 +154,12 @@ const PortfolioContent: React.FC = () => {
   // State
   const [hasEntered, setHasEntered] = useState<boolean>(false);
   const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [education, setEducation] = useState<Education[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [skills, setSkills] = useState<Skill[]>(DEFAULT_SKILLS);
+  const [projects, setProjects] = useState<Project[]>(DEFAULT_PROJECTS);
+  const [education, setEducation] = useState<Education[]>(DEFAULT_EDUCATION);
+  const [achievements, setAchievements] = useState<Achievement[]>(DEFAULT_ACHIEVEMENTS);
 
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

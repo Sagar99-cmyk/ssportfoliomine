@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Download, CheckCircle2, FolderGit2, GraduationCap, Award, Phone, Mail, MapPin, Github, Linkedin, Eye, EyeOff, FileText, Lock } from 'lucide-react';
 import { Profile, Education, Achievement } from '../types';
+import { DEFAULT_EDUCATION, DEFAULT_ACHIEVEMENTS } from '../data/defaultData';
 
 interface ResumeSectionProps {
   profile: Profile;
@@ -322,15 +323,18 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
                 <span>Education Hierarchy</span>
               </h4>
               <div className="space-y-2 flex-1 flex flex-col justify-between">
-                {education.map(e => (
-                  <div key={e.id} className="p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition-colors">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-bold text-white text-xs">{e.degree}</p>
-                      {e.gradeGpa && <span className="text-rose-400 font-mono text-[10px] shrink-0 font-semibold">{e.gradeGpa}</span>}
+                {(education && education.length > 0 ? education : DEFAULT_EDUCATION).map(e => {
+                  const grade = e.gradeGpa || (e as any).grade_gpa;
+                  return (
+                    <div key={e.id} className="p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition-colors">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-bold text-white text-xs">{e.degree}</p>
+                        {grade && <span className="text-rose-400 font-mono text-[10px] shrink-0 font-semibold">{grade}</span>}
+                      </div>
+                      <p className="text-stone-400 text-[11px] mt-0.5">{e.institution} ({e.period})</p>
                     </div>
-                    <p className="text-stone-400 text-[11px] mt-0.5">{e.institution} ({e.period})</p>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {/* Academic Highlights to Align 5-to-5 with Honors Column */}
                 <div className="p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition-colors">
@@ -358,15 +362,18 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
                 <span>Honors & Certifications</span>
               </h4>
               <div className="space-y-2 flex-1 flex flex-col justify-between">
-                {achievements.map(a => (
-                  <div key={a.id} className="p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition-colors">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-bold text-white text-xs">{a.title}</p>
-                      <span className="text-amber-400/80 font-mono text-[10px] shrink-0">{a.issueDate}</span>
+                {(achievements && achievements.length > 0 ? achievements : DEFAULT_ACHIEVEMENTS).map(a => {
+                  const yr = a.issueDate || (a as any).issue_date || '2025';
+                  return (
+                    <div key={a.id} className="p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition-colors">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-bold text-white text-xs">{a.title}</p>
+                        <span className="text-amber-400/80 font-mono text-[10px] shrink-0">{yr}</span>
+                      </div>
+                      <p className="text-stone-400 text-[11px] mt-0.5">{a.issuer}</p>
                     </div>
-                    <p className="text-stone-400 text-[11px] mt-0.5">{a.issuer}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
