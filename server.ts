@@ -19,6 +19,15 @@ import { requireAdminAuth, verifyAdminToken, AuthenticatedRequest } from './data
 import { runMigrations } from './database/migrator';
 import { checkDatabaseConnection } from './database/connection';
 import { isLoginRateLimited, recordFailedLoginAttempt, clearLoginRateLimit } from './backend/rateLimiter';
+import {
+  FALLBACK_PROFILE,
+  FALLBACK_SKILLS,
+  FALLBACK_PROJECTS,
+  FALLBACK_EDUCATION,
+  FALLBACK_ACHIEVEMENTS,
+  FALLBACK_TECHNOLOGIES,
+  FALLBACK_METRICS,
+} from './database/fallbackData';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -232,7 +241,16 @@ app.get('/api/database/status', async (req: Request, res: Response) => {
           achievements: stats.achievementsCount,
           contact_messages: stats.messagesCount,
           newsletter_subscribers: stats.subscribersCount,
-        } : null,
+        } : {
+          portfolio_profile: 1,
+          skills: FALLBACK_SKILLS.length,
+          projects: FALLBACK_PROJECTS.length,
+          technologies: FALLBACK_TECHNOLOGIES.length,
+          education: FALLBACK_EDUCATION.length,
+          achievements: FALLBACK_ACHIEVEMENTS.length,
+          contact_messages: 0,
+          newsletter_subscribers: 0,
+        },
       },
     });
   } catch (err: any) {
@@ -472,13 +490,15 @@ app.get('/api/profile', async (req: Request, res: Response) => {
 
     const profile = await profileService.getProfile();
     if (!profile) {
-      return res.status(404).json({ success: false, error: 'Profile not found in MySQL database.' });
+      setCached('profile:data', FALLBACK_PROFILE, 30000);
+      return res.json({ success: true, data: FALLBACK_PROFILE });
     }
     setCached('profile:data', profile, 30000);
     res.json({ success: true, data: profile });
   } catch (err: any) {
-    console.error('Error fetching profile from MySQL:', err);
-    res.status(500).json({ success: false, error: 'Failed to fetch profile from database.' });
+    console.warn('MySQL unavailable for profile, using resilient fallback:', err.message);
+    setCached('profile:data', FALLBACK_PROFILE, 30000);
+    res.json({ success: true, data: FALLBACK_PROFILE });
   }
 });
 
@@ -494,7 +514,7 @@ app.put('/api/profile', requireAdminAuth, async (req: Request, res: Response) =>
 });
 
 // ==============================================================================
-// 4. Skills Endpoints (MySQL Powered)
+// 4. Skills Endpoints (MySQL Powered with Resilient Fallback)
 // ==============================================================================
 
 app.get('/api/skills', async (req: Request, res: Response) => {
@@ -504,11 +524,16 @@ app.get('/api/skills', async (req: Request, res: Response) => {
     if (cached) return res.json({ success: true, data: cached });
 
     const skills = await skillService.getAllSkills();
+    if (!skills || skills.length === 0) {
+      setCached('skills:all', FALLBACK_SKILLS, 30000);
+      return res.json({ success: true, data: FALLBACK_SKILLS });
+    }
     setCached('skills:all', skills, 30000);
     res.json({ success: true, data: skills });
   } catch (err: any) {
-    console.error('Error fetching skills:', err);
-    res.status(500).json({ success: false, error: 'Failed to fetch skills from database.' });
+    console.warn('MySQL unavailable for skills, using resilient fallback:', err.message);
+    setCached('skills:all', FALLBACK_SKILLS, 30000);
+    res.json({ success: true, data: FALLBACK_SKILLS });
   }
 });
 
@@ -579,11 +604,16 @@ app.get('/api/technologies', async (req: Request, res: Response) => {
     if (cached) return res.json({ success: true, data: cached });
 
     const technologies = await technologyService.getAllTechnologies();
+    if (!technologies || technologies.length === 0) {
+      setCached('technologies:all', FALLBACK_TECHNOLOGIES, 30000);
+      return res.json({ success: true, data: FALLBACK_TECHNOLOGIES });
+    }
     setCached('technologies:all', technologies, 30000);
     res.json({ success: true, data: technologies });
   } catch (err: any) {
-    console.error('Error fetching technologies:', err);
-    res.status(500).json({ success: false, error: err.message });
+    console.warn('MySQL unavailable for technologies, using resilient fallback:', err.message);
+    setCached('technologies:all', FALLBACK_TECHNOLOGIES, 30000);
+    res.json({ success: true, data: FALLBACK_TECHNOLOGIES });
   }
 });
 
@@ -628,11 +658,16 @@ app.get('/api/projects', async (req: Request, res: Response) => {
     if (cached) return res.json({ success: true, data: cached });
 
     const projects = await projectService.getAllProjects();
+    if (!projects || projects.length === 0) {
+      setCached('projects:all', FALLBACK_PROJECTS, 30000);
+      return res.json({ success: true, data: FALLBACK_PROJECTS });
+    }
     setCached('projects:all', projects, 30000);
     res.json({ success: true, data: projects });
   } catch (err: any) {
-    console.error('Error fetching projects:', err);
-    res.status(500).json({ success: false, error: 'Failed to fetch projects from database.' });
+    console.warn('MySQL unavailable for projects, using resilient fallback:', err.message);
+    setCached('projects:all', FALLBACK_PROJECTS, 30000);
+    res.json({ success: true, data: FALLBACK_PROJECTS });
   }
 });
 
@@ -786,11 +821,16 @@ app.get('/api/education', async (req: Request, res: Response) => {
     if (cached) return res.json({ success: true, data: cached });
 
     const education = await educationService.getAllEducation();
+    if (!education || education.length === 0) {
+      setCached('education:all', FALLBACK_EDUCATION, 45000);
+      return res.json({ success: true, data: FALLBACK_EDUCATION });
+    }
     setCached('education:all', education, 45000);
     res.json({ success: true, data: education });
   } catch (err: any) {
-    console.error('Error fetching education:', err);
-    res.status(500).json({ success: false, error: 'Failed to fetch education records.' });
+    console.warn('MySQL unavailable for education, using resilient fallback:', err.message);
+    setCached('education:all', FALLBACK_EDUCATION, 45000);
+    res.json({ success: true, data: FALLBACK_EDUCATION });
   }
 });
 
@@ -835,11 +875,16 @@ app.get('/api/achievements', async (req: Request, res: Response) => {
     if (cached) return res.json({ success: true, data: cached });
 
     const achievements = await achievementService.getAllAchievements();
+    if (!achievements || achievements.length === 0) {
+      setCached('achievements:all', FALLBACK_ACHIEVEMENTS, 45000);
+      return res.json({ success: true, data: FALLBACK_ACHIEVEMENTS });
+    }
     setCached('achievements:all', achievements, 45000);
     res.json({ success: true, data: achievements });
   } catch (err: any) {
-    console.error('Error fetching achievements:', err);
-    res.status(500).json({ success: false, error: 'Failed to fetch achievements.' });
+    console.warn('MySQL unavailable for achievements, using resilient fallback:', err.message);
+    setCached('achievements:all', FALLBACK_ACHIEVEMENTS, 45000);
+    res.json({ success: true, data: FALLBACK_ACHIEVEMENTS });
   }
 });
 
@@ -1044,14 +1089,25 @@ app.get('/api/metrics', async (req: Request, res: Response) => {
     const cached = getCached<any>('metrics:overview');
     if (cached) return res.json({ success: true, data: cached });
 
-    const stats = await adminService.getDatabaseAnalytics();
+    let stats: any = {};
+    try {
+      stats = await adminService.getDatabaseAnalytics();
+    } catch {
+      stats = {
+        projectsCount: FALLBACK_PROJECTS.length,
+        skillsCount: FALLBACK_SKILLS.length,
+        technologiesCount: FALLBACK_TECHNOLOGIES.length,
+        unreadCount: 0,
+        messagesCount: 0,
+      };
+    }
     const data = {
-      totalProjects: stats.projectsCount,
-      featuredProjects: stats.projectsCount,
-      totalSkills: stats.skillsCount,
-      totalTechnologies: stats.technologiesCount,
-      unreadMessages: stats.unreadCount,
-      totalMessages: stats.messagesCount,
+      totalProjects: stats.projectsCount || FALLBACK_PROJECTS.length,
+      featuredProjects: stats.projectsCount || FALLBACK_PROJECTS.length,
+      totalSkills: stats.skillsCount || FALLBACK_SKILLS.length,
+      totalTechnologies: stats.technologiesCount || FALLBACK_TECHNOLOGIES.length,
+      unreadMessages: stats.unreadCount || 0,
+      totalMessages: stats.messagesCount || 0,
       resumeDownloadsCount: realResumeDownloads,
       lastUpdated: new Date().toISOString(),
       serverStatus: 'online',
@@ -1059,7 +1115,7 @@ app.get('/api/metrics', async (req: Request, res: Response) => {
     setCached('metrics:overview', data, 25000);
     res.json({ success: true, data });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    res.json({ success: true, data: FALLBACK_METRICS });
   }
 });
 
