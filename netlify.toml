@@ -2,8 +2,11 @@
   publish = "dist"
   command = "npm run build"
 
+[build.environment]
+  VITE_API_URL = "https://ssportfoliomine.onrender.com"
+  VITE_IS_ADMIN = "true"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-

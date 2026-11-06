@@ -62,12 +62,25 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 }
 
 const isAdminPortalEnvironment = (): boolean => {
-  return (
-    window.location.port === '3001' ||
-    window.location.pathname === '/admin' ||
-    window.location.pathname === '/login' ||
-    window.location.hash === '#admin'
-  );
+  if (typeof window === 'undefined') return false;
+  const path = window.location.pathname;
+  const hash = window.location.hash;
+  const host = window.location.hostname;
+  const port = window.location.port;
+
+  // 1. Port 3001 (local dedicated admin dev) or URL query parameter (?admin=true)
+  if (port === '3001' || window.location.search.includes('admin=true')) return true;
+
+  // 2. Explicit paths or hashes
+  if (path === '/admin' || path === '/login' || hash === '#admin') return true;
+
+  // 3. Hosted on Netlify (e.g. *.netlify.app or admin subdomain)
+  if (host.includes('netlify.app') || host.includes('admin.')) return true;
+
+  // 4. Vite environment flag
+  if (typeof import.meta !== 'undefined' && Boolean((import.meta as any).env?.VITE_IS_ADMIN)) return true;
+
+  return false;
 };
 
 // ==============================================================================
