@@ -331,3 +331,4 @@ export const MASTER_ADMIN_CREDENTIALS = {
   password_salt: 'f6097e5dec979a3e00e465b11ec34b1c',
   role: 'SuperAdmin'
 };
+
