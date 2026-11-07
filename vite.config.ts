@@ -17,22 +17,22 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
-      // Seamlessly proxy API and media assets to the Express backend on port 3000
+      // Seamlessly proxy API and media assets to the live Render backend
       proxy: {
         '/api': {
-          target: 'http://localhost:3000',
+          target: 'https://ssportfoliomine.onrender.com',
           changeOrigin: true,
-          secure: false,
+          secure: true,
         },
         '/uploads': {
-          target: 'http://localhost:3000',
+          target: 'https://ssportfoliomine.onrender.com',
           changeOrigin: true,
-          secure: false,
+          secure: true,
         },
         '/assets': {
-          target: 'http://localhost:3000',
+          target: 'https://ssportfoliomine.onrender.com',
           changeOrigin: true,
-          secure: false,
+          secure: true,
         },
       },
     },

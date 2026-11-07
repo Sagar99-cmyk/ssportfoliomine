@@ -96,32 +96,18 @@ export function normalizeAchievement(raw: any): Achievement {
   };
 }
 
+export const RENDER_BACKEND_URL = 'https://ssportfoliomine.onrender.com/api';
+export const NETLIFY_BACKEND_URL = 'https://chimerical-entremet-dc12c3.netlify.app/api';
+
 const getBaseUrl = (): string => {
-  // 1. Explicit Vite Environment Variable (e.g. from Embarko or deployment dashboard: VITE_API_URL)
+  // 1. Explicit Vite Environment Variable (e.g. from Vercel / Netlify / .env: VITE_API_URL)
   if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) {
     const envUrl = ((import.meta as any).env.VITE_API_URL as string).trim().replace(/\/+$/, '');
     return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
   }
 
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    const port = window.location.port;
-
-    // 2. Localhost development environments
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      if (port && port !== '3000' && port !== '3001') {
-        return `http://${hostname}:3000/api`;
-      }
-      return '/api';
-    }
-
-    // 3. Online Production Deployment (e.g. Embarko, Vercel, Netlify)
-    // Points directly to the deployed Render backend service
-    const DEFAULT_RENDER_BACKEND = 'https://ssportfoliomine.onrender.com';
-    return `${DEFAULT_RENDER_BACKEND}/api`;
-  }
-
-  return '/api';
+  // 2. Direct Cloud Database Backend (Render hosted database server)
+  return RENDER_BACKEND_URL;
 };
 
 class ApiService {
@@ -171,9 +157,29 @@ class ApiService {
     }
   }
 
+  private async safeParseJson(response: Response, endpoint: string): Promise<any> {
+    const text = await response.text();
+    if (!text || !text.trim()) {
+      if (response.ok) {
+        return { success: true };
+      }
+      throw new Error(`Server returned empty response (${response.status}) for ${endpoint}`);
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      if (response.ok) {
+        return { success: true, message: text };
+      }
+      throw new Error(`Server returned non-JSON response (${response.status}) from ${endpoint}`);
+    }
+  }
+
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const primaryUrl = `${getBaseUrl()}${endpoint}`;
-    const fallbackUrl = `/api${endpoint}`;
+    const netlifyUrl = `${NETLIFY_BACKEND_URL}${endpoint}`;
+    const relativeUrl = `/api${endpoint}`;
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -184,52 +190,68 @@ class ApiService {
       headers['Authorization'] = `Bearer ${this.authToken}`;
     }
 
-    try {
-      const response = await fetch(primaryUrl, {
-        ...options,
-        headers,
-      });
+    const candidateUrls: string[] = [primaryUrl];
+    if (!candidateUrls.includes(netlifyUrl)) candidateUrls.push(netlifyUrl);
+    if (!candidateUrls.includes(relativeUrl)) candidateUrls.push(relativeUrl);
 
-      const json = await response.json();
-      if (!response.ok || !json.success) {
-        throw new Error(json.error || json.message || 'API Request failed');
-      }
+    let lastError: any = null;
 
-      return (json.data !== undefined && json.data !== null ? json.data : json) as T;
-    } catch (primaryErr) {
-      // If primary failed and primary was not fallback, try fallback relative /api
-      if (primaryUrl !== fallbackUrl) {
-        try {
-          const fbResponse = await fetch(fallbackUrl, {
-            ...options,
-            headers,
-          });
-          const fbJson = await fbResponse.json();
-          if (fbResponse.ok && fbJson.success) {
-            return (fbJson.data !== undefined && fbJson.data !== null ? fbJson.data : fbJson) as T;
-          }
-        } catch {}
+    for (const url of candidateUrls) {
+      try {
+        const response = await fetch(url, {
+          ...options,
+          headers,
+        });
+
+        const json = await this.safeParseJson(response, endpoint);
+        if (response.ok && json.success !== false) {
+          return (json.data !== undefined && json.data !== null ? json.data : json) as T;
+        }
+
+        if (json.error || json.message) {
+          throw new Error(json.error || json.message);
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[API Connection] Attempt failed for ${url}:`, err?.message || err);
       }
-      console.warn(`[API Connection] Network error on ${endpoint}:`, primaryErr);
-      throw primaryErr;
     }
+
+    throw lastError || new Error(`Network request failed for ${endpoint}`);
   }
 
   // Admin Authentication with MySQL PBKDF2 Hashed Credentials
   async adminLogin(email: string, password: string): Promise<{ token: string; user: any }> {
-    const res = await fetch(`${getBaseUrl()}/admin/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    const urls = [
+      `${RENDER_BACKEND_URL}/admin/login`,
+      `${NETLIFY_BACKEND_URL}/admin/login`,
+      '/api/admin/login'
+    ];
 
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      throw new Error(json.error || 'Admin authentication failed');
+    let lastError: any = null;
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const json = await this.safeParseJson(res, '/admin/login');
+        if (res.ok && json.success && json.token) {
+          this.setAuthToken(json.token);
+          return { token: json.token, user: json.user };
+        }
+        if (json.error) {
+          throw new Error(json.error);
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[API Admin Login] Attempt failed on ${url}:`, err?.message || err);
+      }
     }
 
-    this.setAuthToken(json.token);
-    return { token: json.token, user: json.user };
+    throw lastError || new Error('Admin authentication failed');
   }
 
   async verifyAdminAuth(): Promise<{ valid: boolean; user?: any }> {
@@ -482,10 +504,25 @@ class ApiService {
   }
 
   async sendMessage(data: { name: string; email: string; subject: string; message: string; company?: string }): Promise<ContactMessage> {
-    return this.request<ContactMessage>('/messages', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    const payload = {
+      name: (data.name || '').trim(),
+      email: (data.email || '').trim(),
+      subject: (data.subject || 'Portfolio Direct Inquiry').trim(),
+      company: (data.company || '').trim(),
+      message: (data.message || '').trim(),
+    };
+
+    try {
+      return await this.request<ContactMessage>('/contact', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      return await this.request<ContactMessage>('/messages', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    }
   }
 
   async markMessageRead(id: string, read: boolean = true): Promise<void> {
