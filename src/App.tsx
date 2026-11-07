@@ -319,8 +319,8 @@ const PortfolioContent: React.FC = () => {
           {profile && <ContactSection profile={profile} />}
         </main>
 
-        {/* Footer */}
-        <Footer />
+        {/* Footer with Newsletter and Live Links */}
+        <Footer profile={profile} />
       </div>
     </div>
   );
