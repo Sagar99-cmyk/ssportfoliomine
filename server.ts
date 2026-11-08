@@ -821,24 +821,40 @@ app.post('/api/admin/upload-resume', async (req: Request, res: Response) => {
     const cleanBase64 = pdfBase64.replace(/^data:[^;]+;base64,/, '');
     const buffer = Buffer.from(cleanBase64, 'base64');
 
-    // 1. Save canonical PDF file to public/assets/Sagar_Singh_Resume.pdf
-    const assetsDir = path.join(__dirname, 'public', 'assets');
-    if (!fs.existsSync(assetsDir)) {
-      fs.mkdirSync(assetsDir, { recursive: true });
+    // Update in-memory cached buffer immediately so download endpoints serve it
+    cachedResumeBuffer = buffer;
+
+    // 1. Save canonical PDF file to multiple potential directory paths
+    const possibleDirs = [
+      path.join(__dirname, 'public', 'assets'),
+      path.join(__dirname, 'dist', 'assets'),
+      path.join(process.cwd(), 'public', 'assets'),
+      path.join(process.cwd(), 'dist', 'assets'),
+    ];
+    for (const d of possibleDirs) {
+      try {
+        if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
+        fs.writeFileSync(path.join(d, 'Sagar_Singh_Resume.pdf'), buffer);
+      } catch {}
     }
-    fs.writeFileSync(path.join(assetsDir, 'Sagar_Singh_Resume.pdf'), buffer);
 
     // 2. Also preserve dated archive in public/uploads/
     const uploadDir = path.join(__dirname, 'public', 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
     const cleanFilename = (filename || 'Sagar_Singh_Resume.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
     const safeName = `resume-${Date.now()}-${cleanFilename}`;
-    fs.writeFileSync(path.join(uploadDir, safeName), buffer);
+    try {
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+      fs.writeFileSync(path.join(uploadDir, safeName), buffer);
+    } catch {}
 
     const publicUrl = `/assets/Sagar_Singh_Resume.pdf?v=${Date.now()}`;
-    await profileService.updateProfile({ resumeUrl: publicUrl });
+    liveProfile = { ...liveProfile, resumeUrl: publicUrl };
+
+    try {
+      await profileService.updateProfile({ resumeUrl: publicUrl });
+    } catch (dbErr: any) {
+      console.warn('MySQL unavailable during resume upload, saved in memory & filesystem:', dbErr.message);
+    }
 
     res.json({
       success: true,
@@ -1015,6 +1031,26 @@ const handleContactInquiry = async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       data: message,
     });
+
+    // Optional Automation Webhook forwarding (Zapier / Make.com / n8n)
+    const webhookUrl = process.env.MAKE_WEBHOOK_URL || process.env.ZAPIER_WEBHOOK_URL || process.env.CONTACT_WEBHOOK_URL;
+    if (webhookUrl && (webhookUrl.startsWith('http://') || webhookUrl.startsWith('https://'))) {
+      try {
+        fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'contact_message',
+            name: message.name,
+            email: message.email,
+            subject: message.subject,
+            company: message.company,
+            message: message.message,
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch(err => console.warn('Automation webhook forwarding error:', err.message));
+      } catch {}
+    }
 
     res.status(201).json({
       success: true,

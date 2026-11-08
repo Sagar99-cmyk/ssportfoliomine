@@ -96,10 +96,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
             target="_blank"
             rel="noopener noreferrer"
             title="Sagar Admin Portal"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-semibold rounded-lg text-rose-300 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 hover:border-rose-500/50 transition-all cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-mono font-semibold rounded-lg text-rose-300 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 hover:border-rose-500/50 transition-all cursor-pointer shadow-sm"
           >
             <Shield className="w-3.5 h-3.5 text-rose-400" />
-            <span>Admin</span>
+            <span className="hidden xs:inline">Admin</span>
           </a>
 
           {/* Background Ambient Music (Guitar & Piano) */}
@@ -108,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg transition-colors"
+            className="md:hidden p-2 rounded-lg transition-colors cursor-pointer"
             style={{ color: '#94a3b8', background: 'rgba(255,255,255,0.05)' }}
             aria-label="Toggle menu"
           >
@@ -117,57 +117,92 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Slide-Out Sidebar Drawer (Zero layout shift on page content) */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden overflow-hidden"
-            style={{
-              background: 'rgba(9,9,11,0.95)',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
-            }}
-          >
-            <div className="px-4 py-4 space-y-1">
-              {NAV_LINKS.map((link, i) => (
-                <motion.a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="block px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
-                  style={{ color: '#94a3b8' }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.color = '#f1f5f9';
-                    (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(225,29,72,0.1)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.color = '#94a3b8';
-                    (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
-                  }}
-                >
-                  {link.label}
-                </motion.a>
-              ))}
+          <>
+            {/* Backdrop Blur Overlay */}
+            <motion.div
+              key="mobile-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden"
+            />
 
-              <div className="pt-2 border-t border-white/[0.08]">
+            {/* Slide-in Right Sidebar Drawer */}
+            <motion.aside
+              key="mobile-sidebar"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+              className="fixed inset-y-0 right-0 z-50 w-72 max-w-[85vw] bg-[#09090b]/95 backdrop-blur-2xl border-l border-white/[0.08] shadow-2xl p-6 flex flex-col justify-between md:hidden select-none"
+            >
+              <div className="space-y-6">
+                {/* Drawer Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md"
+                      style={{ background: 'linear-gradient(135deg, #e11d48, #9f1239)' }}
+                    >
+                      <span className="text-white font-bold text-xs font-mono">SS</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white tracking-tight">Navigation</p>
+                      <p className="text-[10px] text-stone-400 font-mono">Sagar Singh Portfolio</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-stone-400 hover:text-white transition-colors cursor-pointer"
+                    aria-label="Close menu"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Nav Links */}
+                <nav className="space-y-1">
+                  {NAV_LINKS.map((link, i) => (
+                    <motion.a
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      initial={{ x: 20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: i * 0.04 }}
+                      className="flex items-center justify-between px-3.5 py-2.5 text-sm font-medium rounded-xl text-stone-300 hover:text-white hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer"
+                    >
+                      <span>{link.label}</span>
+                      <span className="text-stone-600 font-mono text-xs">→</span>
+                    </motion.a>
+                  ))}
+                </nav>
+              </div>
+
+              {/* Drawer Bottom Actions */}
+              <div className="pt-4 border-t border-white/[0.08] space-y-3">
                 <a
                   href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : 'https://chimerical-entremet-dc12c3.netlify.app/'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-mono font-semibold rounded-lg text-rose-300 bg-rose-500/10 border border-rose-500/25 transition-colors"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 px-4 text-xs font-mono font-bold rounded-xl text-white bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 shadow-lg shadow-rose-900/40 transition-all"
                 >
-                  <Shield className="w-4 h-4 text-rose-400" />
-                  <span>Admin Portal</span>
+                  <Shield className="w-4 h-4" />
+                  <span>Open Admin Portal</span>
                 </a>
+
+                <p className="text-[10px] text-center text-stone-500 font-mono">
+                  Sagar Singh · Data Analytics
+                </p>
               </div>
-            </div>
-          </motion.div>
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
     </motion.header>

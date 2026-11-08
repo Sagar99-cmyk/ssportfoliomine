@@ -483,15 +483,45 @@ class ApiService {
   }
 
   async uploadResume(pdfBase64: string, filename?: string): Promise<{ url: string; filename: string; message: string }> {
-    const res = await this.request<{ url: string; filename?: string; message?: string }>('/admin/upload-resume', {
-      method: 'POST',
-      body: JSON.stringify({ pdfBase64, filename }),
-    });
-    return {
-      url: res.url,
-      filename: res.filename || filename || 'Sagar_Singh_Resume.pdf',
-      message: res.message || 'Resume uploaded successfully.',
+    const urls = [
+      `${RENDER_BACKEND_URL}/admin/upload-resume`,
+      `${NETLIFY_BACKEND_URL}/admin/upload-resume`,
+      '/api/admin/upload-resume',
+      '/api/upload-resume',
+    ];
+
+    const body = JSON.stringify({ pdfBase64, filename });
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
     };
+    if (this.authToken) {
+      headers['Authorization'] = `Bearer ${this.authToken}`;
+    }
+
+    let lastError: any = null;
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers,
+          body,
+        });
+        const json = await this.safeParseJson(res, '/admin/upload-resume');
+        if (res.ok && json.success !== false) {
+          return {
+            url: json.url || `/assets/Sagar_Singh_Resume.pdf?v=${Date.now()}`,
+            filename: json.filename || filename || 'Sagar_Singh_Resume.pdf',
+            message: json.message || 'Resume uploaded and synchronized successfully.',
+          };
+        }
+        if (json.error) throw new Error(json.error);
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[Resume Upload] Attempt failed on ${url}:`, err.message);
+      }
+    }
+
+    throw lastError || new Error('Failed to upload resume to cloud server.');
   }
 
   // Education
