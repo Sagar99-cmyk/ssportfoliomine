@@ -14,6 +14,7 @@ import * as achievementService from './database/services/achievementService';
 import * as technologyService from './database/services/technologyService';
 import * as messageService from './database/services/messageService';
 import * as adminService from './database/services/adminService';
+import { sendNewInquiryNotificationToAdmin } from './services/emailService';
 import { requireAdminAuth, verifyAdminToken, AuthenticatedRequest } from './database/auth';
 import { runMigrations } from './database/migrator';
 import { checkDatabaseConnection } from './database/connection';
@@ -1031,6 +1032,16 @@ const handleContactInquiry = async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       data: message,
     });
+
+    // 100% Free & Unlimited Real Gmail Notification to Sagar's Gmail (sirroshan999@gmail.com)
+    sendNewInquiryNotificationToAdmin({
+      name: message.name,
+      email: message.email,
+      subject: message.subject,
+      company: message.company,
+      message: message.message,
+      clientIp: req.ip,
+    }).catch(mailErr => console.warn('Gmail lead dispatch note:', mailErr?.message || mailErr));
 
     // Optional Automation Webhook forwarding (Zapier / Make.com / n8n)
     const webhookUrl = process.env.MAKE_WEBHOOK_URL || process.env.ZAPIER_WEBHOOK_URL || process.env.CONTACT_WEBHOOK_URL;

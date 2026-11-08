@@ -204,3 +204,69 @@ Portfolio: https://sagarsingh.dev
   }
 }
 
+/**
+ * Sends an instant notification email to Sagar Singh's personal Gmail inbox
+ * whenever a visitor fills out the contact form.
+ */
+export async function sendNewInquiryNotificationToAdmin(inquiry: {
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  company?: string;
+  clientIp?: string;
+}): Promise<SendEmailResult> {
+  const adminRecipient = process.env.ADMIN_ALERT_EMAIL || 'sirroshan999@gmail.com';
+  const transporter = getMailTransporter();
+
+  if (!transporter) {
+    return {
+      success: false,
+      configured: false,
+      error: 'SMTP not configured in environment (SMTP_USER & SMTP_PASS needed).',
+    };
+  }
+
+  const subject = `🔔 New Portfolio Lead: ${inquiry.name} (${inquiry.subject || 'Inquiry'})`;
+  const from = `"Sagar Portfolio Lead Bot" <${process.env.SMTP_USER || adminRecipient}>`;
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<body style="background:#080a10;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:24px;margin:0;">
+  <div style="max-width:580px;margin:0 auto;background:#0d101a;border:1px solid #27272a;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.6);">
+    <div style="background:linear-gradient(135deg,#e11d48,#881337);padding:20px 24px;color:#fff;">
+      <h2 style="margin:0;font-size:18px;font-weight:800;">New Contact Form Message!</h2>
+      <p style="margin:4px 0 0;font-size:12px;opacity:0.9;">A visitor reached out from your portfolio at ssportfoliomines.vercel.app</p>
+    </div>
+    <div style="padding:24px;font-size:14px;line-height:1.6;color:#e4e4e7;">
+      <p style="margin:0 0 8px;"><strong>From:</strong> ${inquiry.name} &lt;<a href="mailto:${inquiry.email}" style="color:#fb7185;">${inquiry.email}</a>&gt;</p>
+      ${inquiry.company ? `<p style="margin:0 0 8px;"><strong>Company:</strong> ${inquiry.company}</p>` : ''}
+      <p style="margin:0 0 12px;"><strong>Subject:</strong> ${inquiry.subject || 'Portfolio Inquiry'}</p>
+      <div style="margin:16px 0;padding:16px;background:#141724;border-left:3px solid #e11d48;border-radius:8px;font-size:13px;line-height:1.7;color:#f4f4f5;white-space:pre-wrap;">${inquiry.message}</div>
+      <div style="margin-top:24px;text-align:center;">
+        <a href="https://chimerical-entremet-dc12c3.netlify.app/" style="display:inline-block;padding:11px 22px;background:#e11d48;color:#fff;text-decoration:none;font-weight:bold;border-radius:8px;font-size:13px;box-shadow:0 4px 15px rgba(225,29,72,0.4);">
+          Open in Admin Command Center →
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  try {
+    const info = await transporter.sendMail({
+      from,
+      to: adminRecipient,
+      subject,
+      html: htmlContent,
+      replyTo: inquiry.email,
+    });
+    return { success: true, configured: true, messageId: info.messageId };
+  } catch (err: any) {
+    console.error('Failed to dispatch inquiry notification to admin email:', err.message);
+    return { success: false, configured: true, error: err.message };
+  }
+}
+
