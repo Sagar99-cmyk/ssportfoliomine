@@ -103,7 +103,9 @@ const getBaseUrl = (): string => {
   // 1. Explicit Vite Environment Variable (e.g. from Vercel / Netlify / .env: VITE_API_URL)
   if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) {
     const envUrl = ((import.meta as any).env.VITE_API_URL as string).trim().replace(/\/+$/, '');
-    return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
+    if (envUrl.startsWith('http://') || envUrl.startsWith('https://')) {
+      return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
+    }
   }
 
   // 2. Direct Cloud Database Backend (Render hosted database server)

@@ -211,7 +211,7 @@ const PortfolioContent: React.FC = () => {
       if (results[0].status === 'fulfilled' && results[0].value) {
         setProfile(results[0].value);
       }
-      if (results[1].status === 'fulfilled' && Array.isArray(results[1].value)) {
+      if (results[1].status === 'fulfilled' && Array.isArray(results[1].value) && results[1].value.length > 0) {
         const seen = new Set<string>();
         const unique = results[1].value.filter(s => {
           const key = (s.name || '').trim().toLowerCase();
@@ -219,16 +219,24 @@ const PortfolioContent: React.FC = () => {
           seen.add(key);
           return true;
         });
-        setSkills(unique);
+        setSkills(unique.length > 0 ? unique : DEFAULT_SKILLS);
+      } else {
+        setSkills(DEFAULT_SKILLS);
       }
-      if (results[2].status === 'fulfilled' && Array.isArray(results[2].value)) {
+      if (results[2].status === 'fulfilled' && Array.isArray(results[2].value) && results[2].value.length > 0) {
         setProjects(results[2].value);
+      } else {
+        setProjects(DEFAULT_PROJECTS);
       }
-      if (results[3].status === 'fulfilled' && Array.isArray(results[3].value)) {
+      if (results[3].status === 'fulfilled' && Array.isArray(results[3].value) && results[3].value.length > 0) {
         setEducation(results[3].value);
+      } else {
+        setEducation(DEFAULT_EDUCATION);
       }
-      if (results[4].status === 'fulfilled' && Array.isArray(results[4].value)) {
+      if (results[4].status === 'fulfilled' && Array.isArray(results[4].value) && results[4].value.length > 0) {
         setAchievements(results[4].value);
+      } else {
+        setAchievements(DEFAULT_ACHIEVEMENTS);
       }
     } catch (err: any) {
       console.warn('Portfolio sync note:', err?.message || err);
@@ -304,10 +312,13 @@ const PortfolioContent: React.FC = () => {
               onDownloadResume={handleDownloadResume}
             />
           )}
-          {skills.length > 0 && <SkillsSection skills={skills} />}
-          {projects.length > 0 && <ProjectsGallery projects={projects} />}
+          <SkillsSection skills={skills.length > 0 ? skills : DEFAULT_SKILLS} />
+          <ProjectsGallery projects={projects.length > 0 ? projects : DEFAULT_PROJECTS} />
           {profile && <AboutSection profile={profile} />}
-          <EducationAchievements education={education} achievements={achievements} />
+          <EducationAchievements
+            education={education.length > 0 ? education : DEFAULT_EDUCATION}
+            achievements={achievements.length > 0 ? achievements : DEFAULT_ACHIEVEMENTS}
+          />
           {profile && (
             <ResumeSection
               profile={profile}
