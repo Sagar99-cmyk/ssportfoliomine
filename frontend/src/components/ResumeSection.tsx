@@ -78,21 +78,11 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
                 <Download className="w-4 h-4 text-rose-400" />
                 <span>Download Official Resume (PDF)</span>
               </a>
-
-              <a
-                href="/api/resume/view"
-                target="_blank"
-                rel="noreferrer"
-                className="px-4 py-3.5 rounded-xl bg-stone-900/90 border border-white/10 hover:border-emerald-500/40 text-stone-300 hover:text-white font-semibold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer active:scale-95 shadow-md"
-              >
-                <FileText className="w-4 h-4 text-emerald-400" />
-                <span>Open in Tab</span>
-              </a>
             </div>
           </div>
         ) : (
           /* UNLOCKED STATE: Full Interactive Resume Document */
-          <div className="p-6 sm:p-10 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl space-y-8 shadow-2xl text-stone-200 animate-in fade-in duration-300 relative">
+          <div className="p-6 sm:p-10 rounded-3xl bg-stone-900/30 border border-white/10 backdrop-blur-xl space-y-8 shadow-2xl text-stone-200 animate-in fade-in duration-300 relative">
           
           {/* Action Bar inside the div */}
           <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-white/10">
@@ -104,16 +94,6 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
-              <a
-                href="/api/resume/view"
-                target="_blank"
-                rel="noreferrer"
-                className="px-3.5 py-2 rounded-xl bg-stone-950/80 border border-white/10 hover:border-emerald-500/40 text-stone-300 hover:text-white font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
-              >
-                <FileText className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Open Full PDF</span>
-              </a>
-
               <a
                 href="/api/resume/download-file"
                 download="Sagar_Singh_Resume.pdf"

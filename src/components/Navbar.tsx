@@ -29,6 +29,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Lock background body scroll when mobile menu / sidebar drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <motion.header
       initial={{ y: -80, opacity: 0 }}
@@ -37,11 +49,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
       className="sticky top-0 z-50 w-full transition-all duration-300"
       style={{
         background: scrolled
-          ? 'rgba(9,9,11,0.92)'
-          : 'rgba(9,9,11,0.7)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: scrolled ? '1px solid rgba(225,29,72,0.12)' : '1px solid transparent',
-        boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.4)' : 'none',
+          ? 'rgba(9,9,11,0.96)'
+          : 'rgba(9,9,11,0.90)',
+        backdropFilter: 'blur(24px)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.5)' : 'none',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
@@ -89,19 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
         </nav>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          {/* Admin Portal Gateway */}
-          <a
-            href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : 'https://chimerical-entremet-dc12c3.netlify.app/'}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Sagar Admin Portal"
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-mono font-semibold rounded-lg text-rose-300 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 hover:border-rose-500/50 transition-all cursor-pointer shadow-sm"
-          >
-            <Shield className="w-3.5 h-3.5 text-rose-400" />
-            <span className="hidden xs:inline">Admin</span>
-          </a>
-
+        <div className="flex items-center gap-3 shrink-0">
           {/* Background Ambient Music (Guitar & Piano) */}
           <SoundButton />
 
@@ -129,7 +129,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm md:hidden"
             />
 
             {/* Slide-in Right Sidebar Drawer */}
@@ -139,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="fixed inset-y-0 right-0 z-50 w-72 max-w-[85vw] bg-[#09090b]/95 backdrop-blur-2xl border-l border-white/[0.08] shadow-2xl p-6 flex flex-col justify-between md:hidden select-none"
+              className="fixed inset-y-0 right-0 z-50 w-72 max-w-[85vw] bg-[#09090b] border-l border-white/[0.08] shadow-2xl p-6 flex flex-col justify-between md:hidden select-none overscroll-contain"
             >
               <div className="space-y-6">
                 {/* Drawer Header */}
@@ -185,20 +185,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
                 </nav>
               </div>
 
-              {/* Drawer Bottom Actions */}
-              <div className="pt-4 border-t border-white/[0.08] space-y-3">
-                <a
-                  href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : 'https://chimerical-entremet-dc12c3.netlify.app/'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 px-4 text-xs font-mono font-bold rounded-xl text-white bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 shadow-lg shadow-rose-900/40 transition-all"
-                >
-                  <Shield className="w-4 h-4" />
-                  <span>Open Admin Portal</span>
-                </a>
-
-                <p className="text-[10px] text-center text-stone-500 font-mono">
-                  Sagar Singh · Data Analytics
+              {/* Drawer Bottom Status */}
+              <div className="pt-4 border-t border-white/[0.08]">
+                <p className="text-[11px] text-center text-stone-400 font-mono">
+                  Sagar Singh · Data Analytics & BI
                 </p>
               </div>
             </motion.aside>

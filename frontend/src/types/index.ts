@@ -96,6 +96,8 @@ export interface Achievement {
   title: string;
   issuer: string;
   issueDate: string;
+  category?: string;
+  description?: string;
   credentialUrl?: string;
   badgeUrl?: string;
   skills: string[];

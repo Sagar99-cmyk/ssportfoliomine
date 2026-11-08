@@ -111,10 +111,10 @@ export const EducationAchievements: React.FC<EducationAchievementsProps> = ({
 
                     {/* Hierarchy Card */}
                     <div
-                      className={`p-6 sm:p-7 rounded-2xl border transition-all duration-300 ${
+                      className={`p-6 sm:p-7 rounded-2xl border transition-all duration-300 backdrop-blur-md ${
                         isUndergrad
-                          ? 'bg-stone-900/90 border-rose-500/40 hover:border-rose-500/70 shadow-xl shadow-rose-950/20'
-                          : 'bg-stone-900/70 border-stone-800 hover:border-stone-700'
+                          ? 'bg-stone-900/40 border-rose-500/40 hover:border-rose-500/70 shadow-xl shadow-rose-950/20'
+                          : 'bg-stone-900/30 border-white/[0.08] hover:border-white/[0.18]'
                       }`}
                     >
                       {/* Top Row: Hierarchy Level Pill & Period */}
@@ -224,7 +224,7 @@ export const EducationAchievements: React.FC<EducationAchievementsProps> = ({
                 return (
                   <div
                     key={ach.id || aIdx}
-                    className="p-5 rounded-2xl bg-stone-900/80 border border-stone-800 hover:border-amber-500/40 transition-all duration-300 space-y-3 group shadow-md"
+                    className="p-5 rounded-2xl bg-stone-900/35 backdrop-blur-md border border-white/[0.08] hover:border-amber-500/40 transition-all duration-300 space-y-3 group shadow-md"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1 flex-1">

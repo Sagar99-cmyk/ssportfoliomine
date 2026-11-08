@@ -329,6 +329,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, onDataC
   const [isSubmittingReply, setIsSubmittingReply] = useState<boolean>(false);
   const [replyStatusNotice, setReplyStatusNotice] = useState<{ id: string; success: boolean; message: string } | null>(null);
 
+  // Prevent background scroll when confirmation dialog or modal is open
+  useEffect(() => {
+    if (confirmModal?.isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [confirmModal?.isOpen]);
+
   useEffect(() => {
     loadAllAdminData();
   }, []);

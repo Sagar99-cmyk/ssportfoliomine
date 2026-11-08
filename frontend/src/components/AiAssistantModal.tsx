@@ -116,12 +116,20 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({ isOpen, onCl
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  // Clean audio on unmount or close
+  // Lock background body scroll and clean audio on close/unmount
   useEffect(() => {
-    if (!isOpen && currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
+      }
     }
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   // Fast typewriter effect to render answers fluidly

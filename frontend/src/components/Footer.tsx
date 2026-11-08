@@ -132,17 +132,6 @@ export const Footer: React.FC<FooterProps> = ({ profile }) => {
           </div>
 
           <div className="flex items-center gap-3">
-            <a
-              href={adminUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-rose-500/15 border border-white/[0.08] hover:border-rose-500/30 text-stone-300 hover:text-white transition-all cursor-pointer text-[11px]"
-              title="Open Admin Command Center"
-            >
-              <Shield className="w-3.5 h-3.5 text-rose-400" />
-              <span>Admin Portal</span>
-            </a>
-
             <motion.button
               onClick={scrollToTop}
               whileHover={{ scale: 1.05, y: -2 }}
