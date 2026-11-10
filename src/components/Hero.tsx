@@ -228,14 +228,12 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
             {/* Professional Portrait with Natural Eye Blink Animation */}
             <ProfessionalPhotoAvatar />
 
-            {/* Quick Skills Summary Pill Card below photo - Exact Match to Screenshot */}
+            {/* Quick Skills Summary Pill Card below photo - Zero Solid Background */}
             <div
-              className="w-full max-w-sm p-4 rounded-2xl border space-y-3.5 transition-all"
+              className="w-full max-w-sm p-4 rounded-2xl border space-y-3.5 transition-all bg-transparent"
               style={{
-                background: 'rgba(12,15,24,0.5)',
-                borderColor: 'rgba(225,29,72,0.25)',
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+                borderColor: 'rgba(225,29,72,0.3)',
+                backdropFilter: 'blur(12px)',
               }}
             >
               <div className="flex items-center justify-between gap-2">

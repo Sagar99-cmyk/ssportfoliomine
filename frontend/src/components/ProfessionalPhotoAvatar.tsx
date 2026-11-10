@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
 
 interface ProfessionalPhotoAvatarProps {
   className?: string;
@@ -14,13 +13,11 @@ export const ProfessionalPhotoAvatar: React.FC<ProfessionalPhotoAvatarProps> = (
     let timer: number;
 
     const scheduleNextBlink = () => {
-      // Natural interval strictly between 5 and 6 seconds (5000ms - 6000ms)
       const intervalMs = Math.floor(Math.random() * 1000) + 5000;
       
       timer = window.setTimeout(() => {
         setIsBlinking(true);
 
-        // Fast natural human eye blink (140ms) with zero transition flash
         blinkTimeout = window.setTimeout(() => {
           setIsBlinking(false);
           scheduleNextBlink();
@@ -49,30 +46,27 @@ export const ProfessionalPhotoAvatar: React.FC<ProfessionalPhotoAvatarProps> = (
       className={`relative flex flex-col items-center select-none bg-transparent ${className}`}
       onContextMenu={(e) => e.preventDefault()}
     >
-      {/* Main Avatar Container - Fixed, Unmovable & Drag-Protected */}
+      {/* 
+        Main Avatar Container - Zero Background, Pure Transparent Backdrop
+        Framed with an elegant glowing border ring with full responsiveness 
+      */}
       <div
         onMouseEnter={handleInteraction}
         onClick={handleInteraction}
         onContextMenu={(e) => e.preventDefault()}
         onDragStart={(e) => e.preventDefault()}
-        className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 flex items-center justify-center overflow-visible bg-transparent cursor-pointer group select-none"
+        className="relative w-52 h-52 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full border-2 border-rose-500/60 ring-4 ring-rose-500/20 shadow-[0_0_30px_rgba(225,29,72,0.35)] flex items-center justify-center overflow-hidden bg-transparent cursor-pointer group select-none transition-transform duration-300 hover:scale-[1.02]"
         style={{
           userSelect: 'none',
           WebkitUserSelect: 'none',
           WebkitTouchCallout: 'none',
         }}
       >
-        {/* Transparent Container with Shadow on Parent to Prevent Blink Shadow Flicker */}
+        {/* Transparent Frame - No Card or Background Box */}
         <div
           className="relative w-full h-full bg-transparent flex items-center justify-center select-none pointer-events-none"
-          style={{
-            filter: 'drop-shadow(0 15px 35px rgba(0, 0, 0, 0.75))',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            WebkitTouchCallout: 'none',
-          }}
         >
-          {/* Base Portrait (Always 100% Solid, Never Fades, Zero Flash, Unmovable & Drag-Protected) */}
+          {/* Base Portrait (Clean cutout, transparent backdrop) */}
           <img
             src="/profile-transparent-open.png"
             alt="Sagar Singh"
@@ -90,7 +84,7 @@ export const ProfessionalPhotoAvatar: React.FC<ProfessionalPhotoAvatarProps> = (
             loading="eager"
           />
 
-          {/* Eyelid Closed Overlay (Instant Cut - Zero Dissolve Flash, Unmovable & Drag-Protected) */}
+          {/* Eyelid Closed Overlay */}
           <img
             src="/profile-transparent-closed.png"
             alt="Sagar Singh Blink"

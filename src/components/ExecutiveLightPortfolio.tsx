@@ -1039,3 +1039,4 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
     </div>
   );
 };
+

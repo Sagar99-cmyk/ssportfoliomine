@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ExternalLink, Github, Linkedin, Youtube, FileText, Globe, Search, Layers, Pause, Play, Code2, Sparkles, Database } from 'lucide-react';
+import { ExternalLink, Github, Linkedin, Youtube, FileText, Globe, Search, Layers, Pause, Play, Code2, Sparkles, Database, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Project } from '../types';
 import { CaseStudyModal } from './CaseStudyModal';
@@ -82,6 +82,13 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
   const isDraggingRef = React.useRef(false);
   const startXRef = React.useRef(0);
   const scrollLeftStartRef = React.useRef(0);
+
+  const scrollProjects = (dir: 'left' | 'right') => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const amount = el.clientWidth * 0.75;
+    el.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' });
+  };
 
   const categories = useMemo(
     () => ['All', ...Array.from(new Set(projects.map(p => p.category)))],
@@ -198,8 +205,28 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
             </p>
           </motion.div>
 
-          {/* View Mode Toggle + Pause Button */}
+          {/* View Mode Toggle + Left/Right Navigation + Pause Button */}
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            {/* Left / Right Interactive Slider Buttons */}
+            {viewMode === 'flow' && (
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-stone-900/60 backdrop-blur-md border border-white/[0.08]">
+                <button
+                  onClick={() => scrollProjects('left')}
+                  title="Slide Left"
+                  className="p-1.5 rounded-lg text-stone-300 hover:text-white hover:bg-stone-800 transition-all cursor-pointer active:scale-95"
+                >
+                  <ChevronLeft className="w-4 h-4 text-rose-400" />
+                </button>
+                <button
+                  onClick={() => scrollProjects('right')}
+                  title="Slide Right"
+                  className="p-1.5 rounded-lg text-stone-300 hover:text-white hover:bg-stone-800 transition-all cursor-pointer active:scale-95"
+                >
+                  <ChevronRight className="w-4 h-4 text-rose-400" />
+                </button>
+              </div>
+            )}
+
             {/* View Mode: Flow vs Grid */}
             <div className="flex items-center p-1 rounded-xl bg-stone-900/60 backdrop-blur-md border border-white/[0.08]">
               <button

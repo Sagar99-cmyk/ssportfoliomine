@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Home, Sparkles, FolderGit2, FileText, Send } from 'lucide-react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { ThreeDataBackground } from './components/ThreeDataBackground';
 import { Navbar } from './components/Navbar';
@@ -13,7 +14,7 @@ import { Footer } from './components/Footer';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { LoginPage } from './components/LoginPage';
 import { WelcomeScreen } from './components/WelcomeScreen';
-import { ExecutiveLightPortfolio } from './components/ExecutiveLightPortfolio';
+import { StitchLightBackground } from './components/StitchLightBackground';
 import { api } from './services/api';
 import { Profile, Skill, Project, Education, Achievement } from './types';
 import {
@@ -289,27 +290,23 @@ const PortfolioContent: React.FC = () => {
     );
   }
 
-  // If Executive Light Theme is active, render the dedicated Stitch Light Portfolio
-  if (theme === 'light') {
-    return (
-      <ExecutiveLightPortfolio
-        profile={profile || DEFAULT_PROFILE}
-        skills={skills.length > 0 ? skills : DEFAULT_SKILLS}
-        projects={projects.length > 0 ? projects : DEFAULT_PROJECTS}
-        education={education.length > 0 ? education : DEFAULT_EDUCATION}
-        achievements={achievements.length > 0 ? achievements : DEFAULT_ACHIEVEMENTS}
-        onDownloadResume={handleDownloadResume}
-      />
-    );
-  }
-
   return (
     <div
-      className="min-h-screen relative"
-      style={{ background: '#09090b', color: '#e2e8f0' }}
+      className="min-h-screen relative transition-colors duration-500"
+      style={{
+        background: theme === 'light' ? '#faf9f6' : '#09090b',
+        color: theme === 'light' ? '#0f172a' : '#e2e8f0',
+      }}
     >
-      {/* 3D Animated Background */}
-      <ThreeDataBackground isDark={true} />
+      {/* 3D Animated Background:
+          - In Light Mode: StitchLightBackground (Diamond crystal & magnetic polyhedrons in slow motion)
+          - In Dark Mode: ThreeDataBackground isDark={true} (3D particle grid)
+      */}
+      {theme === 'light' ? (
+        <StitchLightBackground />
+      ) : (
+        <ThreeDataBackground isDark={true} />
+      )}
 
       {/* Main Content */}
       <div className="relative z-10 flex flex-col min-h-screen">
@@ -348,6 +345,51 @@ const PortfolioContent: React.FC = () => {
 
         {/* Footer with Newsletter and Live Links */}
         <Footer profile={profile} />
+
+        {/* Mobile Sticky Bottom Navigation Dock (Exact match to mobile screenshot) */}
+        <nav
+          className={`fixed bottom-0 inset-x-0 z-40 px-4 py-2.5 flex items-center justify-around shadow-2xl md:hidden backdrop-blur-lg border-t transition-colors ${
+            theme === 'light'
+              ? 'bg-white/95 border-stone-200 text-stone-600'
+              : 'bg-[#09090b]/95 border-white/[0.08] text-stone-400'
+          }`}
+        >
+          <a
+            href="#hero"
+            className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
+          >
+            <Home className="w-4 h-4" />
+            <span className="text-[10px]">Home</span>
+          </a>
+          <a
+            href="#skills"
+            className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span className="text-[10px]">Skills</span>
+          </a>
+          <a
+            href="#projects"
+            className="flex flex-col items-center gap-0.5 text-xs font-semibold text-[#e11d48] transition-colors"
+          >
+            <FolderGit2 className="w-4 h-4" />
+            <span className="text-[10px]">Projects</span>
+          </a>
+          <a
+            href="#resume"
+            className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
+          >
+            <FileText className="w-4 h-4" />
+            <span className="text-[10px]">Resume</span>
+          </a>
+          <a
+            href="#contact"
+            className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
+          >
+            <Send className="w-4 h-4" />
+            <span className="text-[10px]">Contact</span>
+          </a>
+        </nav>
       </div>
     </div>
   );
