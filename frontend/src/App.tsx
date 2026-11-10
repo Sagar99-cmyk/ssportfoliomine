@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { ThreeDataBackground } from './components/ThreeDataBackground';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -13,6 +13,7 @@ import { Footer } from './components/Footer';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { LoginPage } from './components/LoginPage';
 import { WelcomeScreen } from './components/WelcomeScreen';
+import { ExecutiveLightPortfolio } from './components/ExecutiveLightPortfolio';
 import { api } from './services/api';
 import { Profile, Skill, Project, Education, Achievement } from './types';
 import {
@@ -164,6 +165,7 @@ const AdminPortalApp: React.FC = () => {
 };
 
 const PortfolioContent: React.FC = () => {
+  const { theme } = useTheme();
   // State
   const [hasEntered, setHasEntered] = useState<boolean>(false);
   const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
@@ -284,6 +286,20 @@ const PortfolioContent: React.FC = () => {
       <div className="min-h-screen relative bg-[#09090b] text-[#f5f0eb]">
         <WelcomeScreen onEnter={() => setHasEntered(true)} />
       </div>
+    );
+  }
+
+  // If Executive Light Theme is active, render the dedicated Stitch Light Portfolio
+  if (theme === 'light') {
+    return (
+      <ExecutiveLightPortfolio
+        profile={profile || DEFAULT_PROFILE}
+        skills={skills.length > 0 ? skills : DEFAULT_SKILLS}
+        projects={projects.length > 0 ? projects : DEFAULT_PROJECTS}
+        education={education.length > 0 ? education : DEFAULT_EDUCATION}
+        achievements={achievements.length > 0 ? achievements : DEFAULT_ACHIEVEMENTS}
+        onDownloadResume={handleDownloadResume}
+      />
     );
   }
 

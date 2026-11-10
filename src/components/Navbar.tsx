@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Shield } from 'lucide-react';
+import { Menu, X, Shield, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SoundButton } from './BackgroundMusic';
+import { useTheme } from '../context/ThemeContext';
 
 interface NavbarProps {
   onOpenAdmin?: () => void;
@@ -18,6 +19,7 @@ const NAV_LINKS = [
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
+  const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -101,7 +103,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
         </nav>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
+          {/* Executive Light Theme / 3D Dark Switcher */}
+          <button
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Switch to Executive Light Theme' : 'Switch to 3D Dark Theme'}
+            className="px-3 py-1.5 rounded-full text-xs font-mono font-semibold transition-all flex items-center gap-1.5 cursor-pointer border border-white/10 bg-white/5 hover:bg-white/10 text-stone-200 shadow-sm active:scale-95"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Light Theme</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-3.5 h-3.5 text-rose-400" />
+                <span className="hidden sm:inline">3D Dark</span>
+              </>
+            )}
+          </button>
+
           {/* Background Ambient Music (Guitar & Piano) */}
           <SoundButton />
 
@@ -183,6 +204,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
                     </motion.a>
                   ))}
                 </nav>
+
+                {/* Mobile Theme Toggle Button */}
+                <div className="pt-2">
+                  <button
+                    onClick={() => {
+                      toggleTheme();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-stone-200 border border-white/10 transition-all cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2">
+                      {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-rose-400" />}
+                      <span>{theme === 'dark' ? 'Switch to Light Theme' : 'Switch to 3D Dark Theme'}</span>
+                    </span>
+                    <span className="text-stone-400 font-mono text-[10px]">Switch</span>
+                  </button>
+                </div>
               </div>
 
               {/* Drawer Bottom Status */}
