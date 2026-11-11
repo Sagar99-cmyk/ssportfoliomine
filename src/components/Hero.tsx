@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Profile, Skill, Project, Education } from '../types';
 import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
 import { getTechLogo } from './TechLogos';
+import { useTheme } from '../context/ThemeContext';
 
 interface HeroProps {
   profile: Profile;
@@ -61,7 +62,7 @@ const TypewriterText: React.FC<{ texts: string[] }> = ({ texts }) => {
   );
 };
 
-const StylishNameTitle: React.FC<{ name: string }> = ({ name }) => {
+const StylishNameTitle: React.FC<{ name: string; isLight?: boolean }> = ({ name, isLight }) => {
   const parts = name.trim().split(/\s+/);
   const firstName = parts[0] || 'Sagar';
   const lastName = parts.slice(1).join(' ') || 'Singh';
@@ -79,11 +80,6 @@ const StylishNameTitle: React.FC<{ name: string }> = ({ name }) => {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
         }
-        @keyframes multiColorShineSweep {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
         .golden-shining-name {
           background-image: linear-gradient(115deg, #f59e0b 0%, #fbbf24 22%, #ffffff 45%, #fef08a 65%, #d97706 85%, #b45309 100%);
           background-size: 260% auto;
@@ -91,6 +87,13 @@ const StylishNameTitle: React.FC<{ name: string }> = ({ name }) => {
           background-clip: text;
           -webkit-text-fill-color: transparent;
           animation: goldShineSweep 5s linear infinite;
+        }
+        .golden-shining-name-light {
+          background-image: linear-gradient(115deg, #92400e 0%, #b45309 25%, #d97706 50%, #b45309 75%, #78350f 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
         .red-shining-singh {
           background-image: linear-gradient(115deg, #e11d48 0%, #f43f5e 20%, #ffffff 42%, #fda4af 60%, #e11d48 80%, #9f1239 100%);
@@ -100,19 +103,30 @@ const StylishNameTitle: React.FC<{ name: string }> = ({ name }) => {
           -webkit-text-fill-color: transparent;
           animation: redShineSweep 5s linear infinite 0.5s;
         }
+        .red-shining-singh-light {
+          background-image: linear-gradient(115deg, #be123c 0%, #e11d48 30%, #9f1239 70%, #881337 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
       `}</style>
 
-      {/* 2-Word Distinct Luxury Styling: SAGAR in Gold, SINGH in Radiant Red with Shining Shimmer */}
+      {/* 2-Word Distinct Luxury Styling: SAGAR in Gold, SINGH in Radiant Red */}
       <div className="flex flex-wrap items-baseline justify-center lg:justify-start gap-x-4 sm:gap-x-5 gap-y-1">
-        {/* WORD 1: SAGAR (Luxury Radiant Polished Gold with Continuous Light Sweep, No Hover Zoom) */}
+        {/* WORD 1: SAGAR */}
         <div className="inline-flex whitespace-nowrap relative">
           {firstName.split('').map((char, cIdx) => (
             <span
               key={`first-${cIdx}`}
-              className="inline-block font-black tracking-tight cursor-default golden-shining-name"
+              className={`inline-block font-black tracking-tight cursor-default ${
+                isLight ? 'golden-shining-name-light' : 'golden-shining-name'
+              }`}
               style={{
                 fontSize: 'clamp(2.8rem, 7vw, 5.2rem)',
-                filter: 'drop-shadow(0 4px 16px rgba(245,158,11,0.3))',
+                filter: isLight
+                  ? 'drop-shadow(0 2px 8px rgba(180,83,9,0.25))'
+                  : 'drop-shadow(0 4px 16px rgba(245,158,11,0.3))',
               }}
             >
               {char}
@@ -120,15 +134,19 @@ const StylishNameTitle: React.FC<{ name: string }> = ({ name }) => {
           ))}
         </div>
 
-        {/* WORD 2: SINGH (Radiant Shining Ruby Crimson Red with Continuous Light Sweep, No Hover Zoom) */}
+        {/* WORD 2: SINGH */}
         <div className="inline-flex whitespace-nowrap relative">
           {lastName.split('').map((char, cIdx) => (
             <span
               key={`last-${cIdx}`}
-              className="inline-block font-black tracking-tight cursor-default red-shining-singh"
+              className={`inline-block font-black tracking-tight cursor-default ${
+                isLight ? 'red-shining-singh-light' : 'red-shining-singh'
+              }`}
               style={{
                 fontSize: 'clamp(2.8rem, 7vw, 5.2rem)',
-                filter: 'drop-shadow(0 4px 16px rgba(225,29,72,0.35))',
+                filter: isLight
+                  ? 'drop-shadow(0 2px 8px rgba(225,29,72,0.28))'
+                  : 'drop-shadow(0 4px 16px rgba(225,29,72,0.35))',
               }}
             >
               {char}
@@ -142,6 +160,8 @@ const StylishNameTitle: React.FC<{ name: string }> = ({ name }) => {
 };
 
 export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [], education = [], onDownloadResume }) => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const typingRoles = useMemo(() => {
     return [
       'Data Analyst · Sales Dashboard & BI',
@@ -193,16 +213,14 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
           {/* Availability Badge */}
           {profile.isAvailable && (
             <div
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold"
-              style={{
-                background: 'rgba(34,197,94,0.1)',
-                borderColor: 'rgba(34,197,94,0.3)',
-                color: '#22c55e',
-              }}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold ${
+                isLight
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-800 shadow-xs'
+                  : 'bg-emerald-950/20 border-emerald-800/40 text-emerald-400'
+              }`}
             >
               <span
-                className="w-2 h-2 rounded-full"
-                style={{ background: '#22c55e', boxShadow: '0 0 6px #22c55e', animation: 'pulse 2s infinite' }}
+                className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#22c55e] animate-pulse"
               />
               <span>{profile.availabilityStatus || 'Available for Data Analyst & Entry-Level Tech Roles'}</span>
             </div>
@@ -210,11 +228,13 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
 
           {/* Stylish Name */}
           <div className="space-y-2 w-full">
-            <StylishNameTitle name={profile.name} />
+            <StylishNameTitle name={profile.name} isLight={isLight} />
 
             {/* Stable Single Container with Fixed Height & Constant Crisp Rose Color - Never Shifts Layout */}
             <div className="h-9 sm:h-11 flex items-center justify-center w-full overflow-hidden">
-              <span className="text-lg sm:text-2xl font-bold tracking-tight text-rose-400 whitespace-nowrap">
+              <span className={`text-lg sm:text-2xl font-bold tracking-tight whitespace-nowrap ${
+                isLight ? 'text-rose-600' : 'text-rose-400'
+              }`}>
                 <TypewriterText texts={typingRoles} />
               </span>
             </div>
@@ -228,13 +248,13 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
             {/* Professional Portrait with Natural Eye Blink Animation */}
             <ProfessionalPhotoAvatar />
 
-            {/* Quick Skills Summary Pill Card below photo - Zero Solid Background */}
+            {/* Quick Skills Summary Pill Card below photo */}
             <div
-              className="w-full max-w-sm p-4 rounded-2xl border space-y-3.5 transition-all bg-transparent"
-              style={{
-                borderColor: 'rgba(225,29,72,0.3)',
-                backdropFilter: 'blur(12px)',
-              }}
+              className={`w-full max-w-sm p-4 rounded-2xl border space-y-3.5 transition-all ${
+                isLight
+                  ? 'bg-white/90 border-stone-300/80 shadow-md backdrop-blur-md'
+                  : 'bg-transparent border-rose-500/30 backdrop-blur-[12px]'
+              }`}
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -245,12 +265,16 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
                     SS
                   </div>
                   <div className="min-w-0 text-left">
-                    <p className="font-bold text-sm text-white truncate">{profile.name}</p>
-                    <p className="text-[11px] text-stone-400 truncate">BCA Graduate · Presidency College</p>
+                    <p className={`font-bold text-sm truncate ${isLight ? 'text-stone-900' : 'text-white'}`}>
+                      {profile.name}
+                    </p>
+                    <p className={`text-[11px] truncate ${isLight ? 'text-stone-600' : 'text-stone-400'}`}>
+                      BCA Graduate · Presidency College
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 shrink-0 px-2 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-800/40">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Verified</span>
                 </div>
@@ -260,12 +284,11 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
                 {heroTags.map((item, i) => (
                   <div
                     key={i}
-                    className="p-2.5 rounded-xl flex items-center gap-2 font-medium border text-[11px] min-w-0 transition-all hover:border-stone-700"
-                    style={{
-                      background: 'rgba(255,255,255,0.035)',
-                      borderColor: 'rgba(255,255,255,0.08)',
-                      color: '#cbd5e1',
-                    }}
+                    className={`p-2.5 rounded-xl flex items-center gap-2 font-medium border text-[11px] min-w-0 transition-all ${
+                      isLight
+                        ? 'bg-stone-50 border-stone-200 text-stone-800 hover:border-stone-400'
+                        : 'bg-white/[0.035] border-white/[0.08] text-stone-300 hover:border-stone-700'
+                    }`}
                   >
                     {item.icon}
                     <span className="truncate">{item.label}</span>
@@ -282,27 +305,27 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
             <div className="hidden lg:flex flex-col items-start space-y-6 w-full">
               {profile.isAvailable && (
                 <div
-                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold"
-                  style={{
-                    background: 'rgba(34,197,94,0.1)',
-                    borderColor: 'rgba(34,197,94,0.3)',
-                    color: '#22c55e',
-                  }}
+                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold ${
+                    isLight
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-800 shadow-xs'
+                      : 'bg-emerald-950/20 border-emerald-800/40 text-emerald-400'
+                  }`}
                 >
                   <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: '#22c55e', boxShadow: '0 0 6px #22c55e', animation: 'pulse 2s infinite' }}
+                    className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#22c55e] animate-pulse"
                   />
                   <span>{profile.availabilityStatus || 'Available for Data Analyst & Entry-Level Tech Roles'}</span>
                 </div>
               )}
 
               <div className="space-y-3 w-full">
-                <StylishNameTitle name={profile.name} />
+                <StylishNameTitle name={profile.name} isLight={isLight} />
 
                 {/* Stable Single Container with Fixed Height & Constant Crisp Rose Color - Never Shifts Layout */}
                 <div className="h-10 md:h-12 flex items-center justify-start w-full overflow-hidden">
-                  <span className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-rose-400 whitespace-nowrap">
+                  <span className={`text-xl sm:text-2xl md:text-3xl font-bold tracking-tight whitespace-nowrap ${
+                    isLight ? 'text-rose-600' : 'text-rose-400'
+                  }`}>
                     <TypewriterText texts={typingRoles} />
                   </span>
                 </div>
@@ -310,16 +333,20 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
             </div>
 
             {/* Intro text */}
-            <p className="text-sm sm:text-base md:text-lg leading-relaxed max-w-xl text-stone-300">
+            <p className={`text-sm sm:text-base md:text-lg leading-relaxed max-w-xl ${
+              isLight ? 'text-stone-700 font-medium' : 'text-stone-300'
+            }`}>
               {profile.intro}
             </p>
 
             {/* Meta line */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 text-xs sm:text-sm font-medium text-stone-400">
+            <div className={`flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 text-xs sm:text-sm font-medium ${
+              isLight ? 'text-stone-600' : 'text-stone-400'
+            }`}>
               <span>{profile.location}</span>
-              <span className="text-stone-600">·</span>
+              <span className={isLight ? 'text-stone-300' : 'text-stone-600'}>·</span>
               <span>Presidency College (BCA 2026)</span>
-              <span className="text-stone-600">·</span>
+              <span className={isLight ? 'text-stone-300' : 'text-stone-600'}>·</span>
               <span>Data Analytics · Power BI · MySQL · Python</span>
             </div>
 
@@ -349,21 +376,23 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
 
               <button
                 onClick={onDownloadResume}
-                className="px-5 sm:px-6 py-3 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border w-full sm:w-auto text-center shrink-0 cursor-pointer hover:bg-white/10 active:scale-95 transition-all"
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  borderColor: 'rgba(255,255,255,0.15)',
-                  color: '#e2e8f0',
-                }}
+                className={`px-5 sm:px-6 py-3 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border w-full sm:w-auto text-center shrink-0 cursor-pointer active:scale-95 transition-all ${
+                  isLight
+                    ? 'bg-white text-stone-800 border-stone-300 hover:bg-stone-50 shadow-xs'
+                    : 'bg-white/[0.05] border-white/15 text-slate-200 hover:bg-white/10'
+                }`}
               >
-                <Download className="w-4 h-4" style={{ color: '#e11d48' }} />
+                <Download className="w-4 h-4 text-rose-500" />
                 <span>Get Resume</span>
               </button>
 
               <a
                 href="#contact"
-                className="px-5 sm:px-6 py-3 rounded-xl text-xs sm:text-sm font-medium border transition-all w-full sm:w-auto text-center shrink-0 cursor-pointer hover:border-white/20 active:scale-95"
-                style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}
+                className={`px-5 sm:px-6 py-3 rounded-xl text-xs sm:text-sm font-medium border transition-all w-full sm:w-auto text-center shrink-0 cursor-pointer active:scale-95 ${
+                  isLight
+                    ? 'bg-white text-stone-700 border-stone-300 hover:text-stone-900 hover:border-rose-400'
+                    : 'border-white/10 text-slate-400 hover:border-white/20'
+                }`}
               >
                 Let's Connect
               </a>
@@ -371,7 +400,9 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
 
             {/* Social Links */}
             <div className="pt-2 flex items-center justify-center lg:justify-start gap-3">
-              <span className="text-xs uppercase tracking-widest font-mono" style={{ color: '#475569' }}>
+              <span className={`text-xs uppercase tracking-widest font-mono ${
+                isLight ? 'text-stone-500' : 'text-slate-500'
+              }`}>
                 Connect:
               </span>
               {[
@@ -384,12 +415,11 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
                   href={href}
                   target="_blank"
                   rel="noreferrer"
-                  className="p-2.5 rounded-lg border transition-all hover:scale-110 hover:text-rose-400"
-                  style={{
-                    color: '#64748b',
-                    borderColor: 'rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.04)',
-                  }}
+                  className={`p-2.5 rounded-lg border transition-all hover:scale-110 hover:text-rose-500 ${
+                    isLight
+                      ? 'bg-white text-stone-600 border-stone-200 shadow-2xs hover:border-rose-300'
+                      : 'bg-white/[0.04] text-slate-400 border-white/[0.08]'
+                  }`}
                   title={label}
                 >
                   {icon}
@@ -403,16 +433,18 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
         {/* Highlight Stats Strip (With Icons & Clean Grid Alignment) */}
         <div
           className="pt-6 grid grid-cols-2 md:grid-cols-4 gap-4"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
+          style={{
+            borderTop: isLight ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(255,255,255,0.08)',
+          }}
         >
           {statsList.map((stat, i) => (
             <div
               key={i}
-              className="p-5 rounded-2xl border text-center transition-all hover:scale-105"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                borderColor: 'rgba(255,255,255,0.08)',
-              }}
+              className={`p-5 rounded-2xl border text-center transition-all hover:scale-105 ${
+                isLight
+                  ? 'bg-white/85 border-stone-200/90 shadow-sm'
+                  : 'bg-white/[0.03] border-white/[0.08]'
+              }`}
             >
               {stat.icon}
               <div
@@ -421,7 +453,7 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
               >
                 {stat.value}
               </div>
-              <div className="text-xs mt-1.5 font-medium" style={{ color: '#94a3b8' }}>
+              <div className={`text-xs mt-1.5 font-medium ${isLight ? 'text-stone-600' : 'text-slate-400'}`}>
                 {stat.label}
               </div>
             </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Download, CheckCircle2, FolderGit2, GraduationCap, Award, Phone, Mail, MapPin, Github, Linkedin, Eye, EyeOff, FileText, Lock } from 'lucide-react';
 import { Profile, Education, Achievement } from '../types';
 import { DEFAULT_EDUCATION, DEFAULT_ACHIEVEMENTS } from '../data/defaultData';
+import { useTheme } from '../context/ThemeContext';
 
 interface ResumeSectionProps {
   profile: Profile;
@@ -16,6 +17,8 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
   achievements,
   onDownloadResume,
 }) => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [isResumeViewOpen, setIsResumeViewOpen] = useState(false);
 
   return (
@@ -25,13 +28,17 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2 max-w-2xl text-left">
-            <span className="text-xs font-semibold text-rose-400 uppercase tracking-widest font-mono">
+            <span className={`text-xs font-semibold uppercase tracking-widest font-mono ${
+              isLight ? 'text-rose-600' : 'text-rose-400'
+            }`}>
               Curriculum Vitae & Verified Resume
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h2 className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
+              isLight ? 'text-stone-900' : 'text-white'
+            }`}>
               Official Resume Preview
             </h2>
-            <p className="text-sm sm:text-base text-stone-400">
+            <p className={`text-sm sm:text-base ${isLight ? 'text-stone-600' : 'text-stone-400'}`}>
               Direct access to my structured experience, technical competencies, and academic background from my official CV.
             </p>
           </div>
@@ -39,23 +46,31 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
 
         {/* LOCKED STATE: When user has NOT clicked View Resume */}
         {!isResumeViewOpen ? (
-          <div className="p-8 sm:p-12 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl text-center space-y-6 shadow-2xl relative overflow-hidden transition-all duration-300">
+          <div className={`p-8 sm:p-12 rounded-3xl border backdrop-blur-xl text-center space-y-6 shadow-2xl relative overflow-hidden transition-all duration-300 ${
+            isLight
+              ? 'bg-white/95 border-stone-200 text-stone-900 shadow-lg'
+              : 'bg-stone-900/40 border-white/10 text-white'
+          }`}>
             {/* Ambient subtle glow */}
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-rose-500/10 blur-3xl pointer-events-none" />
 
-            <div className="w-16 h-16 rounded-2xl bg-rose-950/40 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400 shadow-lg shadow-rose-950/40">
+            <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-500 shadow-md">
               <FileText className="w-8 h-8" />
             </div>
 
             <div className="max-w-md mx-auto space-y-2">
-              <span className="px-3 py-1 rounded-full text-[11px] font-mono font-semibold uppercase tracking-wider bg-emerald-950/50 text-emerald-300 border border-emerald-800/50 inline-flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="px-3 py-1 rounded-full text-[11px] font-mono font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-300 inline-flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 Official Resume Ready
               </span>
-              <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              <h3 className={`text-xl sm:text-2xl font-bold tracking-tight ${
+                isLight ? 'text-stone-900' : 'text-white'
+              }`}>
                 Resume Preview Protected
               </h3>
-              <p className="text-xs sm:text-sm text-stone-300 leading-relaxed">
+              <p className={`text-xs sm:text-sm leading-relaxed ${
+                isLight ? 'text-stone-600' : 'text-stone-300'
+              }`}>
                 Click <strong>"View Official Resume Now"</strong> below to unlock the full interactive document containing complete academic credentials, capstones, and contact information.
               </p>
             </div>
@@ -63,9 +78,9 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setIsResumeViewOpen(true)}
-                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-rose-900 via-rose-800 to-rose-700 hover:brightness-110 text-white font-semibold text-xs sm:text-sm transition-all shadow-lg flex items-center gap-2 cursor-pointer active:scale-95"
+                className="px-6 py-3.5 rounded-xl bg-[#e11d48] hover:bg-[#be123c] text-white font-semibold text-xs sm:text-sm transition-all shadow-md shadow-rose-500/25 flex items-center gap-2 cursor-pointer active:scale-95"
               >
-                <Eye className="w-4 h-4 text-emerald-300" />
+                <Eye className="w-4 h-4 text-white" />
                 <span>View Official Resume Now</span>
               </button>
 
@@ -73,22 +88,32 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
                 href="/api/resume/download-file"
                 download="Sagar_Singh_Resume.pdf"
                 onClick={() => onDownloadResume()}
-                className="px-5 py-3.5 rounded-xl bg-stone-950/80 border border-white/10 hover:border-rose-500/40 text-stone-200 font-semibold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer active:scale-95 shadow-md"
+                className={`px-5 py-3.5 rounded-xl border font-semibold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer active:scale-95 shadow-xs ${
+                  isLight
+                    ? 'bg-white text-stone-800 border-stone-300 hover:bg-stone-50'
+                    : 'bg-stone-950/80 border-white/10 hover:border-rose-500/40 text-stone-200'
+                }`}
               >
-                <Download className="w-4 h-4 text-rose-400" />
+                <Download className="w-4 h-4 text-rose-500" />
                 <span>Download Official Resume (PDF)</span>
               </a>
             </div>
           </div>
         ) : (
           /* UNLOCKED STATE: Full Interactive Resume Document */
-          <div className="p-6 sm:p-10 rounded-3xl bg-stone-900/30 border border-white/10 backdrop-blur-xl space-y-8 shadow-2xl text-stone-200 animate-in fade-in duration-300 relative">
+          <div className={`p-6 sm:p-10 rounded-3xl border backdrop-blur-xl space-y-8 shadow-2xl animate-in fade-in duration-300 relative ${
+            isLight
+              ? 'bg-white border-stone-200 text-stone-900 shadow-xl'
+              : 'bg-stone-900/30 border-white/10 text-stone-200'
+          }`}>
           
           {/* Action Bar inside the div */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-white/10">
+          <div className={`flex flex-wrap items-center justify-between gap-4 pb-6 border-b ${
+            isLight ? 'border-stone-200' : 'border-white/10'
+          }`}>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                 Official Document Unlocked
               </span>
             </div>
@@ -98,7 +123,7 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
                 href="/api/resume/download-file"
                 download="Sagar_Singh_Resume.pdf"
                 onClick={() => onDownloadResume()}
-                className="px-4 py-2 rounded-xl bg-rose-900 hover:bg-rose-800 text-white font-semibold text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#e11d48] hover:bg-[#be123c] text-white font-semibold text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download PDF</span>
@@ -106,18 +131,24 @@ export const ResumeSection: React.FC<ResumeSectionProps> = ({
 
               <button
                 onClick={() => setIsResumeViewOpen(false)}
-                className="px-3.5 py-2 rounded-xl bg-stone-950/80 border border-white/10 hover:border-rose-500/40 text-stone-300 hover:text-white font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                className={`px-3.5 py-2 rounded-xl border font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isLight
+                    ? 'bg-stone-100 border-stone-200 text-stone-700 hover:bg-stone-200'
+                    : 'bg-stone-950/80 border-white/10 text-stone-300 hover:text-white'
+                }`}
               >
-                <EyeOff className="w-3.5 h-3.5 text-rose-400" />
+                <EyeOff className="w-3.5 h-3.5 text-rose-500" />
                 <span>Hide</span>
               </button>
             </div>
           </div>
           
           {/* Header Row */}
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-stone-800">
+          <div className={`flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b ${
+            isLight ? 'border-stone-200' : 'border-stone-800'
+          }`}>
             <div>
-              <h3 className="text-2xl font-bold text-white tracking-tight">
+              <h3 className={`text-2xl font-bold tracking-tight ${isLight ? 'text-stone-900' : 'text-white'}`}>
                 {profile.name}
               </h3>
               <p className="text-sm font-semibold text-rose-400 mt-1">

@@ -13,9 +13,9 @@ export const StitchLightBackground: React.FC = () => {
 
     const scene = new THREE.Scene();
 
-    // Camera positioned with optimized vertical FOV for responsive screens
-    const camera = new THREE.PerspectiveCamera(58, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 90);
+    // Camera with optimized FOV: 52 deg portrait studio view
+    const camera = new THREE.PerspectiveCamera(52, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 85);
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
@@ -25,215 +25,280 @@ export const StitchLightBackground: React.FC = () => {
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.18;
     container.appendChild(renderer.domElement);
 
-    // Studio Lighting tuned for Light Mode contrast & refraction
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
+    // Studio Ambient & Directional Lighting for translucent crystal refraction
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
     scene.add(ambientLight);
 
-    const dirLightRose = new THREE.DirectionalLight(0xf43f5e, 2.8);
-    dirLightRose.position.set(35, 55, 45);
+    const dirLightRose = new THREE.DirectionalLight(0xf43f5e, 2.4);
+    dirLightRose.position.set(40, 50, 45);
     scene.add(dirLightRose);
 
-    const dirLightCyan = new THREE.DirectionalLight(0x06b6d4, 2.4);
-    dirLightCyan.position.set(-40, -30, 40);
+    const dirLightCyan = new THREE.DirectionalLight(0x06b6d4, 2.2);
+    dirLightCyan.position.set(-45, -30, 40);
     scene.add(dirLightCyan);
 
-    const dirLightViolet = new THREE.DirectionalLight(0x8b5cf6, 2.0);
-    dirLightViolet.position.set(0, -50, -20);
-    scene.add(dirLightViolet);
+    const dirLightAmber = new THREE.DirectionalLight(0xf59e0b, 1.9);
+    dirLightAmber.position.set(10, -45, 30);
+    scene.add(dirLightAmber);
 
     const masterGroup = new THREE.Group();
     scene.add(masterGroup);
 
-    // 1. Central High-Refraction Diamond Glass Icosahedron Core
-    const coreGeo = new THREE.IcosahedronGeometry(14.5, 1);
-    const coreMat = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      roughness: 0.04,
-      metalness: 0.08,
-      transmission: 0.92,
-      ior: 1.58,
-      thickness: 9.5,
-      specularIntensity: 1.0,
-      specularColor: 0xffffff,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.03,
-      transparent: true,
-      opacity: 0.88,
-    });
-    const coreMesh = new THREE.Mesh(coreGeo, coreMat);
-    masterGroup.add(coreMesh);
-
-    // 2. Prismatic internal diamond core facet
-    const innerGeo = new THREE.OctahedronGeometry(8.0, 0);
-    const innerMat = new THREE.MeshPhysicalMaterial({
-      color: 0xffe4e6,
-      roughness: 0.02,
-      metalness: 0.15,
-      transmission: 0.88,
-      ior: 1.65,
-      thickness: 5.0,
-      clearcoat: 1.0,
-      transparent: true,
-      opacity: 0.82,
-    });
-    const innerMesh = new THREE.Mesh(innerGeo, innerMat);
-    coreMesh.add(innerMesh);
-
-    // 3. Architectural outer wireframe cage
-    const wireGeo = new THREE.IcosahedronGeometry(18.5, 1);
-    const wireMat = new THREE.MeshBasicMaterial({
-      color: 0x94a3b8,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.32,
-    });
-    const wireMesh = new THREE.Mesh(wireGeo, wireMat);
-    masterGroup.add(wireMesh);
-
-    // 4. Floating Magnetic Polyhedrons
-    const crystalGeometries = [
-      new THREE.OctahedronGeometry(4.0, 0),
-      new THREE.TetrahedronGeometry(4.5, 0),
-      new THREE.DodecahedronGeometry(3.5, 0),
-      new THREE.IcosahedronGeometry(3.4, 0),
+    // =========================================================================
+    // 10 DISTINCT GEOMETRIC OBJECTS (MATCHING EXACT USER SCREENSHOT)
+    // 1. Cyan truncated hexagonal cone/prism
+    // 2. Magenta/rose faceted icosahedron
+    // 3. Teal 12-sided dodecahedron
+    // 4. Emerald green hexagonal cylinder
+    // 5. Red sharp tetrahedron
+    // 6. Purple 4-sided pyramid
+    // 7. Amber-gold cube
+    // 8. Sky-blue faceted icosahedron
+    // 9. Warm golden dodecahedron
+    // 10. Crimson red octahedron
+    // =========================================================================
+    const shapeConfigs = [
+      {
+        // 1. Cyan truncated cone / hexagonal prism
+        geo: new THREE.CylinderGeometry(1.8, 3.4, 4.8, 6),
+        color: 0x00b4d8,
+        wireColor: 0x0e7490,
+      },
+      {
+        // 2. Rose / magenta faceted icosahedron
+        geo: new THREE.IcosahedronGeometry(3.6, 0),
+        color: 0xf43f5e,
+        wireColor: 0xbe123c,
+      },
+      {
+        // 3. Teal dodecahedron
+        geo: new THREE.DodecahedronGeometry(3.5, 0),
+        color: 0x14b8a6,
+        wireColor: 0x0f766e,
+      },
+      {
+        // 4. Emerald green hexagonal cylinder
+        geo: new THREE.CylinderGeometry(2.4, 2.4, 4.6, 6),
+        color: 0x10b981,
+        wireColor: 0x047857,
+      },
+      {
+        // 5. Red tetrahedron
+        geo: new THREE.TetrahedronGeometry(4.2, 0),
+        color: 0xef4444,
+        wireColor: 0xb91c1c,
+      },
+      {
+        // 6. Purple 4-sided pyramid
+        geo: new THREE.ConeGeometry(3.2, 4.8, 4),
+        color: 0x8b5cf6,
+        wireColor: 0x6d28d9,
+      },
+      {
+        // 7. Amber-gold cube
+        geo: new THREE.BoxGeometry(3.8, 3.8, 3.8),
+        color: 0xf59e0b,
+        wireColor: 0xb45309,
+      },
+      {
+        // 8. Sky-blue faceted icosahedron
+        geo: new THREE.IcosahedronGeometry(3.4, 0),
+        color: 0x38bdf8,
+        wireColor: 0x0369a1,
+      },
+      {
+        // 9. Warm amber dodecahedron
+        geo: new THREE.DodecahedronGeometry(3.3, 0),
+        color: 0xd97706,
+        wireColor: 0x92400e,
+      },
+      {
+        // 10. Crimson red octahedron
+        geo: new THREE.OctahedronGeometry(3.8, 0),
+        color: 0xbe123c,
+        wireColor: 0x881337,
+      },
+      {
+        // 11. Extra Cyan crystal variant
+        geo: new THREE.OctahedronGeometry(3.5, 0),
+        color: 0x06b6d4,
+        wireColor: 0x0e7490,
+      },
+      {
+        // 12. Extra Violet crystal variant
+        geo: new THREE.DodecahedronGeometry(3.2, 0),
+        color: 0xa855f7,
+        wireColor: 0x7e22ce,
+      },
     ];
 
-    const crystalMaterials = [
-      new THREE.MeshPhysicalMaterial({ color: 0xff1744, roughness: 0.05, transmission: 0.85, ior: 1.56, thickness: 4.5, clearcoat: 1.0, transparent: true, opacity: 0.85 }),
-      new THREE.MeshPhysicalMaterial({ color: 0x00b4d8, roughness: 0.05, transmission: 0.88, ior: 1.56, thickness: 4.5, clearcoat: 1.0, transparent: true, opacity: 0.88 }),
-      new THREE.MeshPhysicalMaterial({ color: 0x10b981, roughness: 0.06, transmission: 0.86, ior: 1.54, thickness: 4.5, clearcoat: 1.0, transparent: true, opacity: 0.84 }),
-      new THREE.MeshPhysicalMaterial({ color: 0xf59e0b, roughness: 0.05, transmission: 0.87, ior: 1.58, thickness: 4.5, clearcoat: 1.0, transparent: true, opacity: 0.85 }),
-      new THREE.MeshPhysicalMaterial({ color: 0x8b5cf6, roughness: 0.05, transmission: 0.86, ior: 1.57, thickness: 4.5, clearcoat: 1.0, transparent: true, opacity: 0.86 }),
+    // =========================================================================
+    // RESPONSIVE DISPERSED ANCHOR GRID
+    // Separate coordinates across the entire viewport - prevents horizontal clumping
+    // =========================================================================
+    const normalizedAnchors = [
+      // Top row (High corners & mid)
+      { nx: -0.78, ny: 0.78, z: -8 },
+      { nx: -0.32, ny: 0.86, z: 5 },
+      { nx: 0.28, ny: 0.82, z: -6 },
+      { nx: 0.78, ny: 0.80, z: 4 },
+
+      // Mid-high row (Flanks)
+      { nx: -0.72, ny: 0.38, z: 6 },
+      { nx: 0.74, ny: 0.42, z: -8 },
+
+      // Center flanks (Leaving center open for clean UI reading)
+      { nx: -0.84, ny: -0.04, z: -4 },
+      { nx: 0.82, ny: -0.06, z: 8 },
+
+      // Mid-low row (Flanks)
+      { nx: -0.70, ny: -0.46, z: 6 },
+      { nx: 0.72, ny: -0.48, z: -6 },
+
+      // Bottom row (Low corners & mid)
+      { nx: -0.76, ny: -0.82, z: -4 },
+      { nx: -0.22, ny: -0.88, z: 6 },
+      { nx: 0.32, ny: -0.85, z: -6 },
+      { nx: 0.78, ny: -0.80, z: 4 },
     ];
 
     const crystals: THREE.Mesh[] = [];
-    const crystalCount = 12;
 
-    for (let i = 0; i < crystalCount; i++) {
-      const geo = crystalGeometries[i % crystalGeometries.length];
-      const mat = crystalMaterials[i % crystalMaterials.length];
-      const mesh = new THREE.Mesh(geo, mat);
+    const computeWorldPosition = (nx: number, ny: number, z: number, w: number, h: number) => {
+      const aspect = w / h;
+      // On narrow mobile screen, scale X within visible frustum (-20 to +20)
+      // On wide desktop screen, scale X out to (-60 to +60)
+      const xSpread = aspect < 1 ? Math.max(16, aspect * 38) : Math.min(62, aspect * 34);
+      const ySpread = aspect < 1 ? 40 : 34;
 
-      const angle = (i / crystalCount) * Math.PI * 2;
-      const radius = 22 + (i % 3) * 8;
-      const yOffset = Math.sin(i * 1.5) * 18;
+      return {
+        x: nx * xSpread,
+        y: ny * ySpread,
+        z: z,
+      };
+    };
 
-      mesh.position.set(
-        Math.cos(angle) * radius * 0.8,
-        yOffset,
-        Math.sin(angle) * radius * 0.7
-      );
+    shapeConfigs.forEach((cfg, i) => {
+      const anchor = normalizedAnchors[i % normalizedAnchors.length];
+      const pos = computeWorldPosition(anchor.nx, anchor.ny, anchor.z, width, height);
 
+      // Translucent physical jewel facet material
+      const mat = new THREE.MeshPhysicalMaterial({
+        color: cfg.color,
+        roughness: 0.08,
+        transmission: 0.82,
+        ior: 1.55,
+        thickness: 4.5,
+        clearcoat: 1.0,
+        transparent: true,
+        opacity: 0.88,
+      });
+
+      const mesh = new THREE.Mesh(cfg.geo, mat);
+      mesh.position.set(pos.x, pos.y, pos.z);
+
+      // Crisp facet wireframe outline (matching screenshot facet lines)
       const wireOutline = new THREE.LineSegments(
-        new THREE.WireframeGeometry(geo),
-        new THREE.LineBasicMaterial({ color: 0x64748b, transparent: true, opacity: 0.35 })
+        new THREE.WireframeGeometry(cfg.geo),
+        new THREE.LineBasicMaterial({
+          color: cfg.wireColor,
+          transparent: true,
+          opacity: 0.45,
+        })
       );
       mesh.add(wireOutline);
 
-      // Tuned for elegant, graceful slow-motion floating
+      // Independent slow-motion floating kinematics
       mesh.userData = {
-        orbitSpeed: 0.0032 + (i % 4) * 0.0014, // Silky slow-motion orbit
-        angle: angle,
-        radius: radius,
-        yBase: yOffset,
-        rotX: (Math.random() - 0.5) * 0.04,
-        rotY: (Math.random() - 0.5) * 0.04,
-        pulseSpeed: 1.1 + (i % 3) * 0.35,
-        followWeight: 1.1 + (i % 4) * 0.25,
-        elasticity: 0.09 + (i % 3) * 0.025,
+        anchorNx: anchor.nx,
+        anchorNy: anchor.ny,
+        anchorZ: anchor.z,
+        baseX: pos.x,
+        baseY: pos.y,
+        baseZ: pos.z,
+        driftSpeedX: 0.22 + (i % 4) * 0.06,
+        driftSpeedY: 0.28 + (i % 5) * 0.05,
+        driftSpeedZ: 0.18 + (i % 3) * 0.04,
+        amplitudeX: 2.8 + (i % 3) * 0.8,
+        amplitudeY: 3.2 + (i % 4) * 0.9,
+        amplitudeZ: 2.0 + (i % 2) * 0.6,
+        phaseX: (i * Math.PI) / 4,
+        phaseY: (i * Math.PI) / 3,
+        phaseZ: (i * Math.PI) / 5,
+        rotSpeedX: 0.0032 + (i % 3) * 0.0012,
+        rotSpeedY: 0.0038 + (i % 4) * 0.0014,
+        rotSpeedZ: 0.0026 + (i % 2) * 0.0010,
       };
 
       crystals.push(mesh);
       masterGroup.add(mesh);
-    }
+    });
 
     // Pointer Parallax
     let pointerX = 0, pointerY = 0;
-    let targetRotX = 0, targetRotY = 0;
-    let cursorWorldX = 0, cursorWorldY = 0;
-    const TOUCH_SENSITIVITY = 1.2;
+    let targetParallaxX = 0, targetParallaxY = 0;
 
-    const updateCoordinates = (clientX: number, clientY: number) => {
-      const rect = container.getBoundingClientRect ? container.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
-      const px = (((clientX - rect.left) / rect.width) * 2 - 1) * TOUCH_SENSITIVITY;
-      const py = -((((clientY - rect.top) / rect.height) * 2 - 1) * TOUCH_SENSITIVITY);
-      pointerX = Math.max(-1.5, Math.min(1.5, px));
-      pointerY = Math.max(-1.5, Math.min(1.5, py));
-
-      targetRotY = pointerX * 0.45;
-      targetRotX = -pointerY * 0.35;
-
-      cursorWorldX = pointerX * 28;
-      cursorWorldY = pointerY * 22;
+    const onPointerMove = (e: PointerEvent) => {
+      const px = (e.clientX / window.innerWidth) * 2 - 1;
+      const py = -(e.clientY / window.innerHeight) * 2 + 1;
+      targetParallaxX = px * 3.2;
+      targetParallaxY = py * 2.2;
     };
 
-    const handlePointerMove = (e: PointerEvent) => {
-      updateCoordinates(e.clientX, e.clientY);
-    };
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
 
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches && e.touches.length > 0) {
-        updateCoordinates(e.touches[0].clientX, e.touches[0].clientY);
-      }
-    };
-
-    window.addEventListener('pointermove', handlePointerMove, { passive: true });
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
-
-    const onWindowResize = () => {
+    const onResize = () => {
       if (!container) return;
       width = container.clientWidth || window.innerWidth;
       height = container.clientHeight || window.innerHeight;
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
+
+      // Re-calculate dispersed base positions for new screen dimensions
+      for (let i = 0; i < crystals.length; i++) {
+        const c = crystals[i];
+        const ud = c.userData;
+        const newPos = computeWorldPosition(ud.anchorNx, ud.anchorNy, ud.anchorZ, width, height);
+        ud.baseX = newPos.x;
+        ud.baseY = newPos.y;
+        ud.baseZ = newPos.z;
+      }
     };
-    window.addEventListener('resize', onWindowResize);
+
+    window.addEventListener('resize', onResize);
 
     let clock = 0;
-    let animFrameId: number;
+    let animId: number;
 
     const animate = () => {
-      animFrameId = requestAnimationFrame(animate);
-      clock += 0.010; // Slow-motion progression
+      animId = requestAnimationFrame(animate);
+      clock += 0.010; // Silky slow-motion flow
 
-      masterGroup.rotation.y += (targetRotY - masterGroup.rotation.y) * 0.045;
-      masterGroup.rotation.x += (targetRotX - masterGroup.rotation.x) * 0.045;
+      // Smooth parallax damping
+      pointerX += (targetParallaxX - pointerX) * 0.04;
+      pointerY += (targetParallaxY - pointerY) * 0.04;
 
-      coreMesh.rotation.x += 0.004 + pointerY * 0.008;
-      coreMesh.rotation.y += 0.006 + pointerX * 0.008;
-      innerMesh.rotation.x -= 0.009;
-      innerMesh.rotation.y -= 0.010;
-      wireMesh.rotation.x -= 0.0025;
-      wireMesh.rotation.y -= 0.0035;
+      masterGroup.position.x = pointerX;
+      masterGroup.position.y = pointerY;
 
-      const coreScale = 1 + Math.sin(clock * 1.2) * 0.035;
-      coreMesh.scale.setScalar(coreScale);
+      // Update each crystal's independent slow-motion drift
+      for (let i = 0; i < crystals.length; i++) {
+        const c = crystals[i];
+        const ud = c.userData;
 
-      for (let c = 0; c < crystals.length; c++) {
-        const item = crystals[c];
-        item.userData.angle += item.userData.orbitSpeed;
-        const rad = item.userData.radius + Math.sin(clock * 1.1 + c) * 2.8;
+        // Gentle sinusoidal floating in 3D space
+        c.position.x = ud.baseX + Math.sin(clock * ud.driftSpeedX + ud.phaseX) * ud.amplitudeX;
+        c.position.y = ud.baseY + Math.cos(clock * ud.driftSpeedY + ud.phaseY) * ud.amplitudeY;
+        c.position.z = ud.baseZ + Math.sin(clock * ud.driftSpeedZ + ud.phaseZ) * ud.amplitudeZ;
 
-        const baseOrbX = Math.cos(item.userData.angle) * rad * 0.8;
-        const baseOrbZ = Math.sin(item.userData.angle) * rad * 0.7;
-        const baseOrbY = item.userData.yBase + Math.sin(clock * item.userData.pulseSpeed + c) * 3.6;
-
-        const followOffset = item.userData.followWeight;
-        const targetX = baseOrbX * 0.35 + (cursorWorldX * followOffset);
-        const targetY = baseOrbY * 0.35 + (cursorWorldY * followOffset);
-        const targetZ = baseOrbZ + (Math.sin(clock * 1.6 + c) * 4.5) + (Math.abs(pointerX) * 8);
-
-        const lerpSpeed = item.userData.elasticity;
-        item.position.x += (targetX - item.position.x) * lerpSpeed;
-        item.position.y += (targetY - item.position.y) * lerpSpeed;
-        item.position.z += (targetZ - item.position.z) * lerpSpeed;
-
-        item.rotation.x += item.userData.rotX * (0.8 + Math.abs(pointerY) * 2.2);
-        item.rotation.y += item.userData.rotY * (0.8 + Math.abs(pointerX) * 2.2);
+        // Elegant tumbling rotations revealing faceted light reflections
+        c.rotation.x += ud.rotSpeedX;
+        c.rotation.y += ud.rotSpeedY;
+        c.rotation.z += ud.rotSpeedZ;
       }
 
       renderer.render(scene, camera);
@@ -242,11 +307,10 @@ export const StitchLightBackground: React.FC = () => {
     animate();
 
     return () => {
-      cancelAnimationFrame(animFrameId);
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('resize', onWindowResize);
-      if (container && renderer.domElement && container.contains(renderer.domElement)) {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('resize', onResize);
+      if (container && renderer.domElement) {
         container.removeChild(renderer.domElement);
       }
       renderer.dispose();
@@ -256,8 +320,8 @@ export const StitchLightBackground: React.FC = () => {
   return (
     <div
       ref={mountRef}
-      className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden bg-transparent"
-      style={{ opacity: 0.95 }}
+      className="fixed inset-0 w-full h-full pointer-events-none z-0"
+      style={{ overflow: 'hidden' }}
     />
   );
 };

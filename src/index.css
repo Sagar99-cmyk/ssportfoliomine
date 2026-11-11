@@ -1,25 +1,46 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --font-heading: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-    color-scheme: dark;
   }
 
   html {
     scroll-behavior: smooth;
-    background: #09090b;
     overscroll-behavior-y: none;
+  }
+
+  html.dark {
+    color-scheme: dark;
+    background-color: #09090b;
+    color: #e2e8f0;
+  }
+
+  html.light {
+    color-scheme: light;
+    background-color: #faf9f6;
+    color: #0f172a;
   }
 
   body {
     font-family: var(--font-body);
     overflow-x: hidden;
     overscroll-behavior-y: none;
-    background: #09090b;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  html.dark body {
+    background-color: #09090b;
     color: #e2e8f0;
+  }
+
+  html.light body {
+    background-color: #faf9f6;
+    color: #0f172a;
   }
 
   h1, h2, h3, h4, h5, h6 {

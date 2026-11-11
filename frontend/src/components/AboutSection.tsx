@@ -1,12 +1,15 @@
 import React from 'react';
 import { Database, LineChart, Code2, Server, CheckCircle2 } from 'lucide-react';
 import { Profile } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 interface AboutSectionProps {
   profile: Profile;
 }
 
 export const AboutSection: React.FC<AboutSectionProps> = ({ profile }) => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const philosophy = profile.aboutDetails?.philosophy || (
     'My professional approach bridges analytical business intelligence with robust technical implementations. I have built end-to-end solutions including an interactive Sales Performance & Customer Analytics Dashboard ($2.4M analyzed across 50,000+ records in Power BI, Advanced Excel, and MySQL) and a collegiate PG Rental Management System using Supabase cloud database. Equipped with strong analytical acumen, Python data manipulation, and disciplined leadership from NCC Sergeant training, I am eager to contribute to forward-thinking analytics and tech teams.'
   );
@@ -51,15 +54,21 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ profile }) => {
   };
 
   return (
-    <section id="about" className="py-20 border-t border-stone-200/80 dark:border-stone-800/80 relative">
+    <section id="about" className={`py-20 border-t relative ${
+      isLight ? 'border-stone-200' : 'border-white/[0.08]'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* Section Title */}
         <div className="space-y-2 max-w-2xl text-left">
-          <span className="text-xs font-semibold text-rose-900 dark:text-rose-400 uppercase tracking-widest font-mono">
+          <span className={`text-xs font-semibold uppercase tracking-widest font-mono ${
+            isLight ? 'text-rose-600' : 'text-rose-400'
+          }`}>
             Professional Narrative & Discipline
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-stone-900 dark:text-stone-100">
+          <h2 className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
+            isLight ? 'text-stone-900' : 'text-stone-100'
+          }`}>
             About Sagar Singh
           </h2>
         </div>
@@ -68,19 +77,32 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ profile }) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
           {/* Left Column: Bio Prose */}
-          <div className="lg:col-span-7 space-y-6 text-stone-700 dark:text-stone-300 text-sm sm:text-base leading-relaxed">
-            <p className="font-medium text-stone-900 dark:text-stone-100 text-base sm:text-lg leading-snug">
+          <div className={`lg:col-span-7 space-y-6 text-sm sm:text-base leading-relaxed ${
+            isLight ? 'text-stone-700' : 'text-stone-300'
+          }`}>
+            <p className={`font-semibold text-base sm:text-lg leading-snug ${
+              isLight ? 'text-stone-900' : 'text-stone-100'
+            }`}>
               {profile.aboutBio}
             </p>
 
-            <p>
+            <p className={isLight ? 'text-stone-700 font-medium' : 'text-stone-300'}>
               {philosophy}
             </p>
 
-            <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-medium text-stone-200">
+            <div className={`pt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-medium ${
+              isLight ? 'text-stone-800' : 'text-stone-200'
+            }`}>
               {highlights.map((h, i) => (
-                <div key={i} className="flex items-start gap-2.5 p-3 rounded-xl bg-stone-900/35 backdrop-blur-md border border-white/[0.08] hover:border-rose-500/30 transition-all">
-                  <CheckCircle2 className="w-4 h-4 text-rose-400 mt-0.5 shrink-0" />
+                <div
+                  key={i}
+                  className={`flex items-start gap-2.5 p-3 rounded-xl border backdrop-blur-md transition-all ${
+                    isLight
+                      ? 'bg-white/90 border-stone-200 text-stone-800 shadow-2xs hover:border-rose-400'
+                      : 'bg-stone-900/35 border-white/[0.08] hover:border-rose-500/30'
+                  }`}
+                >
+                  <CheckCircle2 className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
                   <span>{h}</span>
                 </div>
               ))}
@@ -90,16 +112,23 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ profile }) => {
           {/* Right Column: Dynamic Core Pillars */}
           <div className="lg:col-span-5 space-y-4">
             {pillars.map((pillar, idx) => (
-              <div key={idx} className="p-5 rounded-2xl bg-stone-900/35 backdrop-blur-md border border-white/[0.08] hover:border-rose-500/30 transition-all space-y-3">
+              <div
+                key={idx}
+                className={`p-5 rounded-2xl border backdrop-blur-md transition-all space-y-3 ${
+                  isLight
+                    ? 'bg-white/90 border-stone-200 shadow-sm hover:border-rose-300 hover:shadow-md'
+                    : 'bg-stone-900/35 border-white/[0.08] hover:border-rose-500/30'
+                }`}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400">
+                  <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500">
                     {renderPillarIcon(pillar.icon)}
                   </div>
-                  <h3 className="font-bold text-white text-sm">
+                  <h3 className={`font-bold text-sm ${isLight ? 'text-stone-900' : 'text-white'}`}>
                     {pillar.title}
                   </h3>
                 </div>
-                <p className="text-xs text-stone-300 leading-relaxed">
+                <p className={`text-xs leading-relaxed ${isLight ? 'text-stone-600' : 'text-stone-300'}`}>
                   {pillar.desc}
                 </p>
               </div>
