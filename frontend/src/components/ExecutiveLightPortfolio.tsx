@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   Mail, MapPin, Linkedin, Github, Download,
-  ChevronRight, CheckCircle2,
+  ChevronRight, ChevronLeft, CheckCircle2,
   Volume2, VolumeX,
   TrendingUp, Database, Code2, Send,
   AlertCircle, Moon, FileText, Table,
-  User, Home, Sparkles, FolderGit2
+  User, Home, Sparkles, FolderGit2, Layers
 } from 'lucide-react';
 import { Profile, Skill, Project, Education, Achievement } from '../types';
 import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
@@ -40,8 +40,49 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
   // Selected Project for Case Study Modal
   const [selectedCaseStudy, setSelectedCaseStudy] = useState<Project | null>(null);
 
-  // Project Category Filter
+  // Project Category Filter & Flow Carousel State
   const [activeProjectFilter, setActiveProjectFilter] = useState<'ALL' | 'BI Dashboards' | 'Python ETL'>('ALL');
+  const [projectViewMode, setProjectViewMode] = useState<'flow' | 'grid'>('flow');
+  const [isProjectsHovered, setIsProjectsHovered] = useState(false);
+  const scrollProjectsRef = React.useRef<HTMLDivElement>(null);
+  const isDraggingProjectsRef = React.useRef(false);
+  const startXProjectsRef = React.useRef(0);
+  const scrollLeftStartProjectsRef = React.useRef(0);
+  const hasDraggedProjectsRef = React.useRef(false);
+
+  // Stepping controls
+  const stepProjects = (dir: 'left' | 'right') => {
+    const el = scrollProjectsRef.current;
+    if (!el) return;
+    const amount = el.clientWidth * 0.75;
+    el.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' });
+  };
+
+  // Continuous auto-flow loop: moves right-to-left, pauses completely on hover or drag
+  useEffect(() => {
+    if (projectViewMode !== 'flow') return;
+    const el = scrollProjectsRef.current;
+    if (!el) return;
+
+    let animId: number;
+    const tick = () => {
+      if (el && !isProjectsHovered && !isDraggingProjectsRef.current) {
+        el.scrollLeft += 0.95;
+        const halfWidth = el.scrollWidth / 2;
+        if (halfWidth > 200) {
+          if (el.scrollLeft >= halfWidth) {
+            el.scrollLeft -= halfWidth;
+          } else if (el.scrollLeft <= 0) {
+            el.scrollLeft += halfWidth;
+          }
+        }
+      }
+      animId = requestAnimationFrame(tick);
+    };
+
+    animId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animId);
+  }, [projectViewMode, isProjectsHovered]);
 
   // Contact Form State
   const [formData, setFormData] = useState({
@@ -85,6 +126,11 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
     );
   }, [projects, activeProjectFilter]);
 
+  const carouselProjects = useMemo(() => {
+    if (filteredProjects.length === 0) return [];
+    return [...filteredProjects, ...filteredProjects, ...filteredProjects];
+  }, [filteredProjects]);
+
   // Contact Form Submission
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,9 +151,9 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
   };
 
   return (
-    <div className="min-h-screen bg-[#faf9f6] text-[#0f172a] relative selection:bg-rose-500/20 selection:text-rose-600 font-sans">
+    <div className="min-h-screen bg-[#faf9f6] text-[#0f172a] relative selection:bg-rose-500/20 selection:text-rose-600 font-sans-inter">
       
-      {/* 3D Dispersed Floating Polyhedrons Background */}
+      {/* 3D Tech Background (Isometric DB Cylinders, Cubes, Circuits & Mouse Parallax) */}
       <StitchLightBackground />
 
       {/* ========================================================================= */}
@@ -187,7 +233,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
 
               {/* Main Headline & Pitch */}
               <div className="space-y-3">
-                <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-black text-stone-900 tracking-tight leading-[1.12]">
+                <h1 className="font-serif-luxury text-3xl xs:text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-bold text-stone-900 tracking-tight leading-[1.14]">
                   Transforming<br />
                   Raw Data into<br />
                   <span className="text-[#e11d48]">Actionable</span><br />
@@ -332,107 +378,293 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
         </section>
 
         {/* ========================================================================= */}
-        {/* 5. FEATURED ANALYTICAL PROJECTS                                           */}
+        {/* 5. FEATURED ANALYTICAL PROJECTS (INTERACTIVE 3D FLOW STREAM & GRID)       */}
         {/* ========================================================================= */}
         <section id="projects" className="space-y-6 pt-4">
           
-          {/* Header with Title and Filter Tabs */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          {/* Header with Title, Controls, and Filter Tabs */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#e11d48]">
                 PORTFOLIO SHOWCASE
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+              <h2 className="font-serif-luxury text-2xl sm:text-3xl md:text-4xl font-bold text-stone-900 tracking-tight">
                 Featured Analytical Projects
               </h2>
+              <p className="text-xs font-mono text-stone-500 pt-1">
+                Continuous 3D flow • Hover to freeze • Drag or swipe left & right
+              </p>
             </div>
 
-            {/* Filter Pills */}
-            <div className="flex items-center gap-1.5">
-              {(['ALL', 'BI Dashboards', 'Python ETL'] as const).map(tab => (
+            {/* Stepping Arrows & View Mode & Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              
+              {/* Stepping Arrow Controls for Flow View */}
+              {projectViewMode === 'flow' && (
+                <div className="flex items-center gap-1 bg-white border border-stone-200/90 rounded-full p-1 shadow-2xs">
+                  <button
+                    onClick={() => stepProjects('left')}
+                    title="Scroll Left"
+                    className="p-1.5 rounded-full hover:bg-stone-100 text-stone-600 hover:text-stone-900 transition-all cursor-pointer active:scale-90"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-[#e11d48]" />
+                  </button>
+                  <button
+                    onClick={() => stepProjects('right')}
+                    title="Scroll Right"
+                    className="p-1.5 rounded-full hover:bg-stone-100 text-stone-600 hover:text-stone-900 transition-all cursor-pointer active:scale-90"
+                  >
+                    <ChevronRight className="w-4 h-4 text-[#e11d48]" />
+                  </button>
+                </div>
+              )}
+
+              {/* View Toggle: Flow Stream vs Grid */}
+              <div className="flex items-center p-1 rounded-full bg-white border border-stone-200/90 shadow-2xs">
                 <button
-                  key={tab}
-                  onClick={() => setActiveProjectFilter(tab)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                    activeProjectFilter === tab
+                  onClick={() => setProjectViewMode('flow')}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold font-mono transition-all flex items-center gap-1.5 cursor-pointer ${
+                    projectViewMode === 'flow'
                       ? 'bg-[#e11d48] text-white shadow-xs'
-                      : 'bg-[#e0e7ff] text-[#3730a3] hover:bg-[#c7d2fe]'
+                      : 'text-stone-600 hover:text-stone-900'
                   }`}
                 >
-                  {tab}
+                  <Layers className="w-3 h-3" />
+                  <span>Flow</span>
                 </button>
-              ))}
+                <button
+                  onClick={() => setProjectViewMode('grid')}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold font-mono transition-all flex items-center gap-1.5 cursor-pointer ${
+                    projectViewMode === 'grid'
+                      ? 'bg-[#e11d48] text-white shadow-xs'
+                      : 'text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  <span>Grid</span>
+                </button>
+              </div>
+
+              {/* Filter Pills */}
+              <div className="flex items-center gap-1.5">
+                {(['ALL', 'BI Dashboards', 'Python ETL'] as const).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveProjectFilter(tab)}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                      activeProjectFilter === tab
+                        ? 'bg-stone-900 text-white shadow-xs'
+                        : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200/80'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Project Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-            {filteredProjects.map(proj => (
-              <div
-                key={proj.id || proj.title}
-                className="rounded-3xl bg-white border border-stone-200/90 overflow-hidden shadow-xs hover:border-rose-300 transition-all flex flex-col group"
-              >
-                {/* Image Mockup */}
-                <div className="relative h-44 sm:h-48 md:h-52 bg-stone-100 overflow-hidden border-b border-stone-100">
-                  <img
-                    src={proj.thumbnailUrl || '/projects/sales-dashboard.png'}
-                    alt={proj.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/projects/sales-dashboard.png';
-                    }}
-                  />
-                  {proj.featured && (
-                    <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#e11d48] text-white shadow-xs">
-                      Featured
-                    </span>
-                  )}
-                </div>
+          {/* Render Flow Stream Mode (Smooth continuous auto-flow, pauses on hover, drag/swipe left-right) */}
+          {projectViewMode === 'flow' ? (
+            <div
+              className="relative w-full overflow-hidden py-3"
+              onMouseEnter={() => setIsProjectsHovered(true)}
+              onMouseLeave={() => {
+                setIsProjectsHovered(false);
+                isDraggingProjectsRef.current = false;
+              }}
+              onMouseDown={(e) => {
+                const el = scrollProjectsRef.current;
+                if (!el) return;
+                isDraggingProjectsRef.current = true;
+                hasDraggedProjectsRef.current = false;
+                startXProjectsRef.current = e.pageX - el.offsetLeft;
+                scrollLeftStartProjectsRef.current = el.scrollLeft;
+              }}
+              onMouseMove={(e) => {
+                if (!isDraggingProjectsRef.current) return;
+                const el = scrollProjectsRef.current;
+                if (!el) return;
+                e.preventDefault();
+                const x = e.pageX - el.offsetLeft;
+                const walk = (x - startXProjectsRef.current) * 1.5;
+                if (Math.abs(walk) > 5) {
+                  hasDraggedProjectsRef.current = true;
+                }
+                el.scrollLeft = scrollLeftStartProjectsRef.current - walk;
+              }}
+              onMouseUp={() => {
+                isDraggingProjectsRef.current = false;
+              }}
+              onTouchStart={(e) => {
+                const el = scrollProjectsRef.current;
+                if (!el || !e.touches[0]) return;
+                setIsProjectsHovered(true);
+                isDraggingProjectsRef.current = true;
+                hasDraggedProjectsRef.current = false;
+                startXProjectsRef.current = e.touches[0].pageX - el.offsetLeft;
+                scrollLeftStartProjectsRef.current = el.scrollLeft;
+              }}
+              onTouchMove={(e) => {
+                if (!isDraggingProjectsRef.current || !e.touches[0]) return;
+                const el = scrollProjectsRef.current;
+                if (!el) return;
+                const x = e.touches[0].pageX - el.offsetLeft;
+                const walk = (x - startXProjectsRef.current) * 1.5;
+                if (Math.abs(walk) > 5) {
+                  hasDraggedProjectsRef.current = true;
+                }
+                el.scrollLeft = scrollLeftStartProjectsRef.current - walk;
+              }}
+              onTouchEnd={() => {
+                isDraggingProjectsRef.current = false;
+                setIsProjectsHovered(false);
+              }}
+            >
+              {/* Side Fade Vignettes */}
+              <div className="absolute inset-y-0 left-0 w-12 sm:w-20 bg-gradient-to-r from-[#faf9f6] to-transparent z-20 pointer-events-none" />
+              <div className="absolute inset-y-0 right-0 w-12 sm:w-20 bg-gradient-to-l from-[#faf9f6] to-transparent z-20 pointer-events-none" />
 
-                {/* Body Content */}
-                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
-                  <div className="space-y-2">
-                    {/* Tags */}
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {(proj.technologies || ['Power BI', 'Python']).slice(0, 3).map((tech: string, tIdx: number) => (
-                        <span
-                          key={tIdx}
-                          className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                        >
-                          {tech}
+              {/* Horizontal Scroll Track */}
+              <div
+                ref={scrollProjectsRef}
+                className="flex items-center gap-5 sm:gap-6 overflow-x-hidden no-scrollbar w-full select-none cursor-grab active:cursor-grabbing py-2"
+                style={{ scrollBehavior: 'auto' }}
+              >
+                {carouselProjects.map((proj, idx) => (
+                  <div
+                    key={`${proj.id || proj.title}-${idx}`}
+                    className="group relative w-[82vw] max-w-sm sm:w-[360px] md:w-[380px] shrink-0 rounded-3xl bg-white border border-stone-200/90 overflow-hidden shadow-sm hover:shadow-xl hover:border-rose-400 transition-all duration-300 flex flex-col justify-between"
+                  >
+                    {/* Image Mockup */}
+                    <div className="relative h-44 sm:h-48 md:h-52 bg-stone-100 overflow-hidden border-b border-stone-100">
+                      <img
+                        src={proj.thumbnailUrl || '/projects/sales-dashboard.png'}
+                        alt={proj.title}
+                        className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500 ease-out"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/projects/sales-dashboard.png';
+                        }}
+                      />
+                      {proj.featured && (
+                        <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#e11d48] text-white shadow-xs">
+                          Featured
                         </span>
-                      ))}
+                      )}
                     </div>
 
-                    <h3 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight group-hover:text-[#e11d48] transition-colors">
-                      {proj.title}
-                    </h3>
+                    {/* Body Content */}
+                    <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
+                      <div className="space-y-2">
+                        {/* Tags */}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {(proj.technologies || ['Power BI', 'Python']).slice(0, 3).map((tech: string, tIdx: number) => (
+                            <span
+                              key={tIdx}
+                              className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
 
-                    <p className="text-xs text-stone-600 leading-relaxed line-clamp-3">
-                      {proj.shortDescription || proj.caseStudy?.overview || ''}
-                    </p>
+                        <h3 className="font-serif-luxury text-base sm:text-lg font-bold text-stone-900 tracking-tight group-hover:text-[#e11d48] transition-colors line-clamp-1">
+                          {proj.title}
+                        </h3>
+
+                        <p className="text-xs text-stone-600 leading-relaxed line-clamp-3">
+                          {proj.shortDescription || proj.caseStudy?.overview || ''}
+                        </p>
+                      </div>
+
+                      {/* Card Footer */}
+                      <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-semibold">
+                        <span className="text-emerald-600 flex items-center gap-1 font-mono text-[11px]">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Verified Capstone
+                        </span>
+
+                        <button
+                          onClick={(e) => {
+                            if (hasDraggedProjectsRef.current) return;
+                            e.stopPropagation();
+                            setSelectedCaseStudy(proj);
+                          }}
+                          className="text-[#e11d48] hover:text-[#be123c] flex items-center gap-1 font-bold cursor-pointer transition-colors"
+                        >
+                          <span>View Case Study</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            /* Render Static Grid Mode */
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+              {filteredProjects.map((proj, idx) => (
+                <div
+                  key={`${proj.id || proj.title}-${idx}`}
+                  className="rounded-3xl bg-white border border-stone-200/90 overflow-hidden shadow-xs hover:border-rose-300 transition-all flex flex-col group"
+                >
+                  <div className="relative h-44 sm:h-48 md:h-52 bg-stone-100 overflow-hidden border-b border-stone-100">
+                    <img
+                      src={proj.thumbnailUrl || '/projects/sales-dashboard.png'}
+                      alt={proj.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/projects/sales-dashboard.png';
+                      }}
+                    />
+                    {proj.featured && (
+                      <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#e11d48] text-white shadow-xs">
+                        Featured
+                      </span>
+                    )}
                   </div>
 
-                  {/* Card Footer: Verified Capstone & View Case Study */}
-                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-semibold">
-                    <span className="text-emerald-600 flex items-center gap-1 font-mono text-[11px]">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Verified Capstone
-                    </span>
+                  <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {(proj.technologies || ['Power BI', 'Python']).slice(0, 3).map((tech: string, tIdx: number) => (
+                          <span
+                            key={tIdx}
+                            className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
 
-                    <button
-                      onClick={() => setSelectedCaseStudy(proj)}
-                      className="text-[#e11d48] hover:text-[#be123c] flex items-center gap-1 font-bold cursor-pointer transition-colors"
-                    >
-                      <span>View Case Study</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
+                      <h3 className="font-serif-luxury text-base sm:text-lg font-bold text-stone-900 tracking-tight group-hover:text-[#e11d48] transition-colors">
+                        {proj.title}
+                      </h3>
+
+                      <p className="text-xs text-stone-600 leading-relaxed line-clamp-3">
+                        {proj.shortDescription || proj.caseStudy?.overview || ''}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-semibold">
+                      <span className="text-emerald-600 flex items-center gap-1 font-mono text-[11px]">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Verified Capstone
+                      </span>
+
+                      <button
+                        onClick={() => setSelectedCaseStudy(proj)}
+                        className="text-[#e11d48] hover:text-[#be123c] flex items-center gap-1 font-bold cursor-pointer transition-colors"
+                      >
+                        <span>View Case Study</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
         </section>
 
@@ -445,7 +677,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#e11d48]">
               ACADEMIC BACKGROUND
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+            <h2 className="font-serif-luxury text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
               Presidency College
             </h2>
           </div>
@@ -526,7 +758,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
               <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#e11d48] block">
                 GET IN TOUCH
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+              <h2 className="font-serif-luxury text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
                 Let's Discuss Data Opportunities
               </h2>
               <p className="text-xs sm:text-sm text-stone-500">

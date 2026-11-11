@@ -136,7 +136,7 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
     return [...filteredProjects, ...filteredProjects, ...filteredProjects];
   }, [filteredProjects]);
 
-  // Animation Loop: Interactive Mouse Cursor Left/Right Control when Hovered, Auto Right-to-Left otherwise
+  // Animation Loop: Auto right-to-left flow when not hovered, completely pauses on hover, and dragging moves smoothly
   React.useEffect(() => {
     if (viewMode !== 'flow') return;
     const el = scrollContainerRef.current;
@@ -145,27 +145,11 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
     let animId: number;
 
     const tick = () => {
-      if (el && !isDraggingRef.current && !isPausedByUser) {
+      if (el && !isDraggingRef.current && !isPausedByUser && !isHovered) {
+        // Continuous, smooth slow flow only when NOT hovering
+        el.scrollLeft += 1.0;
+
         const halfWidth = el.scrollWidth / 2;
-
-        if (isHovered && mouseRatioRef.current !== null) {
-          // Cursor position relative to container center (-1 = far left, +1 = far right)
-          const offset = mouseRatioRef.current;
-          let speed = 0;
-          if (offset < -0.2) {
-            // Mouse on the left side: Scroll left towards earlier projects
-            speed = (offset + 0.2) * 14;
-          } else if (offset > 0.2) {
-            // Mouse on the right side: Scroll right towards later projects
-            speed = (offset - 0.2) * 14;
-          }
-          el.scrollLeft += speed;
-        } else if (!isHovered) {
-          // Otherwise (when not hovering): Smooth, continuous slow right-to-left flow
-          el.scrollLeft += 1.1;
-        }
-
-        // Seamless wrap-around for infinite stream
         if (halfWidth > 200) {
           if (el.scrollLeft >= halfWidth) {
             el.scrollLeft -= halfWidth;
@@ -363,13 +347,7 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => {
               setIsHovered(false);
-              mouseRatioRef.current = null;
               isDraggingRef.current = false;
-            }}
-            onMouseMove={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const ratio = (e.clientX - rect.left) / rect.width;
-              mouseRatioRef.current = (ratio - 0.5) * 2;
             }}
             onMouseDown={(e) => {
               const el = scrollContainerRef.current;
@@ -378,8 +356,37 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
               startXRef.current = e.pageX - el.offsetLeft;
               scrollLeftStartRef.current = el.scrollLeft;
             }}
+            onMouseMove={(e) => {
+              if (!isDraggingRef.current) return;
+              const el = scrollContainerRef.current;
+              if (!el) return;
+              e.preventDefault();
+              const x = e.pageX - el.offsetLeft;
+              const walk = (x - startXRef.current) * 1.5;
+              el.scrollLeft = scrollLeftStartRef.current - walk;
+            }}
             onMouseUp={() => {
               isDraggingRef.current = false;
+            }}
+            onTouchStart={(e) => {
+              const el = scrollContainerRef.current;
+              if (!el || !e.touches[0]) return;
+              setIsHovered(true);
+              isDraggingRef.current = true;
+              startXRef.current = e.touches[0].pageX - el.offsetLeft;
+              scrollLeftStartRef.current = el.scrollLeft;
+            }}
+            onTouchMove={(e) => {
+              if (!isDraggingRef.current || !e.touches[0]) return;
+              const el = scrollContainerRef.current;
+              if (!el) return;
+              const x = e.touches[0].pageX - el.offsetLeft;
+              const walk = (x - startXRef.current) * 1.5;
+              el.scrollLeft = scrollLeftStartRef.current - walk;
+            }}
+            onTouchEnd={() => {
+              isDraggingRef.current = false;
+              setIsHovered(false);
             }}
           >
             {/* Side Fade Vignettes */}

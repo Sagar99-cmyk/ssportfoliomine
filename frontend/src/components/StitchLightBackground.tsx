@@ -1,327 +1,258 @@
 import React, { useEffect, useRef } from 'react';
-import * as THREE from 'three';
 
 export const StitchLightBackground: React.FC = () => {
-  const mountRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const container = mountRef.current;
-    if (!container) return;
+    const el = containerRef.current;
+    if (!el) return;
 
-    let width = container.clientWidth || window.innerWidth;
-    let height = container.clientHeight || window.innerHeight;
-
-    const scene = new THREE.Scene();
-
-    // Camera with optimized FOV: 52 deg portrait studio view
-    const camera = new THREE.PerspectiveCamera(52, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 85);
-
-    const renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-      powerPreference: 'high-performance',
-    });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.18;
-    container.appendChild(renderer.domElement);
-
-    // Studio Ambient & Directional Lighting for translucent crystal refraction
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
-    scene.add(ambientLight);
-
-    const dirLightRose = new THREE.DirectionalLight(0xf43f5e, 2.4);
-    dirLightRose.position.set(40, 50, 45);
-    scene.add(dirLightRose);
-
-    const dirLightCyan = new THREE.DirectionalLight(0x06b6d4, 2.2);
-    dirLightCyan.position.set(-45, -30, 40);
-    scene.add(dirLightCyan);
-
-    const dirLightAmber = new THREE.DirectionalLight(0xf59e0b, 1.9);
-    dirLightAmber.position.set(10, -45, 30);
-    scene.add(dirLightAmber);
-
-    const masterGroup = new THREE.Group();
-    scene.add(masterGroup);
-
-    // =========================================================================
-    // 10 DISTINCT GEOMETRIC OBJECTS (MATCHING EXACT USER SCREENSHOT)
-    // 1. Cyan truncated hexagonal cone/prism
-    // 2. Magenta/rose faceted icosahedron
-    // 3. Teal 12-sided dodecahedron
-    // 4. Emerald green hexagonal cylinder
-    // 5. Red sharp tetrahedron
-    // 6. Purple 4-sided pyramid
-    // 7. Amber-gold cube
-    // 8. Sky-blue faceted icosahedron
-    // 9. Warm golden dodecahedron
-    // 10. Crimson red octahedron
-    // =========================================================================
-    const shapeConfigs = [
-      {
-        // 1. Cyan truncated cone / hexagonal prism
-        geo: new THREE.CylinderGeometry(1.8, 3.4, 4.8, 6),
-        color: 0x00b4d8,
-        wireColor: 0x0e7490,
-      },
-      {
-        // 2. Rose / magenta faceted icosahedron
-        geo: new THREE.IcosahedronGeometry(3.6, 0),
-        color: 0xf43f5e,
-        wireColor: 0xbe123c,
-      },
-      {
-        // 3. Teal dodecahedron
-        geo: new THREE.DodecahedronGeometry(3.5, 0),
-        color: 0x14b8a6,
-        wireColor: 0x0f766e,
-      },
-      {
-        // 4. Emerald green hexagonal cylinder
-        geo: new THREE.CylinderGeometry(2.4, 2.4, 4.6, 6),
-        color: 0x10b981,
-        wireColor: 0x047857,
-      },
-      {
-        // 5. Red tetrahedron
-        geo: new THREE.TetrahedronGeometry(4.2, 0),
-        color: 0xef4444,
-        wireColor: 0xb91c1c,
-      },
-      {
-        // 6. Purple 4-sided pyramid
-        geo: new THREE.ConeGeometry(3.2, 4.8, 4),
-        color: 0x8b5cf6,
-        wireColor: 0x6d28d9,
-      },
-      {
-        // 7. Amber-gold cube
-        geo: new THREE.BoxGeometry(3.8, 3.8, 3.8),
-        color: 0xf59e0b,
-        wireColor: 0xb45309,
-      },
-      {
-        // 8. Sky-blue faceted icosahedron
-        geo: new THREE.IcosahedronGeometry(3.4, 0),
-        color: 0x38bdf8,
-        wireColor: 0x0369a1,
-      },
-      {
-        // 9. Warm amber dodecahedron
-        geo: new THREE.DodecahedronGeometry(3.3, 0),
-        color: 0xd97706,
-        wireColor: 0x92400e,
-      },
-      {
-        // 10. Crimson red octahedron
-        geo: new THREE.OctahedronGeometry(3.8, 0),
-        color: 0xbe123c,
-        wireColor: 0x881337,
-      },
-      {
-        // 11. Extra Cyan crystal variant
-        geo: new THREE.OctahedronGeometry(3.5, 0),
-        color: 0x06b6d4,
-        wireColor: 0x0e7490,
-      },
-      {
-        // 12. Extra Violet crystal variant
-        geo: new THREE.DodecahedronGeometry(3.2, 0),
-        color: 0xa855f7,
-        wireColor: 0x7e22ce,
-      },
-    ];
-
-    // =========================================================================
-    // RESPONSIVE DISPERSED ANCHOR GRID
-    // Separate coordinates across the entire viewport - prevents horizontal clumping
-    // =========================================================================
-    const normalizedAnchors = [
-      // Top row (High corners & mid)
-      { nx: -0.78, ny: 0.78, z: -8 },
-      { nx: -0.32, ny: 0.86, z: 5 },
-      { nx: 0.28, ny: 0.82, z: -6 },
-      { nx: 0.78, ny: 0.80, z: 4 },
-
-      // Mid-high row (Flanks)
-      { nx: -0.72, ny: 0.38, z: 6 },
-      { nx: 0.74, ny: 0.42, z: -8 },
-
-      // Center flanks (Leaving center open for clean UI reading)
-      { nx: -0.84, ny: -0.04, z: -4 },
-      { nx: 0.82, ny: -0.06, z: 8 },
-
-      // Mid-low row (Flanks)
-      { nx: -0.70, ny: -0.46, z: 6 },
-      { nx: 0.72, ny: -0.48, z: -6 },
-
-      // Bottom row (Low corners & mid)
-      { nx: -0.76, ny: -0.82, z: -4 },
-      { nx: -0.22, ny: -0.88, z: 6 },
-      { nx: 0.32, ny: -0.85, z: -6 },
-      { nx: 0.78, ny: -0.80, z: 4 },
-    ];
-
-    const crystals: THREE.Mesh[] = [];
-
-    const computeWorldPosition = (nx: number, ny: number, z: number, w: number, h: number) => {
-      const aspect = w / h;
-      // On narrow mobile screen, scale X within visible frustum (-20 to +20)
-      // On wide desktop screen, scale X out to (-60 to +60)
-      const xSpread = aspect < 1 ? Math.max(16, aspect * 38) : Math.min(62, aspect * 34);
-      const ySpread = aspect < 1 ? 40 : 34;
-
-      return {
-        x: nx * xSpread,
-        y: ny * ySpread,
-        z: z,
-      };
-    };
-
-    shapeConfigs.forEach((cfg, i) => {
-      const anchor = normalizedAnchors[i % normalizedAnchors.length];
-      const pos = computeWorldPosition(anchor.nx, anchor.ny, anchor.z, width, height);
-
-      // Translucent physical jewel facet material
-      const mat = new THREE.MeshPhysicalMaterial({
-        color: cfg.color,
-        roughness: 0.08,
-        transmission: 0.82,
-        ior: 1.55,
-        thickness: 4.5,
-        clearcoat: 1.0,
-        transparent: true,
-        opacity: 0.88,
-      });
-
-      const mesh = new THREE.Mesh(cfg.geo, mat);
-      mesh.position.set(pos.x, pos.y, pos.z);
-
-      // Crisp facet wireframe outline (matching screenshot facet lines)
-      const wireOutline = new THREE.LineSegments(
-        new THREE.WireframeGeometry(cfg.geo),
-        new THREE.LineBasicMaterial({
-          color: cfg.wireColor,
-          transparent: true,
-          opacity: 0.45,
-        })
-      );
-      mesh.add(wireOutline);
-
-      // Independent slow-motion floating kinematics
-      mesh.userData = {
-        anchorNx: anchor.nx,
-        anchorNy: anchor.ny,
-        anchorZ: anchor.z,
-        baseX: pos.x,
-        baseY: pos.y,
-        baseZ: pos.z,
-        driftSpeedX: 0.22 + (i % 4) * 0.06,
-        driftSpeedY: 0.28 + (i % 5) * 0.05,
-        driftSpeedZ: 0.18 + (i % 3) * 0.04,
-        amplitudeX: 2.8 + (i % 3) * 0.8,
-        amplitudeY: 3.2 + (i % 4) * 0.9,
-        amplitudeZ: 2.0 + (i % 2) * 0.6,
-        phaseX: (i * Math.PI) / 4,
-        phaseY: (i * Math.PI) / 3,
-        phaseZ: (i * Math.PI) / 5,
-        rotSpeedX: 0.0032 + (i % 3) * 0.0012,
-        rotSpeedY: 0.0038 + (i % 4) * 0.0014,
-        rotSpeedZ: 0.0026 + (i % 2) * 0.0010,
-      };
-
-      crystals.push(mesh);
-      masterGroup.add(mesh);
-    });
-
-    // Pointer Parallax
-    let pointerX = 0, pointerY = 0;
-    let targetParallaxX = 0, targetParallaxY = 0;
-
-    const onPointerMove = (e: PointerEvent) => {
-      const px = (e.clientX / window.innerWidth) * 2 - 1;
-      const py = -(e.clientY / window.innerHeight) * 2 + 1;
-      targetParallaxX = px * 3.2;
-      targetParallaxY = py * 2.2;
-    };
-
-    window.addEventListener('pointermove', onPointerMove, { passive: true });
-
-    const onResize = () => {
-      if (!container) return;
-      width = container.clientWidth || window.innerWidth;
-      height = container.clientHeight || window.innerHeight;
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-
-      // Re-calculate dispersed base positions for new screen dimensions
-      for (let i = 0; i < crystals.length; i++) {
-        const c = crystals[i];
-        const ud = c.userData;
-        const newPos = computeWorldPosition(ud.anchorNx, ud.anchorNy, ud.anchorZ, width, height);
-        ud.baseX = newPos.x;
-        ud.baseY = newPos.y;
-        ud.baseZ = newPos.z;
-      }
-    };
-
-    window.addEventListener('resize', onResize);
-
-    let clock = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
     let animId: number;
+    const ease = 0.065;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      targetX = (e.clientX / window.innerWidth) - 0.5;
+      targetY = (e.clientY / window.innerHeight) - 0.5;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!e.touches[0]) return;
+      targetX = (e.touches[0].clientX / window.innerWidth) - 0.5;
+      targetY = (e.touches[0].clientY / window.innerHeight) - 0.5;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
 
     const animate = () => {
+      currentX += (targetX - currentX) * ease;
+      currentY += (targetY - currentY) * ease;
+
+      const px = currentX * 42; // max parallax shift in px
+      const py = currentY * 42;
+
+      el.style.setProperty('--parallax-x', `${px}px`);
+      el.style.setProperty('--parallax-y', `${py}px`);
+
       animId = requestAnimationFrame(animate);
-      clock += 0.010; // Silky slow-motion flow
-
-      // Smooth parallax damping
-      pointerX += (targetParallaxX - pointerX) * 0.04;
-      pointerY += (targetParallaxY - pointerY) * 0.04;
-
-      masterGroup.position.x = pointerX;
-      masterGroup.position.y = pointerY;
-
-      // Update each crystal's independent slow-motion drift
-      for (let i = 0; i < crystals.length; i++) {
-        const c = crystals[i];
-        const ud = c.userData;
-
-        // Gentle sinusoidal floating in 3D space
-        c.position.x = ud.baseX + Math.sin(clock * ud.driftSpeedX + ud.phaseX) * ud.amplitudeX;
-        c.position.y = ud.baseY + Math.cos(clock * ud.driftSpeedY + ud.phaseY) * ud.amplitudeY;
-        c.position.z = ud.baseZ + Math.sin(clock * ud.driftSpeedZ + ud.phaseZ) * ud.amplitudeZ;
-
-        // Elegant tumbling rotations revealing faceted light reflections
-        c.rotation.x += ud.rotSpeedX;
-        c.rotation.y += ud.rotSpeedY;
-        c.rotation.z += ud.rotSpeedZ;
-      }
-
-      renderer.render(scene, camera);
     };
 
     animate();
 
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('resize', onResize);
-      if (container && renderer.domElement) {
-        container.removeChild(renderer.domElement);
-      }
-      renderer.dispose();
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
     };
   }, []);
 
   return (
     <div
-      ref={mountRef}
-      className="fixed inset-0 w-full h-full pointer-events-none z-0"
-      style={{ overflow: 'hidden' }}
-    />
+      ref={containerRef}
+      id="tech-bg-light"
+      aria-hidden="true"
+      className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden select-none"
+      style={{
+        background: 'linear-gradient(180deg, #faf9f6 0%, #f6f3ed 50%, #f2ede4 100%)',
+      }}
+    >
+      <style>{`
+        #tech-bg-light svg {
+          width: 100%;
+          height: 100%;
+          opacity: 0.38;
+          transition: opacity 0.5s ease;
+        }
+
+        @keyframes techFloatA {
+          0%, 100% {
+            transform: translate(calc(var(--parallax-x, 0px) * 0.8), calc(var(--parallax-y, 0px) * 0.8)) translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translate(calc(var(--parallax-x, 0px) * 0.8), calc(var(--parallax-y, 0px) * 0.8)) translateY(-16px) rotate(2.5deg);
+          }
+        }
+
+        @keyframes techFloatB {
+          0%, 100% {
+            transform: translate(calc(var(--parallax-x, 0px) * -1.1), calc(var(--parallax-y, 0px) * -1.1)) translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translate(calc(var(--parallax-x, 0px) * -1.1), calc(var(--parallax-y, 0px) * -1.1)) translateY(14px) rotate(-3deg);
+          }
+        }
+
+        @keyframes techFloatC {
+          0%, 100% {
+            transform: translate(calc(var(--parallax-x, 0px) * 0.55), calc(var(--parallax-y, 0px) * -0.55)) translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translate(calc(var(--parallax-x, 0px) * 0.55), calc(var(--parallax-y, 0px) * -0.55)) translateY(-10px) rotate(3.5deg);
+          }
+        }
+
+        @keyframes techPulseGlow {
+          0%, 100% { opacity: 0.28; }
+          50% { opacity: 0.55; }
+        }
+
+        @keyframes techDashFlow {
+          0% { stroke-dashoffset: 60; }
+          100% { stroke-dashoffset: 0; }
+        }
+
+        .tech-float-a { animation: techFloatA 10s ease-in-out infinite; }
+        .tech-float-b { animation: techFloatB 12s ease-in-out infinite; }
+        .tech-float-c { animation: techFloatC 14s ease-in-out infinite; }
+        .tech-pulse { animation: techPulseGlow 4s ease-in-out infinite; }
+        .tech-flow { animation: techDashFlow 3.5s linear infinite; }
+      `}</style>
+
+      {/* 
+        Responsive SVG 3D Isometric Tech Background 
+        Auto-scales on mobile, tablet, and desktop without pixelation
+      */}
+      <svg
+        viewBox="0 0 1400 900"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full"
+      >
+        <defs>
+          {/* Cylinder Gradients for Database */}
+          <linearGradient id="cyl1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.6" />
+            <stop offset="50%" stopColor="#C084FC" stopOpacity="0.75" />
+            <stop offset="100%" stopColor="#BE123C" stopOpacity="0.45" />
+          </linearGradient>
+          <linearGradient id="cyl2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#D97706" stopOpacity="0.5" />
+            <stop offset="50%" stopColor="#FBBF24" stopOpacity="0.65" />
+            <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.4" />
+          </linearGradient>
+
+          {/* 3D Isometric Cube Face Gradients */}
+          <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#F5D0FE" stopOpacity="0.75" />
+            <stop offset="100%" stopColor="#A855F7" stopOpacity="0.45" />
+          </linearGradient>
+          <linearGradient id="cubeLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#4C0519" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#881337" stopOpacity="0.35" />
+          </linearGradient>
+          <linearGradient id="cubeRight" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#7E22CE" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#9333EA" stopOpacity="0.3" />
+          </linearGradient>
+
+          {/* Golden Rose Cube */}
+          <linearGradient id="cubeGoldTop" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FEF08A" stopOpacity="0.75" />
+            <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.45" />
+          </linearGradient>
+          <linearGradient id="cubeGoldLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#B45309" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#92400E" stopOpacity="0.35" />
+          </linearGradient>
+          <linearGradient id="cubeGoldRight" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#D97706" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.3" />
+          </linearGradient>
+
+          {/* Horizontal Glow Bands */}
+          <linearGradient id="glowLine" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0" />
+            <stop offset="50%" stopColor="#E11D48" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="glowLine2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#D97706" stopOpacity="0" />
+            <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#D97706" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {/* ── 1. CIRCUIT GRID & DATA BUS LINES ── */}
+        <g opacity="0.3" className="tech-pulse">
+          <line x1="0" y1="180" x2="1400" y2="180" stroke="#8B5CF6" strokeWidth="0.8" strokeDasharray="6 14" />
+          <line x1="0" y1="420" x2="1400" y2="420" stroke="#BE123C" strokeWidth="0.8" strokeDasharray="6 14" />
+          <line x1="0" y1="680" x2="1400" y2="680" stroke="#7C3AED" strokeWidth="0.8" strokeDasharray="6 14" />
+          <line x1="260" y1="0" x2="260" y2="900" stroke="#F59E0B" strokeWidth="0.8" strokeDasharray="6 14" />
+          <line x1="680" y1="0" x2="680" y2="900" stroke="#E11D48" strokeWidth="0.8" strokeDasharray="6 14" />
+          <line x1="1120" y1="0" x2="1120" y2="900" stroke="#8B5CF6" strokeWidth="0.8" strokeDasharray="6 14" />
+        </g>
+
+        {/* ── 2. GLOWING HORIZONTAL ACCENT BANDS ── */}
+        <rect x="0" y="176" width="1400" height="8" fill="url(#glowLine)" opacity="0.3" className="tech-pulse" />
+        <rect x="0" y="416" width="1400" height="8" fill="url(#glowLine2)" opacity="0.28" className="tech-pulse" style={{ animationDelay: '-2s' }} />
+        <rect x="0" y="676" width="1400" height="8" fill="url(#glowLine)" opacity="0.25" className="tech-pulse" style={{ animationDelay: '-1s' }} />
+
+        {/* ── 3. RUNNING DATA FLOW LINES ── */}
+        <line className="tech-flow" x1="100" y1="70" x2="420" y2="300" stroke="#E11D48" strokeWidth="1.5" strokeDasharray="8 12" opacity="0.45" />
+        <line className="tech-flow" x1="960" y1="110" x2="1280" y2="360" stroke="#8B5CF6" strokeWidth="1.5" strokeDasharray="8 12" opacity="0.45" style={{ animationDelay: '-1.5s' }} />
+        <line className="tech-flow" x1="180" y1="580" x2="520" y2="820" stroke="#F59E0B" strokeWidth="1.3" strokeDasharray="6 10" opacity="0.4" style={{ animationDelay: '-0.8s' }} />
+        <line className="tech-flow" x1="1060" y1="540" x2="740" y2="760" stroke="#E11D48" strokeWidth="1.3" strokeDasharray="6 10" opacity="0.4" style={{ animationDelay: '-2s' }} />
+
+        {/* ── 4. 3D DATABASE CYLINDER (TOP-RIGHT) ── */}
+        <g className="tech-float-b" style={{ transformOrigin: '1250px 150px' }}>
+          <rect x="1200" y="100" width="100" height="80" rx="4" fill="url(#cyl1)" stroke="#8B5CF6" strokeWidth="1.2" opacity="0.75" />
+          <ellipse cx="1250" cy="100" rx="50" ry="14" fill="#F5D0FE" fillOpacity="0.65" stroke="#C084FC" strokeWidth="1.4" opacity="0.8" />
+          <ellipse cx="1250" cy="180" rx="50" ry="14" fill="#8B5CF6" fillOpacity="0.25" stroke="#8B5CF6" strokeWidth="1.1" opacity="0.55" />
+          <line x1="1200" y1="120" x2="1300" y2="120" stroke="#C084FC" strokeWidth="0.8" opacity="0.5" />
+          <line x1="1200" y1="140" x2="1300" y2="140" stroke="#C084FC" strokeWidth="0.8" opacity="0.45" />
+          <line x1="1200" y1="160" x2="1300" y2="160" stroke="#C084FC" strokeWidth="0.8" opacity="0.4" />
+          <text x="1250" y="148" textAnchor="middle" fontSize="12" fill="#7E22CE" opacity="0.9" fontFamily="'Inter', sans-serif" fontWeight="700" letterSpacing="1">
+            DATA
+          </text>
+        </g>
+
+        {/* ── 5. 3D ISOMETRIC CUBE (BOTTOM-LEFT) ── */}
+        <g className="tech-float-c" style={{ transformOrigin: '200px 720px' }}>
+          <polygon points="200,670 260,690 200,710 140,690" fill="url(#cubeTop)" stroke="#A855F7" strokeWidth="1.1" opacity="0.75" />
+          <polygon points="140,690 200,710 200,770 140,750" fill="url(#cubeLeft)" stroke="#BE123C" strokeWidth="1.1" opacity="0.7" />
+          <polygon points="200,710 260,690 260,750 200,770" fill="url(#cubeRight)" stroke="#8B5CF6" strokeWidth="1.1" opacity="0.65" />
+          <line x1="170" y1="700" x2="230" y2="700" stroke="#E9D5FF" strokeWidth="0.8" opacity="0.5" />
+        </g>
+
+        {/* ── 6. 3D ISOMETRIC GOLD CUBE (TOP-CENTER-RIGHT) ── */}
+        <g className="tech-float-a" style={{ transformOrigin: '880px 80px' }}>
+          <polygon points="880,50 940,70 880,90 820,70" fill="url(#cubeGoldTop)" stroke="#F59E0B" strokeWidth="1" opacity="0.75" />
+          <polygon points="820,70 880,90 880,130 820,110" fill="url(#cubeGoldLeft)" stroke="#B45309" strokeWidth="1" opacity="0.7" />
+          <polygon points="880,90 940,70 940,110 880,130" fill="url(#cubeGoldRight)" stroke="#D97706" strokeWidth="1" opacity="0.65" />
+        </g>
+
+        {/* ── 7. 3D ISOMETRIC CUBE (MID-PAGE) ── */}
+        <g className="tech-float-b" style={{ transformOrigin: '540px 380px' }}>
+          <polygon points="540,348 600,368 540,388 480,368" fill="url(#cubeTop)" stroke="#8B5CF6" strokeWidth="1" opacity="0.65" />
+          <polygon points="480,368 540,388 540,428 480,408" fill="url(#cubeLeft)" stroke="#BE123C" strokeWidth="1" opacity="0.6" />
+          <polygon points="540,388 600,368 600,408 540,428" fill="url(#cubeRight)" stroke="#7C3AED" strokeWidth="1" opacity="0.58" />
+        </g>
+
+        {/* ── 8. NEURAL NETWORK NODE CLUSTER (TOP-LEFT) ── */}
+        <g className="tech-float-a" style={{ animationDuration: '9s' }}>
+          <circle cx="60" cy="130" r="7" fill="none" stroke="#E11D48" strokeWidth="1.5" opacity="0.65" />
+          <circle cx="60" cy="165" r="7" fill="none" stroke="#E11D48" strokeWidth="1.5" opacity="0.65" />
+          <circle cx="60" cy="200" r="7" fill="none" stroke="#E11D48" strokeWidth="1.5" opacity="0.65" />
+          <circle cx="115" cy="140" r="8" fill="#E11D48" fillOpacity="0.25" stroke="#E11D48" strokeWidth="1.5" opacity="0.7" />
+          <circle cx="115" cy="175" r="8" fill="#E11D48" fillOpacity="0.25" stroke="#E11D48" strokeWidth="1.5" opacity="0.7" />
+          <circle cx="168" cy="158" r="10" fill="#8B5CF6" fillOpacity="0.35" stroke="#C084FC" strokeWidth="1.8" opacity="0.75" />
+          <line x1="67" y1="130" x2="107" y2="140" stroke="#E11D48" strokeWidth="0.9" opacity="0.5" />
+          <line x1="67" y1="165" x2="107" y2="140" stroke="#E11D48" strokeWidth="0.9" opacity="0.5" />
+          <line x1="67" y1="200" x2="107" y2="175" stroke="#E11D48" strokeWidth="0.9" opacity="0.5" />
+          <line x1="123" y1="140" x2="159" y2="158" stroke="#8B5CF6" strokeWidth="1.1" opacity="0.6" />
+          <line x1="123" y1="175" x2="159" y2="158" stroke="#8B5CF6" strokeWidth="1.1" opacity="0.6" />
+        </g>
+
+        {/* ── 9. ORBITAL DATA RINGS (CENTER BACKGROUND) ── */}
+        <g className="tech-float-c" style={{ animationDuration: '16s' }} opacity="0.35">
+          <ellipse cx="700" cy="450" rx="220" ry="70" fill="none" stroke="#8B5CF6" strokeWidth="1.2" strokeDasharray="10 8" />
+          <ellipse cx="700" cy="450" rx="320" ry="100" fill="none" stroke="#E11D48" strokeWidth="1" strokeDasharray="14 12" />
+        </g>
+      </svg>
+    </div>
   );
 };

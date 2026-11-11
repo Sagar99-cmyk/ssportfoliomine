@@ -213,13 +213,13 @@ export const ThreeDataBackground: React.FC<{ isDark?: boolean }> = ({ isDark = f
       const lineSegments = new THREE.LineSegments(lineGeometry, lineMaterial);
       mainGroup.add(lineSegments);
 
-      // 5. Flowing 3D Cyber Analytics Wave Lattice
+      // 5. Flowing 3D Cyber Analytics Wave Lattice (Calmer, subtle flow for Dark Mode)
       const waveGeom = new THREE.PlaneGeometry(75, 45, 44, 28);
       const waveMat = new THREE.MeshBasicMaterial({
         color: isDark ? 0xe11d48 : 0xbe123c,
         wireframe: true,
         transparent: true,
-        opacity: isDark ? 0.14 : 0.2,
+        opacity: isDark ? 0.08 : 0.18,
         blending: THREE.AdditiveBlending,
       });
       const waveMesh = new THREE.Mesh(waveGeom, waveMat);
@@ -337,16 +337,18 @@ export const ThreeDataBackground: React.FC<{ isDark?: boolean }> = ({ isDark = f
             }
           }
 
-          // Undulating wave flowing smoothly across the 3D data grid
+          // Calm, subtle undulating wave across data grid (Gentle flow for dark mode)
+          const barSpeed = isDark ? 0.12 : 0.32;
+          const barAmp = isDark ? 0.28 : 0.75;
           barData.forEach((b) => {
-            const waveX = Math.sin(elapsed * 0.35 + b.mesh.position.x * 0.12);
-            const waveZ = Math.cos(elapsed * 0.28 + b.mesh.position.z * 0.12);
-            let wave = (waveX + waveZ) * 0.75;
+            const waveX = Math.sin(elapsed * barSpeed + b.mesh.position.x * 0.08);
+            const waveZ = Math.cos(elapsed * (barSpeed * 0.85) + b.mesh.position.z * 0.08);
+            let wave = (waveX + waveZ) * barAmp;
 
-            // Cursor proximity elevation
+            // Cursor proximity elevation (Softened in dark mode)
             const dCursor = Math.hypot(b.mesh.position.x - mouseWorldX, b.mesh.position.z - mouseWorldZ);
             if (dCursor < 12) {
-              wave += (1 - dCursor / 12) * 1.6;
+              wave += (1 - dCursor / 12) * (isDark ? 0.8 : 1.6);
             }
 
             // Click ripple surge across data pillars
@@ -356,36 +358,43 @@ export const ThreeDataBackground: React.FC<{ isDark?: boolean }> = ({ isDark = f
               const waveDist = dist - rip.radius;
               if (Math.abs(waveDist) < 12) {
                 const fade = Math.max(0, 1 - rip.age / rip.lifetime);
-                wave += Math.sin((waveDist / 12) * Math.PI) * rip.amplitude * fade;
+                wave += Math.sin((waveDist / 12) * Math.PI) * (rip.amplitude * (isDark ? 0.4 : 1.0)) * fade;
               }
             }
 
-            const currentScale = b.targetScaleY + wave * 1.5;
+            const currentScale = b.targetScaleY + wave * (isDark ? 0.7 : 1.5);
             b.mesh.scale.y = Math.max(1.2, currentScale);
             b.mesh.position.y = b.initialY + b.mesh.scale.y / 2;
           });
 
           // Gentle counter-drift on particles & lines for rich slow-motion depth
-          particleSystem.rotation.y = -elapsed * 0.003;
-          lineSegments.rotation.y = -elapsed * 0.003;
+          particleSystem.rotation.y = -elapsed * 0.002;
+          lineSegments.rotation.y = -elapsed * 0.002;
 
           // Float analytics panels slowly & smoothly
           panelGroup.children.forEach((p, idx) => {
-            p.position.y = (4 + idx * 2) + Math.sin(elapsed * 0.25 + idx * 0.8) * 0.3;
+            p.position.y = (4 + idx * 2) + Math.sin(elapsed * (isDark ? 0.12 : 0.25) + idx * 0.8) * (isDark ? 0.15 : 0.3);
           });
 
-          // Undulate 3D cyber analytics wave lattice with cursor and ripple reaction
+          // Undulate 3D cyber analytics wave lattice (Subtle & calm in dark mode)
           const wPos = waveGeom.attributes.position;
+          const waveFreqX = isDark ? 0.06 : 0.12;
+          const waveFreqY = isDark ? 0.08 : 0.15;
+          const waveSpeedX = isDark ? 0.14 : 0.38;
+          const waveSpeedY = isDark ? 0.10 : 0.28;
+          const waveHeightA = isDark ? 0.75 : 2.2;
+          const waveHeightB = isDark ? 0.35 : 1.1;
+
           for (let i = 0; i < wPos.count; i++) {
             const u = wPos.getX(i);
             const v = wPos.getY(i);
-            let z = Math.sin(u * 0.12 + elapsed * 0.38) * Math.cos(v * 0.15 + elapsed * 0.28) * 2.2
-                  + Math.sin((u + v) * 0.08 + elapsed * 0.2) * 1.1;
+            let z = Math.sin(u * waveFreqX + elapsed * waveSpeedX) * Math.cos(v * waveFreqY + elapsed * waveSpeedY) * waveHeightA
+                  + Math.sin((u + v) * 0.04 + elapsed * (waveSpeedX * 0.5)) * waveHeightB;
 
             // Cursor hover wave on lattice
             const dCur = Math.hypot(u - mouseWorldX * 0.8, v - mouseWorldZ * 0.8);
             if (dCur < 14) {
-              z += (1 - dCur / 14) * 1.8;
+              z += (1 - dCur / 14) * (isDark ? 0.7 : 1.8);
             }
 
             // Click ripple propagation on wave lattice
@@ -395,7 +404,7 @@ export const ThreeDataBackground: React.FC<{ isDark?: boolean }> = ({ isDark = f
               const waveDist = dist - rip.radius;
               if (Math.abs(waveDist) < 14) {
                 const fade = Math.max(0, 1 - rip.age / rip.lifetime);
-                z += Math.sin((waveDist / 14) * Math.PI) * rip.amplitude * 1.1 * fade;
+                z += Math.sin((waveDist / 14) * Math.PI) * (rip.amplitude * (isDark ? 0.45 : 1.1)) * fade;
               }
             }
 

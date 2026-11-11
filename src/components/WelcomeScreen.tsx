@@ -31,6 +31,38 @@ const InteractiveLetter: React.FC<{ char: string; className?: string; style?: Re
   );
 };
 
+// Smooth Real-Time Typing Text Animator for Welcome Screen
+const WelcomeTypewriter: React.FC<{
+  text: string;
+  speed?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}> = ({ text, speed = 60, className = '', style }) => {
+  const [displayed, setDisplayed] = useState('');
+
+  useEffect(() => {
+    setDisplayed('');
+    let idx = 0;
+    const timer = setInterval(() => {
+      if (idx <= text.length) {
+        setDisplayed(text.slice(0, idx));
+        idx++;
+      } else {
+        clearInterval(timer);
+      }
+    }, speed);
+
+    return () => clearInterval(timer);
+  }, [text, speed]);
+
+  return (
+    <span className={className} style={style}>
+      {displayed}
+      <span className="inline-block w-1 sm:w-1.5 h-[0.85em] ml-1 bg-amber-400 animate-pulse align-middle rounded-xs" />
+    </span>
+  );
+};
+
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdmin }) => {
   const [secondsRemaining, setSecondsRemaining] = useState(10);
   const totalSeconds = 10;
@@ -109,47 +141,44 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
       <div className="relative z-30 w-full flex-1 flex flex-col items-center justify-start pt-6 sm:pt-10 md:pt-12 px-6 text-center select-none pointer-events-none">
         <AnimatePresence mode="wait">
           {!isLastSeconds ? (
-            /* PHASE 1: Exact Reference Typography "Welcome to my portfolio / • INTERACTIVE 3D EXPERIENCE" */
+            /* PHASE 1: Real-time Typewriter Headline "Welcome to our portfolio" */
             <motion.div
               key="phase-welcome"
               initial={{ opacity: 0, y: -15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="space-y-0 tracking-tight max-w-4xl mx-auto flex flex-col items-center"
+              className="space-y-3 tracking-tight max-w-4xl mx-auto flex flex-col items-center"
             >
-              {/* "Welcome to" - Clean Off-White Serif with Interactive Physical Letters */}
-              <motion.h1
+              {/* Typewriter Header: "Welcome to our portfolio" */}
+              <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1.0, ease: 'easeOut' }}
-                className="font-serif-luxury text-5xl sm:text-7xl md:text-8xl lg:text-[6.5rem] font-normal text-[#f8f5f0] leading-none flex flex-wrap justify-center pointer-events-auto"
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-[#f8f5f0] leading-tight flex flex-wrap justify-center pointer-events-auto"
                 style={{
                   letterSpacing: '-0.01em',
                   textShadow: '0 4px 24px rgba(0, 0, 0, 0.9), 0 1px 4px rgba(0,0,0,0.8)',
                 }}
               >
-                {'Welcome to'.split('').map((char, cIdx) => (
-                  <InteractiveLetter key={`wt-${cIdx}`} char={char} />
-                ))}
-              </motion.h1>
+                <WelcomeTypewriter text="Welcome to our portfolio" speed={55} />
+              </motion.div>
 
-              {/* "my portfolio" - Rich Golden Ochre Italic Calligraphic Serif with Interactive Physical Letters */}
+              {/* Interactive Bouncing Callout Subhead */}
               <motion.h2
                 initial={{ opacity: 0, scale: 0.94, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 1.1, delay: 0.2, ease: 'easeOut' }}
-                className="font-serif-luxury italic text-6xl sm:text-8xl md:text-9xl lg:text-[8.5rem] font-normal leading-none flex flex-wrap justify-center pointer-events-auto"
+                transition={{ duration: 1.1, delay: 0.3, ease: 'easeOut' }}
+                className="font-serif-luxury italic text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal leading-none flex flex-wrap justify-center pointer-events-auto"
                 style={{
                   background: 'linear-gradient(135deg, #fef08a 0%, #e2a850 40%, #caa040 70%, #b88628 100%)',
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  marginTop: '-0.12em',
                   filter: 'drop-shadow(0 4px 25px rgba(202, 160, 64, 0.35))',
                 }}
               >
-                {'my portfolio'.split('').map((char, cIdx) => (
+                {'Data Analytics & BI Engineering'.split('').map((char, cIdx) => (
                   <InteractiveLetter key={`mp-${cIdx}`} char={char} />
                 ))}
               </motion.h2>
@@ -159,19 +188,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
                 initial={{ opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.45, duration: 0.6 }}
-                className="mt-4 sm:mt-5 inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 rounded-full border border-rose-900/60 bg-stone-950/75 backdrop-blur-md shadow-2xl pointer-events-auto"
+                className="mt-3 sm:mt-4 inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 rounded-full border border-rose-900/60 bg-stone-950/75 backdrop-blur-md shadow-2xl pointer-events-auto"
                 style={{
                   boxShadow: '0 8px 30px rgba(0, 0, 0, 0.6)',
                 }}
               >
                 <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse" />
                 <span className="text-[10px] sm:text-xs font-mono tracking-[0.25em] uppercase text-rose-200 font-semibold">
-                  DATA ANALYTICS & INSIGHTS
+                  INTERACTIVE 3D DATA EXPERIENCE
                 </span>
               </motion.div>
             </motion.div>
           ) : (
-            /* PHASE 2 (Last 3-4 seconds): "Let's see our portfolio!" */
+            /* PHASE 2 (Last 3-4 seconds): "Let's see our portfolio!" with Typewriter */
             <motion.div
               key="phase-portfolio-enter"
               initial={{ opacity: 0, y: 25, scale: 0.96 }}
@@ -197,12 +226,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
                 </span>
               </motion.div>
 
-              {/* Main Callout: "Let's see our portfolio" */}
-              <motion.h2
+              {/* Main Callout: "Let's see our portfolio" (Typewriter) */}
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.7 }}
-                className="font-serif-luxury text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold leading-tight"
+                className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight"
                 style={{
                   background: 'linear-gradient(135deg, #ffffff 0%, #fef08a 30%, #f59e0b 70%, #d97706 100%)',
                   WebkitBackgroundClip: 'text',
@@ -211,8 +240,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
                   filter: 'drop-shadow(0 6px 30px rgba(245,158,11,0.35))',
                 }}
               >
-                Let's see our portfolio
-              </motion.h2>
+                <WelcomeTypewriter text="Let's see our portfolio" speed={60} />
+              </motion.div>
 
               <motion.p
                 initial={{ opacity: 0 }}

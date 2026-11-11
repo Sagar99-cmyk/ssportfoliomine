@@ -1,178 +1,292 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-interface Ripple {
-  x: number;
-  y: number;
-  radius: number;
-  maxRadius: number;
-  amplitude: number;
-  frequency: number;
+interface SatelliteData {
+  mesh: THREE.Mesh;
+  baseRadius: number;
+  angle: number;
   speed: number;
-  age: number;
-  lifetime: number;
+  axis: THREE.Vector3;
+  rotSpeed: { x: number; y: number; z: number };
+  // Distribution burst state
+  scatterPos: THREE.Vector3;
+  scatterVel: THREE.Vector3;
+  isScattered: boolean;
 }
 
 export const Welcome3DRedWave: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [clickCount, setClickCount] = useState<number>(0);
-  const [webGlSupported, setWebGlSupported] = useState<boolean>(true);
+  const [clickNotice, setClickNotice] = useState<boolean>(true);
 
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
-
-    // Check WebGL availability
-    const canvasTest = document.createElement('canvas');
-    const gl = canvasTest.getContext('webgl2') || canvasTest.getContext('webgl');
-    if (!gl) {
-      setWebGlSupported(false);
-      return;
-    }
 
     let width = container.clientWidth || window.innerWidth;
     let height = container.clientHeight || window.innerHeight;
 
     // 1. Three.js Scene Setup
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x09090b, 0.015);
+    scene.fog = new THREE.FogExp2(0x09090b, 0.012);
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    // Perspective view looking slightly down onto the rolling 3D wave plane
-    camera.position.set(0, -3.5, 34);
-    camera.lookAt(0, 1.5, 0);
+    const camera = new THREE.PerspectiveCamera(48, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 36);
+    camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
       powerPreference: 'high-performance',
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.95;
+    renderer.toneMappingExposure = 1.1;
     container.appendChild(renderer.domElement);
 
-    // 2. Procedural Fallback Texture (High-Res Crimson & Gold Luxury Gradient)
-    const createProceduralTexture = (): THREE.CanvasTexture => {
-      const c = document.createElement('canvas');
-      c.width = 1024;
-      c.height = 1024;
-      const ctx = c.getContext('2d');
-      if (ctx) {
-        // Deep obsidian-crimson radial background
-        const grad = ctx.createRadialGradient(512, 450, 80, 512, 512, 700);
-        grad.addColorStop(0, '#f43f5e'); // Radiant rose
-        grad.addColorStop(0.3, '#be123c'); // Deep ruby
-        grad.addColorStop(0.65, '#4c0519'); // Wine dark
-        grad.addColorStop(1, '#09090b'); // Obsidian black
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 1024, 1024);
+    // 2. Studio Lighting (Crimson Key + Amber Gold Rim + Cyan Atmospheric Fill)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    scene.add(ambientLight);
 
-        // Subtle diagonal energy streaks
-        ctx.strokeStyle = 'rgba(251, 191, 36, 0.12)';
-        ctx.lineWidth = 2;
-        for (let i = 0; i < 40; i++) {
-          ctx.beginPath();
-          ctx.moveTo(i * 35, 0);
-          ctx.lineTo(i * 35 + 400, 1024);
-          ctx.stroke();
-        }
-      }
-      const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = THREE.ClampToEdgeWrapping;
-      tex.wrapT = THREE.ClampToEdgeWrapping;
-      return tex;
-    };
+    const keyRose = new THREE.DirectionalLight(0xf43f5e, 2.8);
+    keyRose.position.set(25, 30, 25);
+    scene.add(keyRose);
 
-    // Load actual background image, with graceful fallback
-    const fallbackTexture = createProceduralTexture();
-    const textureLoader = new THREE.TextureLoader();
-    let waveTexture: THREE.Texture = fallbackTexture;
+    const rimGold = new THREE.DirectionalLight(0xf59e0b, 2.2);
+    rimGold.position.set(-25, -20, 20);
+    scene.add(rimGold);
 
-    textureLoader.load(
-      '/red-welcome-bg.jpg',
-      (loadedTex) => {
-        loadedTex.wrapS = THREE.ClampToEdgeWrapping;
-        loadedTex.wrapT = THREE.ClampToEdgeWrapping;
-        loadedTex.generateMipmaps = true;
-        loadedTex.minFilter = THREE.LinearMipmapLinearFilter;
-        waveMat.map = loadedTex;
-        waveMat.needsUpdate = true;
-        waveTexture = loadedTex;
-      },
-      undefined,
-      (err) => {
-        console.warn('Using procedural crimson wave texture fallback:', err);
-      }
-    );
+    const fillCyan = new THREE.DirectionalLight(0x06b6d4, 1.4);
+    fillCyan.position.set(0, 35, -15);
+    scene.add(fillCyan);
 
-    // 3. 3D Wave Plane Geometry (96x64 grid = 6,200 interactive vertices)
-    const planeWidth = 72;
-    const planeHeight = 44;
-    const segX = 96;
-    const segY = 64;
-    const waveGeom = new THREE.PlaneGeometry(planeWidth, planeHeight, segX, segY);
+    // 3. Ambient Deep Background Starfield & Floating Particles
+    const starCount = 350;
+    const starGeom = new THREE.BufferGeometry();
+    const starPositions = new Float32Array(starCount * 3);
+    const starColors = new Float32Array(starCount * 3);
 
-    // Store base positions for dynamic displacement calculation
-    const posAttr = waveGeom.attributes.position;
-    const originalPositions = new Float32Array(posAttr.array.length);
-    originalPositions.set(posAttr.array);
+    const colRose = new THREE.Color(0xf43f5e);
+    const colGold = new THREE.Color(0xfbbf24);
+    const colCyan = new THREE.Color(0x38bdf8);
 
-    // Material with high-end specular sheen & metallic reflection
-    const waveMat = new THREE.MeshStandardMaterial({
-      map: waveTexture,
-      roughness: 0.28,
-      metalness: 0.42,
-      side: THREE.DoubleSide,
+    for (let i = 0; i < starCount; i++) {
+      starPositions[i * 3] = (Math.random() - 0.5) * 120;
+      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 80;
+      starPositions[i * 3 + 2] = (Math.random() - 0.5) * 80 - 10;
+
+      const pickColor = i % 3 === 0 ? colRose : i % 3 === 1 ? colGold : colCyan;
+      starColors[i * 3] = pickColor.r;
+      starColors[i * 3 + 1] = pickColor.g;
+      starColors[i * 3 + 2] = pickColor.b;
+    }
+
+    starGeom.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    starGeom.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+    const starMat = new THREE.PointsMaterial({
+      size: 0.85,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.65,
+      blending: THREE.AdditiveBlending,
     });
+    const starField = new THREE.Points(starGeom, starMat);
+    scene.add(starField);
 
-    const waveMesh = new THREE.Mesh(waveGeom, waveMat);
-    waveMesh.rotation.x = -0.32; // Tilted back to display 3D perspective depth
-    waveMesh.position.set(0, 0, -2);
-    scene.add(waveMesh);
+    // =========================================================================
+    // 4. CENTRAL 3D ZOOM-IN DATA CORE ("When comes it comes - Zoom in Object")
+    // =========================================================================
+    const coreMasterGroup = new THREE.Group();
+    scene.add(coreMasterGroup);
 
-    // Subtle 3D Wireframe Cyber Grid Overlay
-    const wireMat = new THREE.MeshBasicMaterial({
+    // Initial Zoom-In Coordinates (Starts deep at z = -90, zooms to z = 0)
+    coreMasterGroup.position.set(0, 0, -90);
+    coreMasterGroup.scale.set(0.08, 0.08, 0.08);
+
+    // 4a. Outer Geodesic Icosahedron Faceted Frame
+    const outerGeo = new THREE.IcosahedronGeometry(6.2, 1);
+    const outerWireMat = new THREE.MeshBasicMaterial({
       color: 0xf43f5e,
       wireframe: true,
       transparent: true,
-      opacity: 0.09,
+      opacity: 0.35,
       blending: THREE.AdditiveBlending,
     });
-    const wireMesh = new THREE.Mesh(waveGeom, wireMat);
-    wireMesh.rotation.copy(waveMesh.rotation);
-    wireMesh.position.copy(waveMesh.position);
-    wireMesh.position.z += 0.05;
-    scene.add(wireMesh);
+    const outerWireMesh = new THREE.Mesh(outerGeo, outerWireMat);
+    coreMasterGroup.add(outerWireMesh);
 
-    // 5. 3D Lighting Setup (Refined Deep Ruby + Amber Gold Highlights - Reduced Glare)
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
-    scene.add(ambientLight);
+    // 4b. Inner Faceted Crystal Jewel
+    const innerGeo = new THREE.OctahedronGeometry(3.8, 0);
+    const innerMat = new THREE.MeshPhysicalMaterial({
+      color: 0x9f1239,
+      roughness: 0.15,
+      metalness: 0.75,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.1,
+      transparent: true,
+      opacity: 0.88,
+      wireframe: false,
+    });
+    const innerCrystal = new THREE.Mesh(innerGeo, innerMat);
+    coreMasterGroup.add(innerCrystal);
 
-    const primaryLight = new THREE.DirectionalLight(0xe11d48, 1.6);
-    primaryLight.position.set(18, 25, 22);
-    scene.add(primaryLight);
+    // 4c. Inner Glowing Core Sphere
+    const sphereGeo = new THREE.SphereGeometry(1.8, 24, 24);
+    const sphereMat = new THREE.MeshBasicMaterial({
+      color: 0xfef08a,
+      wireframe: false,
+      transparent: true,
+      opacity: 0.9,
+    });
+    const coreSphere = new THREE.Mesh(sphereGeo, sphereMat);
+    coreMasterGroup.add(coreSphere);
 
-    const rimGoldLight = new THREE.DirectionalLight(0xd97706, 1.0);
-    rimGoldLight.position.set(-22, -15, 16);
-    scene.add(rimGoldLight);
+    // 4d. 3 Concentric Glowing Orbital Data Rings (Torus)
+    const ringMaterials = [
+      new THREE.MeshBasicMaterial({ color: 0xf43f5e, transparent: true, opacity: 0.65, blending: THREE.AdditiveBlending }),
+      new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending }),
+      new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending }),
+    ];
 
-    // Interactive Point Light that follows user cursor in 3D
-    const cursorLight = new THREE.PointLight(0xf43f5e, 2.2, 30);
-    cursorLight.position.set(0, 0, 10);
-    scene.add(cursorLight);
+    const rings: { mesh: THREE.Mesh; rotSpeed: { x: number; y: number; z: number } }[] = [];
+    const ringRadii = [8.2, 9.8, 11.4];
 
-    // 6. Interactive Click Ripple Tracking
-    const ripples: Ripple[] = [];
-    const raycaster = new THREE.Raycaster();
-    const mouseNorm = new THREE.Vector2(0, 0);
-    let targetCameraX = 0;
-    let targetCameraY = -3.5;
-    let mouseWorldX = 0;
-    let mouseWorldY = 0;
+    ringRadii.forEach((r, idx) => {
+      const ringGeo = new THREE.TorusGeometry(r, 0.08, 16, 90);
+      const ringMesh = new THREE.Mesh(ringGeo, ringMaterials[idx]);
+      ringMesh.rotation.x = (idx * Math.PI) / 3.2;
+      ringMesh.rotation.y = (idx * Math.PI) / 4.1;
+      coreMasterGroup.add(ringMesh);
+      rings.push({
+        mesh: ringMesh,
+        rotSpeed: {
+          x: (idx + 1) * 0.008 * (idx % 2 === 0 ? 1 : -1),
+          y: (idx + 1) * 0.012 * (idx % 2 === 0 ? -1 : 1),
+          z: (idx + 1) * 0.006,
+        },
+      });
+    });
 
-    // Track mouse move for camera tilt & subtle surface hover
+    // 4e. 72 Orbiting Crystal Satellites (Mini Polyhedra ready to DISTRIBUTE on click)
+    const satelliteCount = 72;
+    const satellites: SatelliteData[] = [];
+    const polyGeos = [
+      new THREE.BoxGeometry(0.7, 0.7, 0.7),
+      new THREE.TetrahedronGeometry(0.65),
+      new THREE.OctahedronGeometry(0.6),
+      new THREE.IcosahedronGeometry(0.55),
+    ];
+
+    const satMaterials = [
+      new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.2, metalness: 0.7 }),
+      new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.2, metalness: 0.8 }),
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.6 }),
+      new THREE.MeshStandardMaterial({ color: 0xa855f7, roughness: 0.3, metalness: 0.5 }),
+    ];
+
+    for (let i = 0; i < satelliteCount; i++) {
+      const geo = polyGeos[i % polyGeos.length];
+      const mat = satMaterials[i % satMaterials.length];
+      const satMesh = new THREE.Mesh(geo, mat);
+
+      const baseR = 10 + Math.random() * 8.5;
+      const angle = (i / satelliteCount) * Math.PI * 2;
+      const axis = new THREE.Vector3(
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2
+      ).normalize();
+
+      satMesh.position.set(
+        Math.cos(angle) * baseR,
+        (Math.random() - 0.5) * 6,
+        Math.sin(angle) * baseR
+      );
+
+      coreMasterGroup.add(satMesh);
+
+      satellites.push({
+        mesh: satMesh,
+        baseRadius: baseR,
+        angle: angle,
+        speed: 0.012 + Math.random() * 0.018,
+        axis: axis,
+        rotSpeed: {
+          x: (Math.random() - 0.5) * 0.08,
+          y: (Math.random() - 0.5) * 0.08,
+          z: (Math.random() - 0.5) * 0.08,
+        },
+        scatterPos: satMesh.position.clone(),
+        scatterVel: new THREE.Vector3(),
+        isScattered: false,
+      });
+    }
+
+    // 4f. Expanding Shockwave Energy Rings for Click Dispersion
+    interface Shockwave {
+      mesh: THREE.Mesh;
+      scale: number;
+      opacity: number;
+      speed: number;
+    }
+    const shockwaves: Shockwave[] = [];
+    const shockwaveGeo = new THREE.RingGeometry(1, 1.4, 64);
+
+    const spawnShockwave = (origin: THREE.Vector3) => {
+      const shockMat = new THREE.MeshBasicMaterial({
+        color: Math.random() > 0.5 ? 0xf43f5e : 0xf59e0b,
+        transparent: true,
+        opacity: 0.9,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+      });
+      const shockMesh = new THREE.Mesh(shockwaveGeo, shockMat);
+      shockMesh.position.copy(origin);
+      shockMesh.lookAt(camera.position);
+      scene.add(shockMesh);
+      shockwaves.push({
+        mesh: shockMesh,
+        scale: 1,
+        opacity: 0.9,
+        speed: 35 + Math.random() * 15,
+      });
+    };
+
+    // =========================================================================
+    // 5. INTERACTION: CLICK / TAP TO DISTRIBUTE ELEMENTS IN 3D
+    // =========================================================================
+    let distributionTimer = 0;
+
+    const triggerElementDistribution = (clickX?: number, clickY?: number) => {
+      // 1. Scatter Satellites Outward with High Radial Velocities
+      satellites.forEach((sat) => {
+        sat.isScattered = true;
+        // Direction from center outwards, plus random tangential burst
+        const dir = sat.mesh.position.clone().normalize();
+        const burstSpeed = 22 + Math.random() * 26;
+        sat.scatterVel.set(
+          (dir.x + (Math.random() - 0.5) * 0.6) * burstSpeed,
+          (dir.y + (Math.random() - 0.5) * 0.6) * burstSpeed,
+          (dir.z + (Math.random() - 0.5) * 0.6) * burstSpeed
+        );
+      });
+
+      // 2. Shockwave Burst
+      spawnShockwave(new THREE.Vector3(0, 0, 0));
+      setTimeout(() => spawnShockwave(new THREE.Vector3(0, 0, 0)), 120);
+
+      // 3. Pulse Core
+      coreMasterGroup.scale.multiplyScalar(1.25);
+
+      distributionTimer = 2.8; // Duration before gentle re-orbit
+      setClickNotice(false);
+    };
+
+    // Pointer move for 3D Camera Parallax
+    let targetCamX = 0;
+    let targetCamY = 0;
+
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
       let clientX = 0;
       let clientY = 0;
@@ -184,57 +298,11 @@ export const Welcome3DRedWave: React.FC = () => {
         clientY = (e as MouseEvent).clientY;
       }
 
-      mouseNorm.x = (clientX / width) * 2 - 1;
-      mouseNorm.y = -(clientY / height) * 2 + 1;
+      const normX = (clientX / (window.innerWidth || 1000)) * 2 - 1;
+      const normY = (clientY / (window.innerHeight || 800)) * 2 - 1;
 
-      targetCameraX = mouseNorm.x * 3.5;
-      targetCameraY = -3.5 + mouseNorm.y * 2.2;
-
-      // Approximate 3D plane coordinates for local hover elevation
-      mouseWorldX = mouseNorm.x * (planeWidth * 0.45);
-      mouseWorldY = mouseNorm.y * (planeHeight * 0.45);
-
-      cursorLight.position.x = mouseWorldX;
-      cursorLight.position.y = mouseWorldY;
-    };
-
-    // Trigger Dynamic 3D Ripple on Click / Tap
-    const triggerWaveAtPoint = (clientX: number, clientY: number) => {
-      mouseNorm.x = (clientX / width) * 2 - 1;
-      mouseNorm.y = -(clientY / height) * 2 + 1;
-
-      raycaster.setFromCamera(mouseNorm, camera);
-      const intersects = raycaster.intersectObject(waveMesh);
-
-      let rippleX = mouseNorm.x * (planeWidth * 0.45);
-      let rippleY = mouseNorm.y * (planeHeight * 0.45);
-
-      if (intersects.length > 0) {
-        // Convert intersection point to local mesh space
-        const localPt = waveMesh.worldToLocal(intersects[0].point.clone());
-        rippleX = localPt.x;
-        rippleY = localPt.y;
-      }
-
-      // Add a dynamic radiating ripple wave
-      ripples.push({
-        x: rippleX,
-        y: rippleY,
-        radius: 0,
-        maxRadius: 55,
-        amplitude: 5.5,
-        frequency: 0.65,
-        speed: 26,
-        age: 0,
-        lifetime: 2.5,
-      });
-
-      // Keep ripples list bounded
-      if (ripples.length > 10) {
-        ripples.shift();
-      }
-
-      setClickCount((c) => c + 1);
+      targetCamX = normX * 6;
+      targetCamY = -normY * 4;
     };
 
     const handlePointerDown = (e: MouseEvent | TouchEvent) => {
@@ -247,32 +315,17 @@ export const Welcome3DRedWave: React.FC = () => {
         clientX = (e as MouseEvent).clientX;
         clientY = (e as MouseEvent).clientY;
       }
-
-      triggerWaveAtPoint(clientX, clientY);
+      triggerElementDistribution(clientX, clientY);
     };
 
-    // Attach listeners to window so clicks anywhere on the welcome screen trigger the wave
     window.addEventListener('mousemove', handlePointerMove, { passive: true });
     window.addEventListener('touchmove', handlePointerMove, { passive: true });
     window.addEventListener('mousedown', handlePointerDown);
     window.addEventListener('touchstart', handlePointerDown, { passive: true });
 
-    // Initial gentle introductory ripple
-    setTimeout(() => {
-      ripples.push({
-        x: 0,
-        y: 0,
-        radius: 0,
-        maxRadius: 45,
-        amplitude: 4.0,
-        frequency: 0.55,
-        speed: 20,
-        age: 0,
-        lifetime: 2.2,
-      });
-    }, 600);
-
-    // 7. 60 FPS Animation Loop
+    // =========================================================================
+    // 6. 60 FPS ANIMATION LOOP
+    // =========================================================================
     let animId: number;
     const clock = new THREE.Clock();
 
@@ -281,69 +334,94 @@ export const Welcome3DRedWave: React.FC = () => {
       const delta = Math.min(clock.getDelta(), 0.1);
       const elapsed = clock.getElapsedTime();
 
-      // Smooth camera orbit
-      camera.position.x += (targetCameraX - camera.position.x) * 0.035;
-      camera.position.y += (targetCameraY - camera.position.y) * 0.035;
-      camera.lookAt(0, 1.2, 0);
+      // Camera smooth tracking
+      camera.position.x += (targetCamX - camera.position.x) * 0.05;
+      camera.position.y += (targetCamY - camera.position.y) * 0.05;
+      camera.lookAt(0, 0, 0);
 
-      // Advance active user-click ripples
-      for (let r = ripples.length - 1; r >= 0; r--) {
-        const rip = ripples[r];
-        rip.age += delta;
-        rip.radius += rip.speed * delta;
-        if (rip.age >= rip.lifetime || rip.radius >= rip.maxRadius) {
-          ripples.splice(r, 1);
+      // --- ZOOM-IN ENTRY ANIMATION (from z = -90 to z = 0) ---
+      if (coreMasterGroup.position.z < -0.2) {
+        // Smooth logarithmic approach to center
+        coreMasterGroup.position.z += (0 - coreMasterGroup.position.z) * 0.045;
+        const currentScale = coreMasterGroup.scale.x;
+        const targetScale = 1.0;
+        coreMasterGroup.scale.setScalar(currentScale + (targetScale - currentScale) * 0.045);
+      } else {
+        // Settle smoothly at 1.0 scale with gentle breathing pulse
+        const breathe = 1.0 + Math.sin(elapsed * 1.5) * 0.035;
+        coreMasterGroup.scale.set(breathe, breathe, breathe);
+      }
+
+      // Continuous slow majestic rotation of the core
+      coreMasterGroup.rotation.y = elapsed * 0.12;
+      coreMasterGroup.rotation.x = Math.sin(elapsed * 0.2) * 0.15;
+
+      outerWireMesh.rotation.y = -elapsed * 0.22;
+      outerWireMesh.rotation.z = elapsed * 0.14;
+
+      innerCrystal.rotation.x = elapsed * 0.35;
+      innerCrystal.rotation.y = elapsed * 0.28;
+
+      // Rotate Concentric Rings
+      rings.forEach((r) => {
+        r.mesh.rotation.x += r.rotSpeed.x;
+        r.mesh.rotation.y += r.rotSpeed.y;
+        r.mesh.rotation.z += r.rotSpeed.z;
+      });
+
+      // Update Satellites (Orbit vs Distributed Element Scattering)
+      if (distributionTimer > 0) {
+        distributionTimer -= delta;
+      }
+
+      satellites.forEach((sat) => {
+        sat.mesh.rotation.x += sat.rotSpeed.x;
+        sat.mesh.rotation.y += sat.rotSpeed.y;
+        sat.mesh.rotation.z += sat.rotSpeed.z;
+
+        if (sat.isScattered && distributionTimer > 0) {
+          // Flying outwards in explosive distribution
+          sat.mesh.position.addScaledVector(sat.scatterVel, delta);
+          // Apply gentle drag
+          sat.scatterVel.multiplyScalar(0.96);
+        } else {
+          // Orbiting smoothly around the central core
+          sat.isScattered = false;
+          sat.angle += sat.speed;
+          const targetX = Math.cos(sat.angle) * sat.baseRadius;
+          const targetZ = Math.sin(sat.angle) * sat.baseRadius;
+          const targetY = Math.sin(sat.angle * 2 + sat.baseRadius) * 4.5;
+
+          // Smooth interpolation back into orbit
+          sat.mesh.position.x += (targetX - sat.mesh.position.x) * 0.06;
+          sat.mesh.position.y += (targetY - sat.mesh.position.y) * 0.06;
+          sat.mesh.position.z += (targetZ - sat.mesh.position.z) * 0.06;
+        }
+      });
+
+      // Update Shockwaves
+      for (let s = shockwaves.length - 1; s >= 0; s--) {
+        const sw = shockwaves[s];
+        sw.scale += sw.speed * delta;
+        sw.opacity -= delta * 0.95;
+        sw.mesh.scale.set(sw.scale, sw.scale, 1);
+        (sw.mesh.material as THREE.MeshBasicMaterial).opacity = Math.max(0, sw.opacity);
+
+        if (sw.opacity <= 0) {
+          scene.remove(sw.mesh);
+          shockwaves.splice(s, 1);
         }
       }
 
-      // Compute 3D wave deformation on plane vertices
-      const pos = waveGeom.attributes.position;
-      const count = pos.count;
+      // Rotate background stars slowly
+      starField.rotation.y = elapsed * 0.015;
 
-      for (let i = 0; i < count; i++) {
-        const ox = originalPositions[i * 3];
-        const oy = originalPositions[i * 3 + 1];
-
-        // A) Base Slow-Motion Wave Flow (Otherwise gentle, relaxing undulation)
-        const wave1 = Math.sin(ox * 0.13 + elapsed * 0.42) * Math.cos(oy * 0.16 + elapsed * 0.32) * 2.3;
-        const wave2 = Math.sin((ox + oy) * 0.09 + elapsed * 0.28) * 1.3;
-        const wave3 = Math.cos(ox * 0.22 - elapsed * 0.2) * 0.6;
-        let z = wave1 + wave2 + wave3;
-
-        // B) Local cursor hover elevation
-        const dCursor = Math.hypot(ox - mouseWorldX, oy - mouseWorldY);
-        if (dCursor < 12) {
-          z += (1 - dCursor / 12) * 1.4;
-        }
-
-        // C) Dynamic Radiating Waves According to User Clicks
-        for (let rIdx = 0; rIdx < ripples.length; rIdx++) {
-          const rip = ripples[rIdx];
-          const dist = Math.hypot(ox - rip.x, oy - rip.y);
-          const waveDist = dist - rip.radius;
-          const envelope = 14; // wave packet width
-
-          if (Math.abs(waveDist) < envelope) {
-            const progress = rip.age / rip.lifetime;
-            const fade = Math.max(0, 1 - progress) * Math.exp(-dist * 0.035);
-            const shape = Math.cos((waveDist / envelope) * (Math.PI * 0.5));
-            z += Math.sin(waveDist * rip.frequency) * rip.amplitude * fade * shape;
-          }
-        }
-
-        pos.setZ(i, z);
-      }
-
-      pos.needsUpdate = true;
-      waveGeom.computeVertexNormals();
-
-      // Render Scene
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // 8. Resize Handler
+    // Resize Handler
     const handleResize = () => {
       if (!container) return;
       width = container.clientWidth || window.innerWidth;
@@ -355,57 +433,35 @@ export const Welcome3DRedWave: React.FC = () => {
 
     window.addEventListener('resize', handleResize);
 
-    // 9. Cleanup
     return () => {
       cancelAnimationFrame(animId);
+      window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handlePointerMove);
       window.removeEventListener('touchmove', handlePointerMove);
       window.removeEventListener('mousedown', handlePointerDown);
       window.removeEventListener('touchstart', handlePointerDown);
-      window.removeEventListener('resize', handleResize);
-
       if (container && renderer.domElement) {
         container.removeChild(renderer.domElement);
       }
-
-      waveGeom.dispose();
-      waveMat.dispose();
-      wireMat.dispose();
-      fallbackTexture.dispose();
       renderer.dispose();
     };
   }, []);
 
-  if (!webGlSupported) {
-    // Graceful fallback for devices without WebGL
-    return (
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <img
-          src="/red-welcome-bg.jpg"
-          alt="Welcome Crimson Background"
-          className="w-full h-full object-cover object-center"
-        />
-      </div>
-    );
-  }
-
   return (
-    <div className="absolute inset-0 overflow-hidden z-0">
-      {/* 3D WebGL Canvas Mount */}
-      <div ref={mountRef} className="w-full h-full cursor-pointer select-none" />
-
-      {/* Atmospheric dark red vignetting & contrast overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(225,29,72,0.03) 0%, rgba(13,6,10,0.55) 60%, rgba(6,3,5,0.94) 100%)',
-        }}
-      />
-
-      {/* Top & bottom gentle gradient fades */}
-      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-[#09090b]/90 via-[#09090b]/30 to-transparent pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#09090b]/95 via-[#09090b]/40 to-transparent pointer-events-none" />
+    <div
+      ref={mountRef}
+      className="absolute inset-0 w-full h-full pointer-events-auto cursor-pointer"
+      title="Click anywhere to trigger 3D element distribution!"
+    >
+      {/* Click Interaction Prompt Pill */}
+      {clickNotice && (
+        <div className="absolute top-20 sm:top-24 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-opacity duration-700">
+          <div className="px-4 py-1.5 rounded-full bg-stone-900/80 border border-rose-500/40 text-rose-300 text-[11px] font-mono shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce">
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+            <span>✨ Tap anywhere to distribute 3D elements in space</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
