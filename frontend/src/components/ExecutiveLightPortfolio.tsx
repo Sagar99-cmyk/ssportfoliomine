@@ -1,15 +1,14 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
-  Mail, Phone, MapPin, Linkedin, Github, Download, Eye,
-  ExternalLink, ChevronRight, CheckCircle2, Play, Pause,
-  Volume2, VolumeX, Award, GraduationCap, FolderGit2,
-  TrendingUp, BarChart3, Database, Code2, Sparkles, Send,
-  AlertCircle, Moon, Sun, ArrowRight, FileText, Table, Terminal,
-  User, Check
+  Mail, MapPin, Linkedin, Github, Download,
+  ChevronRight, CheckCircle2,
+  Volume2, VolumeX,
+  TrendingUp, Database, Code2, Send,
+  AlertCircle, Moon, FileText, Table,
+  User, Home, Sparkles, FolderGit2
 } from 'lucide-react';
 import { Profile, Skill, Project, Education, Achievement } from '../types';
-import { Realistic3DAvatar, AvatarExpression } from './Realistic3DAvatar';
+import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
 import { CaseStudyModal } from './CaseStudyModal';
 import { StitchLightBackground } from './StitchLightBackground';
 import { globalAudioEngine } from './BackgroundMusic';
@@ -40,12 +39,6 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
 
   // Selected Project for Case Study Modal
   const [selectedCaseStudy, setSelectedCaseStudy] = useState<Project | null>(null);
-
-  // Active 3D Avatar Expression
-  const [avatarExpression, setAvatarExpression] = useState<AvatarExpression>('happy');
-
-  // Avatar View Mode: 3D Twin vs Authentic Studio Portrait Photo
-  const [avatarMode, setAvatarMode] = useState<'3d' | 'photo'>('3d');
 
   // Project Category Filter
   const [activeProjectFilter, setActiveProjectFilter] = useState<'ALL' | 'BI Dashboards' | 'Python ETL'>('ALL');
@@ -111,15 +104,6 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
     }
   };
 
-  const expressionOptions: { key: AvatarExpression; label: string; icon: string }[] = [
-    { key: 'happy', label: 'Happy', icon: '🥰' },
-    { key: 'sad', label: 'Sad', icon: '😢' },
-    { key: 'confident', label: 'Confident', icon: '😎' },
-    { key: 'surprised', label: 'Surprised', icon: '😲' },
-    { key: 'thinking', label: 'Thinking', icon: '🤔' },
-    { key: 'winking', label: 'Winking', icon: '😉' },
-  ];
-
   return (
     <div className="min-h-screen bg-[#faf9f6] text-[#0f172a] relative selection:bg-rose-500/20 selection:text-rose-600 font-sans">
       
@@ -129,8 +113,8 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
       {/* ========================================================================= */}
       {/* 1. TOP NAVBAR (MATCHING SCREENSHOT)                                       */}
       {/* ========================================================================= */}
-      <header className="sticky top-0 z-50 bg-[#faf9f6]/90 backdrop-blur-md border-b border-stone-200/80 px-4 sm:px-8 py-3.5 transition-all">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-[#faf9f6]/92 backdrop-blur-md border-b border-stone-200/80 px-4 sm:px-6 md:px-8 py-3.5 transition-all">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
           
           {/* Brand Name on Left */}
           <div className="flex items-center gap-1.5">
@@ -167,14 +151,13 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
             {/* Profile Avatar Badge */}
             <div className="w-9 h-9 rounded-full bg-[#e11d48] border-2 border-white shadow-xs flex items-center justify-center text-white overflow-hidden">
               <img
-                src="/sagar-portrait-studio.jpg"
+                src="/profile-transparent-open.png"
                 alt="Sagar Singh"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-top"
                 onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
+                  (e.target as HTMLImageElement).src = '/profile2.png';
                 }}
               />
-              <User className="w-5 h-5 text-white" />
             </div>
           </div>
 
@@ -182,158 +165,101 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-20 space-y-12 relative z-10">
+      <main className="max-w-5xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-10 md:pt-12 pb-24 space-y-14 sm:space-y-16 relative z-10">
 
         {/* ========================================================================= */}
         {/* 2. HERO SECTION - TRANSFORMING RAW DATA INTO ACTIONABLE INTELLIGENCE       */}
         {/* ========================================================================= */}
-        <section id="hero" className="space-y-6 pt-2">
+        <section id="hero" className="pt-2">
           
-          {/* Role Pill */}
-          <div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50/90 text-indigo-950 border border-indigo-100/90 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-[#e11d48]"></span>
-              Data Analyst & BI Engineer
-            </span>
-          </div>
-
-          {/* Main Headline */}
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-5xl font-black text-stone-900 tracking-tight leading-[1.15]">
-              Transforming<br />
-              Raw Data into<br />
-              <span className="text-[#e11d48]">Actionable</span><br />
-              <span className="text-[#e11d48]">Intelligence</span>
-            </h1>
-
-            <p className="text-sm sm:text-base text-stone-600 font-medium leading-relaxed max-w-xl">
-              Specializing in enterprise dashboards, predictive modeling, and scalable Python ETL pipelines. 
-              Bridging complex datasets with high-impact executive decision-making.
-            </p>
-          </div>
-
-          {/* CTA Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3 pt-1">
-            <a
-              href="#projects"
-              className="px-6 py-3 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white font-semibold text-xs sm:text-sm tracking-wide shadow-md shadow-rose-500/25 transition-all flex items-center justify-center cursor-pointer active:scale-95"
-            >
-              Explore Projects
-            </a>
-
-            <a
-              href="#contact"
-              className="px-6 py-3 rounded-full bg-[#e0e7ff] hover:bg-[#c7d2fe] text-[#3730a3] font-semibold text-xs sm:text-sm border border-indigo-200/60 shadow-2xs transition-all flex items-center justify-center cursor-pointer active:scale-95"
-            >
-              Get in Touch
-            </a>
-          </div>
-
-          {/* 3 Stat KPI Cards (Horizontal 3-Card Grid) */}
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-4 pt-2">
-            {/* Card 1 */}
-            <div className="p-3 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs text-center space-y-1">
-              <p className="text-lg sm:text-2xl font-black text-[#e11d48] tracking-tight">150K+</p>
-              <p className="text-[9px] sm:text-[10px] font-mono font-bold text-stone-500 uppercase tracking-wider">
-                RECORDS PROCESSED
-              </p>
-            </div>
-
-            {/* Card 2 */}
-            <div className="p-3 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs text-center space-y-1">
-              <p className="text-lg sm:text-2xl font-black text-emerald-600 tracking-tight">98.5%</p>
-              <p className="text-[9px] sm:text-[10px] font-mono font-bold text-stone-500 uppercase tracking-wider">
-                MODEL ACCURACY
-              </p>
-            </div>
-
-            {/* Card 3 */}
-            <div className="p-3 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs text-center space-y-1">
-              <p className="text-lg sm:text-2xl font-black text-amber-600 tracking-tight">5+</p>
-              <p className="text-[9px] sm:text-[10px] font-mono font-bold text-stone-500 uppercase tracking-wider">
-                CAPSTONES BUILT
-              </p>
-            </div>
-          </div>
-
-          {/* ===================================================================== */}
-          {/* 3. LIVING 3D DIGITAL TWIN CONTROLLER CARD                             */}
-          {/* ===================================================================== */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-[#f8f9ff] border border-indigo-100/80 shadow-xs space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             
-            {/* Top Status & Greet Button */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-700 text-[11px] font-mono shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Living 3D Digital Twin • Real-Time Eye Blink & 6 Expressions • 60 FPS Three.js</span>
+            {/* Left Column (Hero Content + CTAs + KPI Stats) */}
+            <div className="lg:col-span-7 space-y-6">
+              
+              {/* Role Pill */}
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-indigo-50/90 text-indigo-950 border border-indigo-100/90 shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-[#e11d48] animate-pulse"></span>
+                  Data Analyst & BI Engineer
+                </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setAvatarMode(prev => prev === '3d' ? 'photo' : '3d')}
-                  className="px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-white border border-stone-200 text-stone-700 hover:border-rose-400 transition-all cursor-pointer shadow-2xs"
-                >
-                  {avatarMode === '3d' ? '📸 Studio Photo' : '🤖 3D Twin'}
-                </button>
+              {/* Main Headline & Pitch */}
+              <div className="space-y-3">
+                <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-black text-stone-900 tracking-tight leading-[1.12]">
+                  Transforming<br />
+                  Raw Data into<br />
+                  <span className="text-[#e11d48]">Actionable</span><br />
+                  <span className="text-[#e11d48]">Intelligence</span>
+                </h1>
 
-                <button
-                  onClick={() => {
-                    const avatarElem = document.querySelector('[title*="Click to interact"]') as HTMLElement;
-                    if (avatarElem) avatarElem.click();
-                  }}
-                  className="px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-[#e11d48] border border-rose-200 transition-all cursor-pointer shadow-2xs active:scale-95"
-                >
-                  👋 Greet / Nod
-                </button>
+                <p className="text-xs xs:text-sm sm:text-base text-stone-600 font-medium leading-relaxed max-w-xl">
+                  Specializing in enterprise dashboards, predictive modeling, and scalable Python ETL pipelines. 
+                  Bridging complex datasets with high-impact executive decision-making.
+                </p>
               </div>
-            </div>
 
-            {/* Expression Selector Row */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-xs font-mono font-bold text-stone-500 mr-1">Expression:</span>
-              {expressionOptions.map(expr => (
-                <button
-                  key={expr.key}
-                  onClick={() => setAvatarExpression(expr.key)}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer border ${
-                    avatarExpression === expr.key
-                      ? 'bg-[#e11d48] text-white border-rose-600 shadow-xs scale-105'
-                      : 'bg-white text-stone-700 border-stone-200 hover:border-rose-300'
-                  }`}
+              {/* CTA Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <a
+                  href="#projects"
+                  className="px-6 py-3 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white font-semibold text-xs sm:text-sm tracking-wide shadow-md shadow-rose-500/25 transition-all flex items-center justify-center cursor-pointer active:scale-95"
                 >
-                  <span>{expr.icon}</span>
-                  <span>{expr.label}</span>
-                </button>
-              ))}
-            </div>
+                  Explore Projects
+                </a>
 
-            {/* Avatar Display Container */}
-            <div className="py-4 flex justify-center items-center min-h-[280px]">
-              {avatarMode === '3d' ? (
-                <Realistic3DAvatar onExpressionChange={(expr) => setAvatarExpression(expr as AvatarExpression)} />
-              ) : (
-                <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-full border-4 border-white shadow-xl overflow-hidden ring-4 ring-rose-500/20">
-                  <img
-                    src="/sagar-portrait-studio.jpg"
-                    alt="Sagar Singh Professional Studio Portrait"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-stone-900/60 backdrop-blur-xs py-1 text-center">
-                    <span className="text-[10px] font-mono text-white font-semibold">Official Studio Portrait</span>
-                  </div>
+                <a
+                  href="#contact"
+                  className="px-6 py-3 rounded-full bg-[#e0e7ff] hover:bg-[#c7d2fe] text-[#3730a3] font-semibold text-xs sm:text-sm border border-indigo-200/60 shadow-2xs transition-all flex items-center justify-center cursor-pointer active:scale-95"
+                >
+                  Get in Touch
+                </a>
+              </div>
+
+              {/* 3 Stat KPI Cards (Responsive Horizontal Grid) */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-3.5 md:gap-4 pt-2">
+                {/* Card 1 */}
+                <div className="p-3 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs text-center space-y-1">
+                  <p className="text-base xs:text-xl sm:text-2xl md:text-3xl font-black text-[#e11d48] tracking-tight">150K+</p>
+                  <p className="text-[8px] xs:text-[9px] sm:text-[10px] font-mono font-bold text-stone-500 uppercase tracking-tight">
+                    RECORDS PROCESSED
+                  </p>
                 </div>
-              )}
+
+                {/* Card 2 */}
+                <div className="p-3 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs text-center space-y-1">
+                  <p className="text-base xs:text-xl sm:text-2xl md:text-3xl font-black text-emerald-600 tracking-tight">98.5%</p>
+                  <p className="text-[8px] xs:text-[9px] sm:text-[10px] font-mono font-bold text-stone-500 uppercase tracking-tight">
+                    MODEL ACCURACY
+                  </p>
+                </div>
+
+                {/* Card 3 */}
+                <div className="p-3 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs text-center space-y-1">
+                  <p className="text-base xs:text-xl sm:text-2xl md:text-3xl font-black text-amber-600 tracking-tight">5+</p>
+                  <p className="text-[8px] xs:text-[9px] sm:text-[10px] font-mono font-bold text-stone-500 uppercase tracking-tight">
+                    CAPSTONES BUILT
+                  </p>
+                </div>
+              </div>
+
             </div>
 
-            {/* Bottom Tracking Note & FPS Badge */}
-            <div className="flex items-center justify-between pt-2 border-t border-indigo-100/60 text-[11px] font-mono text-stone-500">
-              <div className="flex items-center gap-1.5">
-                <span className="text-rose-500">👆</span>
-                <span>Select an expression above • Move cursor to track • Click anywhere to nod</span>
+            {/* Right Column: 3D Interactive Profile Photo Avatar (Floating, Zero Box Background) */}
+            <div className="lg:col-span-5 flex flex-col items-center justify-center space-y-3 pt-4 lg:pt-0">
+              
+              {/* Profile Avatar with Glowing Crimson Border Ring */}
+              <ProfessionalPhotoAvatar
+                sizeClassName="w-52 h-52 xs:w-60 xs:h-60 sm:w-68 sm:h-68 md:w-76 md:h-76 lg:w-80 lg:h-80"
+              />
+
+              {/* Dynamic Interaction Pill */}
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 border border-stone-200 text-stone-600 text-[11px] font-mono shadow-2xs backdrop-blur-xs">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                <span>3D Tilt Parallax • Move to track, tap to greet</span>
               </div>
-              <span className="px-2 py-0.5 rounded bg-white border border-stone-200 text-stone-700 font-bold shadow-2xs shrink-0">
-                60 FPS Three.js
-              </span>
+
             </div>
 
           </div>
@@ -341,14 +267,14 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
         </section>
 
         {/* ========================================================================= */}
-        {/* 4. CORE METHODOLOGIES & TOOLS SECTION (EXACT MATCH TO IMAGE 3)             */}
+        {/* 4. CORE METHODOLOGIES & TOOLS SECTION                                     */}
         {/* ========================================================================= */}
         <section id="methodologies" className="space-y-5 pt-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
             Core Methodologies & Tools
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 md:gap-5">
             
             {/* Card 1: Power BI & DAX */}
             <div className="p-5 sm:p-6 rounded-2xl bg-white border border-stone-200/80 shadow-2xs hover:border-rose-300 transition-all space-y-3">
@@ -406,7 +332,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
         </section>
 
         {/* ========================================================================= */}
-        {/* 5. FEATURED ANALYTICAL PROJECTS (IMAGES 3 & 5)                            */}
+        {/* 5. FEATURED ANALYTICAL PROJECTS                                           */}
         {/* ========================================================================= */}
         <section id="projects" className="space-y-6 pt-4">
           
@@ -440,14 +366,14 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
           </div>
 
           {/* Project Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             {filteredProjects.map(proj => (
               <div
                 key={proj.id || proj.title}
                 className="rounded-3xl bg-white border border-stone-200/90 overflow-hidden shadow-xs hover:border-rose-300 transition-all flex flex-col group"
               >
                 {/* Image Mockup */}
-                <div className="relative h-44 sm:h-48 bg-stone-100 overflow-hidden border-b border-stone-100">
+                <div className="relative h-44 sm:h-48 md:h-52 bg-stone-100 overflow-hidden border-b border-stone-100">
                   <img
                     src={proj.thumbnailUrl || '/projects/sales-dashboard.png'}
                     alt={proj.title}
@@ -464,7 +390,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
                 </div>
 
                 {/* Body Content */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
                   <div className="space-y-2">
                     {/* Tags */}
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -478,7 +404,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
                       ))}
                     </div>
 
-                    <h3 className="text-lg font-bold text-stone-900 tracking-tight group-hover:text-[#e11d48] transition-colors">
+                    <h3 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight group-hover:text-[#e11d48] transition-colors">
                       {proj.title}
                     </h3>
 
@@ -511,7 +437,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
         </section>
 
         {/* ========================================================================= */}
-        {/* 6. ACADEMIC BACKGROUND & GET THE COMPLETE DOSSIER (IMAGE 5)                */}
+        {/* 6. ACADEMIC BACKGROUND & GET THE COMPLETE DOSSIER                          */}
         {/* ========================================================================= */}
         <section id="education" className="space-y-6 pt-4">
           
@@ -524,10 +450,10 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6 items-stretch">
             
             {/* Left Card: Education */}
-            <div className="p-6 rounded-3xl bg-white border border-stone-200/90 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="p-6 sm:p-7 rounded-3xl bg-white border border-stone-200/90 shadow-xs flex flex-col justify-between space-y-4">
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-base font-bold text-stone-900">
@@ -551,7 +477,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
             </div>
 
             {/* Right Card: Get the Complete Dossier */}
-            <div className="p-6 rounded-3xl bg-[#f8f9ff] border border-indigo-100/80 shadow-xs flex flex-col justify-between items-center text-center space-y-4">
+            <div className="p-6 sm:p-7 rounded-3xl bg-[#f8f9ff] border border-indigo-100/80 shadow-xs flex flex-col justify-between items-center text-center space-y-4">
               <div className="space-y-3 flex flex-col items-center">
                 <div className="w-12 h-12 rounded-2xl bg-[#e11d48] text-white flex items-center justify-center shadow-sm">
                   <FileText className="w-6 h-6" />
@@ -589,11 +515,11 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
         </section>
 
         {/* ========================================================================= */}
-        {/* 7. CONTACT SECTION: LET'S DISCUSS DATA OPPORTUNITIES (IMAGE 4)             */}
+        {/* 7. CONTACT SECTION: LET'S DISCUSS DATA OPPORTUNITIES                       */}
         {/* ========================================================================= */}
-        <section id="contact" className="py-8">
+        <section id="contact" className="py-6 sm:py-8">
           
-          <div className="p-6 sm:p-10 rounded-3xl bg-[#f8f9ff] border border-indigo-100/70 shadow-xs space-y-6">
+          <div className="p-6 sm:p-8 md:p-10 rounded-3xl bg-[#f8f9ff] border border-indigo-100/70 shadow-xs space-y-6">
             
             {/* Header */}
             <div className="text-center space-y-1.5 max-w-lg mx-auto">
@@ -611,7 +537,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
             {/* Inner Form Card */}
             <form
               onSubmit={handleContactSubmit}
-              className="max-w-xl mx-auto p-6 sm:p-8 rounded-3xl bg-white border border-stone-200/90 shadow-2xs space-y-4"
+              className="max-w-xl mx-auto p-5 sm:p-7 md:p-8 rounded-3xl bg-white border border-stone-200/90 shadow-2xs space-y-4"
             >
               {formSuccess && (
                 <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
@@ -706,10 +632,10 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
       </main>
 
       {/* ========================================================================= */}
-      {/* 8. FOOTER BAR (IMAGE 4)                                                   */}
+      {/* 8. FOOTER BAR                                                             */}
       {/* ========================================================================= */}
-      <footer className="border-t border-stone-200/80 bg-white/90 backdrop-blur-md py-6 px-4 sm:px-8 text-xs font-mono text-stone-500 relative z-10">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="border-t border-stone-200/80 bg-white/92 backdrop-blur-md py-6 px-4 sm:px-6 md:px-8 text-xs font-mono text-stone-500 relative z-10">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           
           <div>
             © 2025 Sagar Singh. Crafted with precision.
@@ -747,6 +673,45 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
 
         </div>
       </footer>
+
+      {/* Mobile Sticky Bottom Navigation Dock (Home, Skills, Projects, Resume, Contact) */}
+      <nav className="fixed bottom-0 inset-x-0 z-40 px-4 py-2.5 flex items-center justify-around shadow-2xl md:hidden backdrop-blur-lg border-t bg-white/95 border-stone-200 text-stone-600 transition-colors">
+        <a
+          href="#hero"
+          className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
+        >
+          <Home className="w-4 h-4" />
+          <span className="text-[10px]">Home</span>
+        </a>
+        <a
+          href="#methodologies"
+          className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span className="text-[10px]">Skills</span>
+        </a>
+        <a
+          href="#projects"
+          className="flex flex-col items-center gap-0.5 text-xs font-semibold text-[#e11d48] transition-colors"
+        >
+          <FolderGit2 className="w-4 h-4" />
+          <span className="text-[10px]">Projects</span>
+        </a>
+        <a
+          href="#education"
+          className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
+        >
+          <FileText className="w-4 h-4" />
+          <span className="text-[10px]">Resume</span>
+        </a>
+        <a
+          href="#contact"
+          className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
+        >
+          <Send className="w-4 h-4" />
+          <span className="text-[10px]">Contact</span>
+        </a>
+      </nav>
 
       {/* Deep-Dive Case Study Modal */}
       {selectedCaseStudy && (

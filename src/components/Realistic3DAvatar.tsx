@@ -4,18 +4,32 @@ import * as THREE from 'three';
 interface Realistic3DAvatarProps {
   className?: string;
   onExpressionChange?: (expr: string) => void;
+  selectedExpression?: AvatarExpression;
+  showChips?: boolean;
 }
 
 export type AvatarExpression = 'happy' | 'confident' | 'thinking' | 'surprised' | 'winking' | 'sad';
 
-export const Realistic3DAvatar: React.FC<Realistic3DAvatarProps> = ({ className = '', onExpressionChange }) => {
+export const Realistic3DAvatar: React.FC<Realistic3DAvatarProps> = ({
+  className = '',
+  onExpressionChange,
+  selectedExpression,
+  showChips = true,
+}) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [currentExpression, setCurrentExpression] = useState<AvatarExpression>('confident');
+  const [currentExpression, setCurrentExpression] = useState<AvatarExpression>(selectedExpression || 'happy');
   const [isNoddingUI, setIsNoddingUI] = useState(false);
 
   // References to communicate with Three.js animation loop
   const setExpressionRef = useRef<((expr: AvatarExpression) => void) | null>(null);
   const triggerNodRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (selectedExpression && setExpressionRef.current) {
+      setExpressionRef.current(selectedExpression);
+      setCurrentExpression(selectedExpression);
+    }
+  }, [selectedExpression]);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -762,22 +776,24 @@ export const Realistic3DAvatar: React.FC<Realistic3DAvatarProps> = ({ className 
       </div>
 
       {/* Interactive Expression Selector Chips */}
-      <div className="flex flex-wrap items-center justify-center gap-1.5 pt-3">
-        {expressions.map((e) => (
-          <button
-            key={e.key}
-            onClick={() => switchExpression(e.key)}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer border ${
-              currentExpression === e.key
-                ? 'bg-rose-500 text-white border-rose-600 shadow-sm shadow-rose-500/30 scale-105'
-                : 'bg-white/80 dark:bg-stone-900/60 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-white/10 hover:border-rose-400'
-            }`}
-          >
-            <span>{e.icon}</span>
-            <span>{e.label}</span>
-          </button>
-        ))}
-      </div>
+      {showChips && (
+        <div className="flex flex-wrap items-center justify-center gap-1.5 pt-3">
+          {expressions.map((e) => (
+            <button
+              key={e.key}
+              onClick={() => switchExpression(e.key)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer border ${
+                currentExpression === e.key
+                  ? 'bg-rose-500 text-white border-rose-600 shadow-sm shadow-rose-500/30 scale-105'
+                  : 'bg-white/80 dark:bg-stone-900/60 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-white/10 hover:border-rose-400'
+              }`}
+            >
+              <span>{e.icon}</span>
+              <span>{e.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
