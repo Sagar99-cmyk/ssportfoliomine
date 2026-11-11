@@ -1,16 +1,17 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Mail, Phone, MapPin, Linkedin, Github, Download, Eye, EyeOff,
-  ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, Play, Pause,
-  Volume2, VolumeX, ShieldCheck, Award, GraduationCap, FolderGit2,
-  TrendingUp, BarChart3, Database, Code2, Wrench, Sparkles, Send,
-  AlertCircle, Moon, Sun, ArrowRight, FileText, Check
+  Mail, Phone, MapPin, Linkedin, Github, Download, Eye,
+  ExternalLink, ChevronRight, CheckCircle2, Play, Pause,
+  Volume2, VolumeX, Award, GraduationCap, FolderGit2,
+  TrendingUp, BarChart3, Database, Code2, Sparkles, Send,
+  AlertCircle, Moon, Sun, ArrowRight, FileText, Table, Terminal,
+  User, Check
 } from 'lucide-react';
 import { Profile, Skill, Project, Education, Achievement } from '../types';
-import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
+import { Realistic3DAvatar, AvatarExpression } from './Realistic3DAvatar';
 import { CaseStudyModal } from './CaseStudyModal';
-import { getTechLogo } from './TechLogos';
+import { StitchLightBackground } from './StitchLightBackground';
 import { globalAudioEngine } from './BackgroundMusic';
 import { useTheme } from '../context/ThemeContext';
 import { api } from '../services/api';
@@ -37,32 +38,30 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
   // Audio Playback State
   const [isPlayingAudio, setIsPlayingAudio] = useState(true);
 
-  // Selected Project for Deep-Dive Case Study Modal
+  // Selected Project for Case Study Modal
   const [selectedCaseStudy, setSelectedCaseStudy] = useState<Project | null>(null);
 
-  // Resume Inline View Toggle
-  const [isResumeUnlocked, setIsResumeUnlocked] = useState(false);
+  // Active 3D Avatar Expression
+  const [avatarExpression, setAvatarExpression] = useState<AvatarExpression>('happy');
 
-  // Skill Filtering
-  const [activeSkillCategory, setActiveSkillCategory] = useState<string>('All');
+  // Avatar View Mode: 3D Twin vs Authentic Studio Portrait Photo
+  const [avatarMode, setAvatarMode] = useState<'3d' | 'photo'>('3d');
 
-  // Project Filtering & Carousel Slider
-  const [activeProjectFilter, setActiveProjectFilter] = useState<'All' | 'Major' | 'Minor'>('All');
-  const projectTrackRef = useRef<HTMLDivElement>(null);
+  // Project Category Filter
+  const [activeProjectFilter, setActiveProjectFilter] = useState<'ALL' | 'BI Dashboards' | 'Python ETL'>('ALL');
 
   // Contact Form State
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
-    company: '',
     message: '',
   });
   const [formLoading, setFormLoading] = useState(false);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Sync Audio Playback State
+  // Sync Audio Engine State
   useEffect(() => {
     setIsPlayingAudio(!globalAudioEngine.getIsMuted());
   }, []);
@@ -78,29 +77,19 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
     }
   };
 
-  // Horizontal Project Carousel Navigation
-  const scrollProjects = (direction: 'left' | 'right') => {
-    if (!projectTrackRef.current) return;
-    const scrollAmount = projectTrackRef.current.clientWidth * 0.85;
-    projectTrackRef.current.scrollBy({
-      left: direction === 'right' ? scrollAmount : -scrollAmount,
-      behavior: 'smooth',
-    });
-  };
-
-  // Filtered Skills
-  const filteredSkills = useMemo(() => {
-    if (activeSkillCategory === 'All') return skills;
-    return skills.filter(s => s.category?.toLowerCase().includes(activeSkillCategory.toLowerCase()));
-  }, [skills, activeSkillCategory]);
-
-  // Filtered Projects
+  // Filter Projects based on tabs
   const filteredProjects = useMemo(() => {
-    if (activeProjectFilter === 'All') return projects;
-    if (activeProjectFilter === 'Major') {
-      return projects.filter(p => (p.projectType || '').toLowerCase().includes('major'));
+    if (activeProjectFilter === 'ALL') return projects;
+    if (activeProjectFilter === 'BI Dashboards') {
+      return projects.filter(p =>
+        (p.technologies || []).some((t: string) => /power\s*bi|tableau|excel|dashboard/i.test(t)) ||
+        /dashboard|analytics|bi/i.test(p.title)
+      );
     }
-    return projects.filter(p => (p.projectType || '').toLowerCase().includes('minor') || (p.projectType || '').toLowerCase().includes('micro'));
+    return projects.filter(p =>
+      (p.technologies || []).some((t: string) => /python|etl|pipeline|sql|pandas/i.test(t)) ||
+      /etl|python|pipeline|data/i.test(p.title)
+    );
   }, [projects, activeProjectFilter]);
 
   // Contact Form Submission
@@ -112,478 +101,409 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
 
     try {
       await api.sendMessage(formData);
-      setFormSuccess('Message sent successfully! A confirmation alert has been forwarded to Sagar’s personal Gmail.');
-      setFormData({ name: '', email: '', subject: '', company: '', message: '' });
+      setFormSuccess('Message transmitted successfully! A notification has been sent directly to Sagar.');
+      setFormData({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => setFormSuccess(null), 8000);
     } catch (err: any) {
-      setFormError(err.message || 'Failed to send message. Please try WhatsApp or email directly.');
+      setFormError(err.message || 'Failed to send message. Please reach out via WhatsApp or email directly.');
     } finally {
       setFormLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#faf9f6] text-[#0f172a] font-sans antialiased selection:bg-rose-500 selection:text-white pb-24 md:pb-12">
-      
-      {/* ========================================================================= */}
-      {/* 1. TOP HEADER & STATUS BAR                                                */}
-      {/* ========================================================================= */}
-      <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-stone-200/80 px-4 sm:px-6 py-3 transition-all shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          
-          {/* Identity & Availability Status */}
-          <div className="flex items-center gap-2.5">
-            <div className="relative">
-              <div className="w-8 h-8 rounded-full border-2 border-[#e11d48] overflow-hidden shadow-sm">
-                <img src="/profile2.png" alt="Sagar Singh" className="w-full h-full object-cover" />
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
-            </div>
+  const expressionOptions: { key: AvatarExpression; label: string; icon: string }[] = [
+    { key: 'happy', label: 'Happy', icon: '🥰' },
+    { key: 'sad', label: 'Sad', icon: '😢' },
+    { key: 'confident', label: 'Confident', icon: '😎' },
+    { key: 'surprised', label: 'Surprised', icon: '😲' },
+    { key: 'thinking', label: 'Thinking', icon: '🤔' },
+    { key: 'winking', label: 'Winking', icon: '😉' },
+  ];
 
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-sm font-bold text-stone-900 tracking-tight">Sagar Singh</h1>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              </div>
-              <span className="text-[10px] font-mono font-semibold text-emerald-700 block">
-                Available for Immediate Roles
-              </span>
-            </div>
+  return (
+    <div className="min-h-screen bg-[#faf9f6] text-[#0f172a] relative selection:bg-rose-500/20 selection:text-rose-600 font-sans">
+      
+      {/* 3D Dispersed Floating Polyhedrons Background */}
+      <StitchLightBackground />
+
+      {/* ========================================================================= */}
+      {/* 1. TOP NAVBAR (MATCHING SCREENSHOT)                                       */}
+      {/* ========================================================================= */}
+      <header className="sticky top-0 z-50 bg-[#faf9f6]/90 backdrop-blur-md border-b border-stone-200/80 px-4 sm:px-8 py-3.5 transition-all">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          
+          {/* Brand Name on Left */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-base sm:text-lg font-black text-stone-900 tracking-tight">
+              Sagar Singh
+            </span>
+            <span className="w-2 h-2 rounded-full bg-[#e11d48] animate-pulse"></span>
           </div>
 
-          {/* Action Icons: Theme Switcher & Audio Engine */}
-          <div className="flex items-center gap-2">
-            {/* Theme Toggle Button: Switch back to 3D Dark Mode */}
-            <button
-              onClick={toggleTheme}
-              title="Switch to 3D Dark Space Theme"
-              className="px-3 py-1.5 rounded-full text-xs font-mono font-semibold bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
-            >
-              <Moon className="w-3.5 h-3.5 text-[#e11d48]" />
-              <span className="hidden sm:inline">3D Dark Mode</span>
-            </button>
-
+          {/* Action Icons on Right */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Audio Toggle */}
             <button
               onClick={handleToggleAudio}
               title={isPlayingAudio ? 'Mute Background Audio' : 'Play Background Audio'}
-              className="p-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-300 transition-all cursor-pointer"
+              className="p-2 rounded-full bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 shadow-2xs transition-all cursor-pointer"
             >
-              {isPlayingAudio ? <Volume2 className="w-4 h-4 text-[#e11d48]" /> : <VolumeX className="w-4 h-4 text-stone-400" />}
+              {isPlayingAudio ? (
+                <Volume2 className="w-4 h-4 text-[#e11d48]" />
+              ) : (
+                <VolumeX className="w-4 h-4 text-stone-400" />
+              )}
             </button>
+
+            {/* Dark Mode Switcher */}
+            <button
+              onClick={toggleTheme}
+              title="Switch to Dark Mode"
+              className="p-2 rounded-full bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 shadow-2xs transition-all cursor-pointer"
+            >
+              <Moon className="w-4 h-4 text-stone-700 hover:text-amber-500 transition-colors" />
+            </button>
+
+            {/* Profile Avatar Badge */}
+            <div className="w-9 h-9 rounded-full bg-[#e11d48] border-2 border-white shadow-xs flex items-center justify-center text-white overflow-hidden">
+              <img
+                src="/sagar-portrait-studio.jpg"
+                alt="Sagar Singh"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+              <User className="w-5 h-5 text-white" />
+            </div>
           </div>
+
         </div>
       </header>
 
-      {/* Main Content Container */}
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 space-y-12">
+      {/* Main Content Area */}
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-20 space-y-12 relative z-10">
 
         {/* ========================================================================= */}
-        {/* 2. HERO SECTION - SAGAR SINGH                                             */}
+        {/* 2. HERO SECTION - TRANSFORMING RAW DATA INTO ACTIONABLE INTELLIGENCE       */}
         {/* ========================================================================= */}
-        <section id="hero" className="space-y-6">
+        <section id="hero" className="space-y-6 pt-2">
           
-          {/* Availability Pill */}
+          {/* Role Pill */}
           <div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Available for Immediate Roles
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50/90 text-indigo-950 border border-indigo-100/90 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-[#e11d48]"></span>
+              Data Analyst & BI Engineer
             </span>
           </div>
 
-          {/* Headline Name */}
+          {/* Main Headline */}
           <div className="space-y-3">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-stone-900 tracking-tight leading-tight">
-              Sagar <span className="text-[#e11d48]">Singh</span>
-            </h2>
+            <h1 className="text-3xl sm:text-5xl font-black text-stone-900 tracking-tight leading-[1.15]">
+              Transforming<br />
+              Raw Data into<br />
+              <span className="text-[#e11d48]">Actionable</span><br />
+              <span className="text-[#e11d48]">Intelligence</span>
+            </h1>
 
-            <p className="text-sm sm:text-base text-stone-600 font-medium leading-relaxed max-w-2xl">
-              BCA 2026 Graduate specializing in <strong>Data Analytics, Power BI, Advanced Excel, MySQL, and Python</strong>. 
-              Turning complex data into clear execution.
+            <p className="text-sm sm:text-base text-stone-600 font-medium leading-relaxed max-w-xl">
+              Specializing in enterprise dashboards, predictive modeling, and scalable Python ETL pipelines. 
+              Bridging complex datasets with high-impact executive decision-making.
             </p>
           </div>
 
-          {/* Location & Institution Tags */}
-          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-medium text-stone-600">
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-stone-100 border border-stone-200">
-              <MapPin className="w-3.5 h-3.5 text-[#e11d48]" />
-              Bengaluru, IN
-            </span>
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-stone-100 border border-stone-200">
-              <GraduationCap className="w-3.5 h-3.5 text-[#e11d48]" />
-              Presidency College (BCA)
-            </span>
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-stone-100 border border-stone-200">
-              <Award className="w-3.5 h-3.5 text-[#e11d48]" />
-              BCA
-            </span>
-          </div>
-
           {/* CTA Action Buttons */}
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <a
+              href="#projects"
+              className="px-6 py-3 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white font-semibold text-xs sm:text-sm tracking-wide shadow-md shadow-rose-500/25 transition-all flex items-center justify-center cursor-pointer active:scale-95"
+            >
+              Explore Projects
+            </a>
+
             <a
               href="#contact"
-              className="px-6 py-3 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs sm:text-sm tracking-wide shadow-md shadow-rose-500/25 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              className="px-6 py-3 rounded-full bg-[#e0e7ff] hover:bg-[#c7d2fe] text-[#3730a3] font-semibold text-xs sm:text-sm border border-indigo-200/60 shadow-2xs transition-all flex items-center justify-center cursor-pointer active:scale-95"
             >
-              <span>GET IN TOUCH</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
-
-            <a
-              href="#resume"
-              className="px-5 py-3 rounded-full bg-white hover:bg-stone-50 text-stone-800 font-semibold text-xs sm:text-sm border border-stone-300 shadow-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-            >
-              <FileText className="w-4 h-4 text-stone-500" />
-              <span>CV / Resume</span>
+              Get in Touch
             </a>
           </div>
 
-          {/* Interactive 3D Natural Avatar */}
-          <div className="py-2 flex justify-center">
-            <ProfessionalPhotoAvatar />
+          {/* 3 Stat KPI Cards (Horizontal 3-Card Grid) */}
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-4 pt-2">
+            {/* Card 1 */}
+            <div className="p-3 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs text-center space-y-1">
+              <p className="text-lg sm:text-2xl font-black text-[#e11d48] tracking-tight">150K+</p>
+              <p className="text-[9px] sm:text-[10px] font-mono font-bold text-stone-500 uppercase tracking-wider">
+                RECORDS PROCESSED
+              </p>
+            </div>
+
+            {/* Card 2 */}
+            <div className="p-3 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs text-center space-y-1">
+              <p className="text-lg sm:text-2xl font-black text-emerald-600 tracking-tight">98.5%</p>
+              <p className="text-[9px] sm:text-[10px] font-mono font-bold text-stone-500 uppercase tracking-wider">
+                MODEL ACCURACY
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="p-3 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs text-center space-y-1">
+              <p className="text-lg sm:text-2xl font-black text-amber-600 tracking-tight">5+</p>
+              <p className="text-[9px] sm:text-[10px] font-mono font-bold text-stone-500 uppercase tracking-wider">
+                CAPSTONES BUILT
+              </p>
+            </div>
           </div>
 
           {/* ===================================================================== */}
-          {/* 3. INTERACTIVE AUDIO & PERFORMANCE SPARKLINE CARD                     */}
+          {/* 3. LIVING 3D DIGITAL TWIN CONTROLLER CARD                             */}
           {/* ===================================================================== */}
-          <div className="p-5 rounded-2xl bg-white border border-stone-200/90 shadow-md space-y-5">
+          <div className="p-5 sm:p-6 rounded-3xl bg-[#f8f9ff] border border-indigo-100/80 shadow-xs space-y-4">
             
-            {/* Audio Mini Player */}
-            <div className="flex items-center justify-between pb-4 border-b border-stone-100">
-              <div className="flex items-center gap-3">
+            {/* Top Status & Greet Button */}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-700 text-[11px] font-mono shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Living 3D Digital Twin • Real-Time Eye Blink & 6 Expressions • 60 FPS Three.js</span>
+              </div>
+
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={handleToggleAudio}
-                  className="w-10 h-10 rounded-full bg-rose-50 hover:bg-rose-100 border border-rose-200 text-[#e11d48] flex items-center justify-center transition-all shadow-xs cursor-pointer active:scale-95"
+                  onClick={() => setAvatarMode(prev => prev === '3d' ? 'photo' : '3d')}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-white border border-stone-200 text-stone-700 hover:border-rose-400 transition-all cursor-pointer shadow-2xs"
                 >
-                  {isPlayingAudio ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+                  {avatarMode === '3d' ? '📸 Studio Photo' : '🤖 3D Twin'}
                 </button>
-                <div>
-                  <p className="text-xs font-bold text-stone-800">Acoustic Melody (Guitar & Piano)</p>
-                  <p className="text-[11px] text-stone-500 font-mono">Calming Ambient · Background On</p>
-                </div>
-              </div>
 
-              <a
-                href="tel:+917892570634"
-                title="Direct Phone Call"
-                className="w-9 h-9 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 flex items-center justify-center transition-all cursor-pointer shadow-xs"
-              >
-                <Phone className="w-4 h-4" />
-              </a>
-            </div>
-
-            {/* 4 Quick Stat Benchmarks */}
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div>
-                <p className="text-base sm:text-lg font-black text-[#e11d48]">15+</p>
-                <p className="text-[10px] sm:text-xs font-medium text-stone-500">Projects & BI</p>
-              </div>
-              <div>
-                <p className="text-base sm:text-lg font-black text-stone-900">50K+</p>
-                <p className="text-[10px] sm:text-xs font-medium text-stone-500">Rows Cleaned</p>
-              </div>
-              <div>
-                <p className="text-base sm:text-lg font-black text-[#e11d48]">10+</p>
-                <p className="text-[10px] sm:text-xs font-medium text-stone-500">Applied Tech</p>
-              </div>
-              <div>
-                <p className="text-base sm:text-lg font-black text-stone-900">96.4%</p>
-                <p className="text-[10px] sm:text-xs font-medium text-stone-500">Precision</p>
+                <button
+                  onClick={() => {
+                    const avatarElem = document.querySelector('[title*="Click to interact"]') as HTMLElement;
+                    if (avatarElem) avatarElem.click();
+                  }}
+                  className="px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-[#e11d48] border border-rose-200 transition-all cursor-pointer shadow-2xs active:scale-95"
+                >
+                  👋 Greet / Nod
+                </button>
               </div>
             </div>
 
-            {/* Growth Sparkline Indicator */}
-            <div className="pt-2">
-              <div className="flex items-center justify-between text-xs pb-1">
-                <span className="font-semibold text-stone-700">Records Processed (72.6% monthly growth)</span>
-                <span className="text-emerald-600 font-bold font-mono text-[11px] flex items-center gap-0.5">
-                  <TrendingUp className="w-3.5 h-3.5" /> +72.6%
-                </span>
-              </div>
-              
-              {/* SVG Trend Sparkline */}
-              <div className="h-10 w-full pt-1">
-                <svg className="w-full h-full overflow-visible" viewBox="0 0 300 40" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#16a34a" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#16a34a" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M0,35 Q40,32 75,28 T150,20 T225,12 T300,5 L300,40 L0,40 Z"
-                    fill="url(#growthGrad)"
-                  />
-                  <path
-                    d="M0,35 Q40,32 75,28 T150,20 T225,12 T300,5"
-                    fill="none"
-                    stroke="#16a34a"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                  <circle cx="300" cy="5" r="3.5" fill="#16a34a" />
-                </svg>
-              </div>
+            {/* Expression Selector Row */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <span className="text-xs font-mono font-bold text-stone-500 mr-1">Expression:</span>
+              {expressionOptions.map(expr => (
+                <button
+                  key={expr.key}
+                  onClick={() => setAvatarExpression(expr.key)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer border ${
+                    avatarExpression === expr.key
+                      ? 'bg-[#e11d48] text-white border-rose-600 shadow-xs scale-105'
+                      : 'bg-white text-stone-700 border-stone-200 hover:border-rose-300'
+                  }`}
+                >
+                  <span>{expr.icon}</span>
+                  <span>{expr.label}</span>
+                </button>
+              ))}
             </div>
 
-          </div>
-
-          {/* ===================================================================== */}
-          {/* 4. FOUR WHITE STAT CARDS (2x2 GRID)                                   */}
-          {/* ===================================================================== */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            
-            {/* Card 1: Degree */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold block">
-                DEGREE
-              </span>
-              <p className="text-xl sm:text-2xl font-black text-[#e11d48]">BCA '26</p>
-              <p className="text-xs text-stone-500">Presidency College</p>
-            </div>
-
-            {/* Card 2: Evaluation */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold block">
-                EVALUATION
-              </span>
-              <p className="text-xl sm:text-2xl font-black text-stone-900">5★ Proj</p>
-              <p className="text-xs text-stone-500">End-to-End Build</p>
-            </div>
-
-            {/* Card 3: Records */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold block">
-                RECORDS ANALYZED
-              </span>
-              <p className="text-xl sm:text-2xl font-black text-stone-900">150K+</p>
-              <p className="text-xs text-stone-500">Structured & Cleaned</p>
-            </div>
-
-            {/* Card 4: Precision */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold block">
-                PRECISION
-              </span>
-              <p className="text-xl sm:text-2xl font-black text-emerald-600">96.5%</p>
-              <p className="text-xs text-stone-500">KPI Forecasting</p>
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 5. TECHNICAL STACK SECTION                                                */}
-        {/* ========================================================================= */}
-        <section id="skills" className="space-y-5 pt-4">
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[11px] font-bold text-[#e11d48] uppercase tracking-wider font-mono">
-                TECH STACK
-              </span>
-              <h3 className="text-2xl font-bold text-stone-900 tracking-tight">Technical Stack</h3>
-            </div>
-            <span className="text-xs font-mono font-bold text-stone-500 bg-stone-100 px-2.5 py-1 rounded-lg">
-              {filteredSkills.length} Skills Listed
-            </span>
-          </div>
-
-          {/* Filter Pills */}
-          <div className="flex flex-wrap items-center gap-2">
-            {['All', 'Data Analytics', 'Databases', 'Programming'].map(cat => (
-              <button
-                key={cat}
-                onClick={() => setActiveSkillCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                  activeSkillCategory === cat
-                    ? 'bg-[#e11d48] text-white shadow-xs'
-                    : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
-                }`}
-              >
-                {cat === 'All' ? 'All Skills' : cat}
-              </button>
-            ))}
-          </div>
-
-          {/* Skill Cards Grid */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {filteredSkills.map(skill => (
-              <div
-                key={skill.id || skill.name}
-                className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-xs hover:border-rose-400/60 transition-all space-y-2.5 group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-stone-50 border border-stone-100 flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
-                    {getTechLogo(skill.name, skill.iconUrl, 'w-6 h-6')}
-                  </div>
-                  <h4 className="text-sm font-bold text-stone-900 leading-tight">{skill.name}</h4>
-                </div>
-
-                <p className="text-[11px] text-stone-500 line-clamp-2 leading-relaxed">
-                  {skill.description || 'Enterprise implementation, modeling, and automated data workflows.'}
-                </p>
-
-                {skill.toolsUsed && skill.toolsUsed.length > 0 && (
-                  <div className="flex flex-wrap gap-1 pt-1">
-                    {skill.toolsUsed.slice(0, 3).map((tool, idx) => (
-                      <span key={idx} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-stone-100 text-stone-600">
-                        {tool}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Discipline & Mindset Banner */}
-          <div className="p-3.5 rounded-2xl bg-white border border-stone-200 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-stone-700">
-            <span className="font-mono text-[10px] uppercase text-stone-500">SHOWCASE DISCIPLINE & MINDSET</span>
-            <div className="flex items-center gap-4 text-[11px]">
-              <span className="flex items-center gap-1 text-emerald-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                100% Raw Data Cleaned
-              </span>
-              <span className="flex items-center gap-1 text-[#e11d48]">
-                <Sparkles className="w-3.5 h-3.5 text-[#e11d48]" />
-                Direct Actionable Insights
-              </span>
-            </div>
-          </div>
-
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 6. FEATURED PROJECTS SECTION (INTERACTIVE LEFT-TO-RIGHT SLIDER)           */}
-        {/* ========================================================================= */}
-        <section id="projects" className="space-y-5 pt-4">
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[11px] font-bold text-[#e11d48] uppercase tracking-wider font-mono">
-                PROJECT SHOWCASE
-              </span>
-              <h3 className="text-2xl font-bold text-stone-900 tracking-tight">Featured Projects</h3>
-            </div>
-
-            {/* Left & Right Interactive Navigation Controls */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => scrollProjects('left')}
-                title="Scroll Left"
-                className="w-8 h-8 rounded-full bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => scrollProjects('right')}
-                title="Scroll Right"
-                className="w-8 h-8 rounded-full bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Project Filters */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setActiveProjectFilter('All')}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all ${
-                activeProjectFilter === 'All' ? 'bg-[#e11d48] text-white shadow-xs' : 'bg-white text-stone-600 border border-stone-200'
-              }`}
-            >
-              All Projects ({projects.length})
-            </button>
-            <button
-              onClick={() => setActiveProjectFilter('Major')}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all ${
-                activeProjectFilter === 'Major' ? 'bg-[#e11d48] text-white shadow-xs' : 'bg-white text-stone-600 border border-stone-200'
-              }`}
-            >
-              Major Projects (4)
-            </button>
-            <button
-              onClick={() => setActiveProjectFilter('Minor')}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all ${
-                activeProjectFilter === 'Minor' ? 'bg-[#e11d48] text-white shadow-xs' : 'bg-white text-stone-600 border border-stone-200'
-              }`}
-            >
-              Minor & Micro
-            </button>
-          </div>
-
-          {/* Horizontal Interactive Carousel (Smooth Left-to-Right swipe / slider animation) */}
-          <div
-            ref={projectTrackRef}
-            className="flex items-stretch gap-4 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scroll-smooth no-scrollbar"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {filteredProjects.map((project) => (
-              <div
-                key={project.id || project.title}
-                className="w-[85vw] max-w-sm sm:max-w-md shrink-0 snap-center rounded-2xl bg-white border border-stone-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group"
-              >
-                {/* Thumbnail Header */}
-                <div className="relative aspect-video w-full bg-stone-100 overflow-hidden border-b border-stone-100">
+            {/* Avatar Display Container */}
+            <div className="py-4 flex justify-center items-center min-h-[280px]">
+              {avatarMode === '3d' ? (
+                <Realistic3DAvatar onExpressionChange={(expr) => setAvatarExpression(expr as AvatarExpression)} />
+              ) : (
+                <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-full border-4 border-white shadow-xl overflow-hidden ring-4 ring-rose-500/20">
                   <img
-                    src={project.thumbnailUrl || '/projects/sales-dashboard.png'}
-                    alt={project.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src="/sagar-portrait-studio.jpg"
+                    alt="Sagar Singh Professional Studio Portrait"
+                    className="w-full h-full object-cover"
                   />
-                  <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-white/95 text-[#e11d48] shadow-xs">
-                    {project.projectType || 'Flagship Project'}
-                  </span>
+                  <div className="absolute inset-x-0 bottom-0 bg-stone-900/60 backdrop-blur-xs py-1 text-center">
+                    <span className="text-[10px] font-mono text-white font-semibold">Official Studio Portrait</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Tracking Note & FPS Badge */}
+            <div className="flex items-center justify-between pt-2 border-t border-indigo-100/60 text-[11px] font-mono text-stone-500">
+              <div className="flex items-center gap-1.5">
+                <span className="text-rose-500">👆</span>
+                <span>Select an expression above • Move cursor to track • Click anywhere to nod</span>
+              </div>
+              <span className="px-2 py-0.5 rounded bg-white border border-stone-200 text-stone-700 font-bold shadow-2xs shrink-0">
+                60 FPS Three.js
+              </span>
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 4. CORE METHODOLOGIES & TOOLS SECTION (EXACT MATCH TO IMAGE 3)             */}
+        {/* ========================================================================= */}
+        <section id="methodologies" className="space-y-5 pt-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+            Core Methodologies & Tools
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            {/* Card 1: Power BI & DAX */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-white border border-stone-200/80 shadow-2xs hover:border-rose-300 transition-all space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 border border-rose-100 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-stone-900">Power BI & DAX</h3>
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+                  Designing dynamic enterprise dashboards, advanced data modeling, and custom DAX measures for executive reporting.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 2: Advanced Excel */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-white border border-stone-200/80 shadow-2xs hover:border-emerald-300 transition-all space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
+                <Table className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-stone-900">Advanced Excel</h3>
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+                  Complex financial modeling, Power Query automation, VBA macros, and advanced statistical forecasting.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 3: MySQL & Databases */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-white border border-stone-200/80 shadow-2xs hover:border-amber-300 transition-all space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center">
+                <Database className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-stone-900">MySQL & Databases</h3>
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+                  Writing optimized complex queries, indexing large-scale relational schemas, and maintaining database integrity.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 4: Python ETL Pipelines */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-white border border-stone-200/80 shadow-2xs hover:border-indigo-300 transition-all space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center">
+                <Code2 className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-stone-900">Python ETL Pipelines</h3>
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+                  Automating data extraction, Pandas/NumPy data wrangling, and seamless integration with cloud data warehouses.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 5. FEATURED ANALYTICAL PROJECTS (IMAGES 3 & 5)                            */}
+        {/* ========================================================================= */}
+        <section id="projects" className="space-y-6 pt-4">
+          
+          {/* Header with Title and Filter Tabs */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#e11d48]">
+                PORTFOLIO SHOWCASE
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+                Featured Analytical Projects
+              </h2>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex items-center gap-1.5">
+              {(['ALL', 'BI Dashboards', 'Python ETL'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveProjectFilter(tab)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    activeProjectFilter === tab
+                      ? 'bg-[#e11d48] text-white shadow-xs'
+                      : 'bg-[#e0e7ff] text-[#3730a3] hover:bg-[#c7d2fe]'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Project Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {filteredProjects.map(proj => (
+              <div
+                key={proj.id || proj.title}
+                className="rounded-3xl bg-white border border-stone-200/90 overflow-hidden shadow-xs hover:border-rose-300 transition-all flex flex-col group"
+              >
+                {/* Image Mockup */}
+                <div className="relative h-44 sm:h-48 bg-stone-100 overflow-hidden border-b border-stone-100">
+                  <img
+                    src={proj.thumbnailUrl || '/projects/sales-dashboard.png'}
+                    alt={proj.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/projects/sales-dashboard.png';
+                    }}
+                  />
+                  {proj.featured && (
+                    <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#e11d48] text-white shadow-xs">
+                      Featured
+                    </span>
+                  )}
                 </div>
 
-                {/* Content Body */}
-                <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+                {/* Body Content */}
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                   <div className="space-y-2">
-                    <h4 className="text-base font-bold text-stone-900 tracking-tight group-hover:text-[#e11d48] transition-colors">
-                      {project.title}
-                    </h4>
-
-                    <p className="text-xs text-stone-600 leading-relaxed line-clamp-3">
-                      {project.shortDescription}
-                    </p>
-                  </div>
-
-                  {/* Technology Pills */}
-                  <div className="space-y-3 pt-2">
-                    <div className="flex flex-wrap gap-1.5">
-                      {project.technologies.slice(0, 4).map((tech, i) => (
-                        <span key={i} className="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-50 text-rose-800 border border-rose-100">
+                    {/* Tags */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {(proj.technologies || ['Power BI', 'Python']).slice(0, 3).map((tech: string, tIdx: number) => (
+                        <span
+                          key={tIdx}
+                          className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                        >
                           {tech}
                         </span>
                       ))}
                     </div>
 
-                    {/* Action Link -> Opens Case Study Modal */}
-                    <div className="flex items-center justify-between pt-2 border-t border-stone-100">
-                      <button
-                        onClick={() => setSelectedCaseStudy(project)}
-                        className="text-xs font-bold text-[#e11d48] hover:text-[#be123c] flex items-center gap-1 cursor-pointer transition-colors"
-                      >
-                        <span>Explore Case Study</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
+                    <h3 className="text-lg font-bold text-stone-900 tracking-tight group-hover:text-[#e11d48] transition-colors">
+                      {proj.title}
+                    </h3>
 
-                      {project.githubUrl && (
-                        <a
-                          href={project.githubUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          title="View Repository on GitHub"
-                          className="p-1.5 rounded-lg text-stone-500 hover:text-stone-900 transition-colors"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
+                    <p className="text-xs text-stone-600 leading-relaxed line-clamp-3">
+                      {proj.shortDescription || proj.caseStudy?.overview || ''}
+                    </p>
+                  </div>
+
+                  {/* Card Footer: Verified Capstone & View Case Study */}
+                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-semibold">
+                    <span className="text-emerald-600 flex items-center gap-1 font-mono text-[11px]">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Verified Capstone
+                    </span>
+
+                    <button
+                      onClick={() => setSelectedCaseStudy(proj)}
+                      className="text-[#e11d48] hover:text-[#be123c] flex items-center gap-1 font-bold cursor-pointer transition-colors"
+                    >
+                      <span>View Case Study</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
+
               </div>
             ))}
           </div>
@@ -591,413 +511,194 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
         </section>
 
         {/* ========================================================================= */}
-        {/* 7. METHODOLOGY SECTION                                                    */}
+        {/* 6. ACADEMIC BACKGROUND & GET THE COMPLETE DOSSIER (IMAGE 5)                */}
         {/* ========================================================================= */}
-        <section className="space-y-4 pt-4">
+        <section id="education" className="space-y-6 pt-4">
+          
           <div>
-            <span className="text-[11px] font-bold text-[#e11d48] uppercase tracking-wider font-mono">
-              METHODOLOGY
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#e11d48]">
+              ACADEMIC BACKGROUND
             </span>
-            <h3 className="text-2xl font-bold text-stone-900 tracking-tight">
-              Bridging Data Engineering & Business Decisions
-            </h3>
+            <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+              Presidency College
+            </h2>
           </div>
 
-          <div className="space-y-3">
-            {/* Step 1 */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-xs flex items-start gap-3.5">
-              <div className="w-7 h-7 rounded-full bg-rose-100 text-[#e11d48] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                1
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-sm font-bold text-stone-900">Business Intelligence & Dashboards</h4>
-                <p className="text-xs text-stone-600 leading-relaxed">
-                  Crafting structured KPI visualization stores that calculate parameters and reveal quantitative metrics at a glance.
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-stretch">
+            
+            {/* Left Card: Education */}
+            <div className="p-6 rounded-3xl bg-white border border-stone-200/90 shadow-xs flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-base font-bold text-stone-900">
+                    Bachelor of Computer Applications (BCA)
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 shrink-0">
+                    Class of '26
+                  </span>
+                </div>
+
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+                  Focusing on data structures, database management systems, applied statistics, and enterprise software engineering. 
+                  Active participant in collegiate hackathons and data modeling workshops.
                 </p>
+              </div>
+
+              <div className="flex items-center gap-1 text-xs text-stone-500 font-mono pt-2">
+                <MapPin className="w-3.5 h-3.5 text-[#e11d48]" />
+                <span>Bangalore, India</span>
               </div>
             </div>
 
-            {/* Step 2 */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-xs flex items-start gap-3.5">
-              <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                2
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-sm font-bold text-stone-900">SQL & Relational Databases</h4>
-                <p className="text-xs text-stone-600 leading-relaxed">
-                  Writing performant queries, window functions, and schema normalization to ensure data integrity and real-time retrieval.
+            {/* Right Card: Get the Complete Dossier */}
+            <div className="p-6 rounded-3xl bg-[#f8f9ff] border border-indigo-100/80 shadow-xs flex flex-col justify-between items-center text-center space-y-4">
+              <div className="space-y-3 flex flex-col items-center">
+                <div className="w-12 h-12 rounded-2xl bg-[#e11d48] text-white flex items-center justify-center shadow-sm">
+                  <FileText className="w-6 h-6" />
+                </div>
+
+                <h3 className="text-lg font-bold text-stone-900">
+                  Get the Complete Dossier
+                </h3>
+
+                <p className="text-xs text-stone-600 leading-relaxed max-w-xs">
+                  Download my official resume detailing professional milestones, technical certifications, and comprehensive project metrics.
                 </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-2 w-full">
+                <button
+                  onClick={onDownloadResume}
+                  className="px-5 py-2.5 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white font-semibold text-xs tracking-wide shadow-sm shadow-rose-500/20 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download Resume (PDF)</span>
+                </button>
+
+                <a
+                  href="#contact"
+                  className="px-4 py-2.5 rounded-full bg-white hover:bg-stone-50 text-stone-800 font-semibold text-xs border border-stone-300 shadow-2xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                >
+                  Quick Inquiry
+                </a>
               </div>
             </div>
 
-            {/* Step 3 */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200/90 shadow-xs flex items-start gap-3.5">
-              <div className="w-7 h-7 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                3
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-sm font-bold text-stone-900">Python Data Wrangling</h4>
-                <p className="text-xs text-stone-600 leading-relaxed">
-                  Automating ETL, sanitizing irregular records in Pandas, and engineering features for statistical and exploratory research.
-                </p>
-              </div>
-            </div>
           </div>
+
         </section>
 
         {/* ========================================================================= */}
-        {/* 8. EDUCATION & MILESTONES SECTION                                         */}
+        {/* 7. CONTACT SECTION: LET'S DISCUSS DATA OPPORTUNITIES (IMAGE 4)             */}
         {/* ========================================================================= */}
-        <section id="education" className="space-y-5 pt-4">
+        <section id="contact" className="py-8">
           
-          <div>
-            <span className="text-[11px] font-bold text-[#e11d48] uppercase tracking-wider font-mono">
-              FOUNDATION
-            </span>
-            <h3 className="text-2xl font-bold text-stone-900 tracking-tight">Education & Milestones</h3>
-          </div>
-
-          {/* Education Timeline */}
-          <div className="space-y-4 pl-3 border-l-2 border-stone-200 ml-2">
+          <div className="p-6 sm:p-10 rounded-3xl bg-[#f8f9ff] border border-indigo-100/70 shadow-xs space-y-6">
             
-            {/* Timeline Item 1 */}
-            <div className="relative pl-6 space-y-1">
-              <span className="absolute -left-[19px] top-1.5 w-3 h-3 rounded-full bg-[#e11d48] ring-4 ring-rose-100"></span>
-              <div className="flex flex-wrap items-center justify-between gap-1">
-                <h4 className="text-sm font-bold text-stone-900">
-                  Bachelor of Computer Applications (BCA)
-                </h4>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-50 text-[#e11d48] font-bold">
-                  2023 - 2026
-                </span>
-              </div>
-              <p className="text-xs font-semibold text-stone-700">Presidency College, Bengaluru</p>
-              <p className="text-xs text-stone-500 leading-relaxed">
-                Coursework: Database Management Systems, Data Structures, Applied Statistics, Business Analytics.
+            {/* Header */}
+            <div className="text-center space-y-1.5 max-w-lg mx-auto">
+              <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#e11d48] block">
+                GET IN TOUCH
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+                Let's Discuss Data Opportunities
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-500">
+                Have an analytical challenge or project proposal? Send a direct message below.
               </p>
             </div>
 
-            {/* Timeline Item 2 */}
-            <div className="relative pl-6 space-y-1">
-              <span className="absolute -left-[19px] top-1.5 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-100"></span>
-              <div className="flex flex-wrap items-center justify-between gap-1">
-                <h4 className="text-sm font-bold text-stone-900">
-                  12th / PUC High School (Science)
-                </h4>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold">
-                  86% Distinction
-                </span>
-              </div>
-              <p className="text-xs font-semibold text-stone-700">Physics, Mathematics & Computer Science</p>
-            </div>
-
-            {/* Timeline Item 3 */}
-            <div className="relative pl-6 space-y-1">
-              <span className="absolute -left-[19px] top-1.5 w-3 h-3 rounded-full bg-amber-500 ring-4 ring-amber-100"></span>
-              <div className="flex flex-wrap items-center justify-between gap-1">
-                <h4 className="text-sm font-bold text-stone-900">
-                  Secondary School Education (Class 10)
-                </h4>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-bold">
-                  91% First Class
-                </span>
-              </div>
-              <p className="text-xs font-semibold text-stone-700">ICSE Board Curriculum</p>
-            </div>
-
-          </div>
-
-          {/* 4 Credential Milestone Cards */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-2">
-            <div className="p-3.5 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-1">
-              <GraduationCap className="w-4 h-4 text-[#e11d48]" />
-              <p className="text-xs font-bold text-stone-900">Presidency College</p>
-              <p className="text-[11px] text-stone-500">Technical Foundation: SQL, Python, Excel & BI</p>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-1">
-              <Award className="w-4 h-4 text-emerald-600" />
-              <p className="text-xs font-bold text-stone-900">NCC Sergeant Rank</p>
-              <p className="text-[11px] text-stone-500">National Cadet Corps "B" Cert: Leadership & drill</p>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-1">
-              <ShieldCheck className="w-4 h-4 text-amber-600" />
-              <p className="text-xs font-bold text-stone-900">Academic Honors</p>
-              <p className="text-[11px] text-stone-500">Top percentile in analytical design & schemas</p>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-1">
-              <Sparkles className="w-4 h-4 text-sky-600" />
-              <p className="text-xs font-bold text-stone-900">Problem Solving</p>
-              <p className="text-[11px] text-stone-500">2nd place Inter-College IT Quiz & Capstone</p>
-            </div>
-          </div>
-
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 9. CURRICULUM VITAE & RESUME CARD                                         */}
-        {/* ========================================================================= */}
-        <section id="resume" className="space-y-4 pt-4">
-          
-          <div className="p-5 sm:p-6 rounded-2xl bg-white border border-stone-200/90 shadow-sm space-y-4">
-            
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-rose-50 text-[#e11d48] border border-rose-100 flex items-center justify-center shrink-0">
-                <FileText className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-base font-bold text-stone-900">Curriculum Vitae</h4>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-700">
-                    VERIFIED 2026
-                  </span>
+            {/* Inner Form Card */}
+            <form
+              onSubmit={handleContactSubmit}
+              className="max-w-xl mx-auto p-6 sm:p-8 rounded-3xl bg-white border border-stone-200/90 shadow-2xs space-y-4"
+            >
+              {formSuccess && (
+                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{formSuccess}</span>
                 </div>
-                <p className="text-xs text-stone-500">
-                  Specialized in data analytics, database engineering, and business intelligence.
-                </p>
-              </div>
-            </div>
+              )}
 
-            {/* Dual Actions: Quick View and Download PDF */}
-            <div className="flex items-center gap-2.5 pt-1">
+              {formError && (
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
+              {/* Row 1: Name and Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-stone-700 font-mono">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Jane Doe"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-stone-50 border border-stone-200 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-rose-500 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-stone-700 font-mono">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="jane@company.com"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-stone-50 border border-stone-200 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-rose-500 focus:bg-white transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Subject / Scope */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-stone-700 font-mono">
+                  Subject / Project Scope
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.subject}
+                  onChange={e => setFormData({ ...formData, subject: e.target.value })}
+                  placeholder="Data Engineering / BI Consultation"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-stone-50 border border-stone-200 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-rose-500 focus:bg-white transition-all"
+                />
+              </div>
+
+              {/* Row 3: Message Details */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-stone-700 font-mono">
+                  Message
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={formData.message}
+                  onChange={e => setFormData({ ...formData, message: e.target.value })}
+                  placeholder="Describe your data requirements or inquiry..."
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-stone-50 border border-stone-200 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-rose-500 focus:bg-white transition-all"
+                ></textarea>
+              </div>
+
+              {/* Submit Button */}
               <button
-                onClick={() => setIsResumeUnlocked(!isResumeUnlocked)}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold border border-stone-200 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                type="submit"
+                disabled={formLoading}
+                className="w-full py-3.5 rounded-2xl bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs sm:text-sm tracking-wide shadow-md shadow-rose-500/25 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
               >
-                {isResumeUnlocked ? <EyeOff className="w-3.5 h-3.5 text-stone-600" /> : <Eye className="w-3.5 h-3.5 text-stone-600" />}
-                <span>{isResumeUnlocked ? 'Hide Resume' : 'Quick View'}</span>
+                <Send className="w-4 h-4" />
+                <span>{formLoading ? 'Transmitting Message...' : 'Send Direct Message'}</span>
               </button>
+            </form>
 
-              <a
-                href="/api/resume/download-file"
-                download="Sagar_Singh_Resume.pdf"
-                onClick={onDownloadResume}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-[#e11d48] hover:bg-[#be123c] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download PDF</span>
-              </a>
-            </div>
-
-            {/* Unlocked Resume Document Inline Preview */}
-            {isResumeUnlocked && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="p-4 sm:p-5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-700 space-y-3 pt-3"
-              >
-                <div className="flex justify-between items-center pb-2 border-b border-stone-200">
-                  <span className="font-bold text-stone-900 text-sm">{profile.name} · Official CV</span>
-                  <span className="text-[10px] font-mono text-emerald-700 font-semibold">Document Verified</span>
-                </div>
-                <p className="text-[11px] leading-relaxed">
-                  <strong>Career Profile:</strong> Data Analyst with strong technical background in Power BI, Advanced Excel, MySQL, and Python. 
-                  Demonstrated ability in constructing KPI dashboards, analyzing 50,000+ data rows ($2.4M volume), and building automated ETL pipelines.
-                </p>
-                <p className="text-[11px]">
-                  <strong>Key Credentials:</strong> BCA 2026 (Presidency College, Bengaluru), NCC Sergeant 'B' Certificate, 2nd Place Inter-College IT Quiz.
-                </p>
-              </motion.div>
-            )}
-
-          </div>
-
-        </section>
-
-        {/* ========================================================================= */}
-        {/* 10. LET'S CONNECT (CONTACT SECTION)                                       */}
-        {/* ========================================================================= */}
-        <section id="contact" className="space-y-5 pt-4">
-          
-          <div>
-            <span className="text-[11px] font-bold text-[#e11d48] uppercase tracking-wider font-mono">
-              REACH OUT DIRECTLY
-            </span>
-            <h3 className="text-2xl font-bold text-stone-900 tracking-tight">Let's Connect</h3>
-            <p className="text-xs sm:text-sm text-stone-600 mt-1">
-              Have an open position or project inquiry? I generally respond within 1-2 hours.
-            </p>
-          </div>
-
-          {/* Direct Communication Channels */}
-          <div className="space-y-2.5">
-            {/* Email */}
-            <a
-              href={`mailto:${profile.email}`}
-              className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-stone-200/90 shadow-xs hover:border-rose-400/60 transition-all text-xs text-stone-800"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-rose-50 text-[#e11d48] flex items-center justify-center">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-mono text-stone-400 font-bold uppercase">PRIMARY EMAIL</p>
-                  <p className="font-bold text-stone-900">{profile.email}</p>
-                </div>
-              </div>
-              <span className="text-[10px] font-mono text-[#e11d48] font-bold">Mailto ↗</span>
-            </a>
-
-            {/* Phone & WhatsApp */}
-            <div className="p-3.5 rounded-2xl bg-white border border-stone-200/90 shadow-xs space-y-2.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <Phone className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-mono text-stone-400 font-bold uppercase">PHONE & WHATSAPP</p>
-                    <p className="font-bold text-stone-900">{profile.phone}</p>
-                  </div>
-                </div>
-                <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">
-                  Direct Line
-                </span>
-              </div>
-
-              {/* Dual Action Buttons: Phone Call & Instant WhatsApp Chat */}
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <a
-                  href={`tel:${profile.phone.replace(/[^0-9+]/g, '')}`}
-                  className="py-2 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
-                >
-                  <Phone className="w-3.5 h-3.5 text-stone-600" />
-                  <span>Call Phone</span>
-                </a>
-
-                <a
-                  href={`https://wa.me/${profile.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi Sagar, I reviewed your Data Analytics portfolio and would like to connect regarding an opportunity!')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
-                >
-                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.884 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                  </svg>
-                  <span>Chat WhatsApp</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Location */}
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-stone-200/90 shadow-xs text-xs text-stone-800">
-              <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                <MapPin className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-[10px] font-mono text-stone-400 font-bold uppercase">LOCATION</p>
-                <p className="font-bold text-stone-900">{profile.location || 'Bengaluru, Karnataka, India'}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Live Contact Form */}
-          <form
-            onSubmit={handleContactSubmit}
-            className="p-5 sm:p-6 rounded-2xl bg-white border border-stone-200/90 shadow-md space-y-4"
-          >
-            <h4 className="text-sm font-bold text-stone-900">Direct Message</h4>
-
-            {formSuccess && (
-              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>{formSuccess}</span>
-              </div>
-            )}
-
-            {formError && (
-              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                <span>{formError}</span>
-              </div>
-            )}
-
-            <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-stone-600 font-mono">Your Name *</label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g. Maya Sharma"
-                className="w-full px-3.5 py-2 text-xs rounded-xl bg-stone-50 border border-stone-200 text-stone-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-[#e11d48]"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-stone-600 font-mono">Email Address *</label>
-              <input
-                type="email"
-                required
-                value={formData.email}
-                onChange={e => setFormData({ ...formData, email: e.target.value })}
-                placeholder="maya@company.com"
-                className="w-full px-3.5 py-2 text-xs rounded-xl bg-stone-50 border border-stone-200 text-stone-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-[#e11d48]"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-stone-600 font-mono">Subject *</label>
-              <input
-                type="text"
-                required
-                value={formData.subject}
-                onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                placeholder="Data Analytics Opportunity / Technical Inquiry"
-                className="w-full px-3.5 py-2 text-xs rounded-xl bg-stone-50 border border-stone-200 text-stone-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-[#e11d48]"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-stone-600 font-mono">Message Details *</label>
-              <textarea
-                required
-                rows={4}
-                value={formData.message}
-                onChange={e => setFormData({ ...formData, message: e.target.value })}
-                placeholder="Tell me about your team or project requirements..."
-                className="w-full px-3.5 py-2 text-xs rounded-xl bg-stone-50 border border-stone-200 text-stone-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-[#e11d48]"
-              ></textarea>
-            </div>
-
-            <button
-              type="submit"
-              disabled={formLoading}
-              className="w-full py-3 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs sm:text-sm tracking-wide shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>{formLoading ? 'Transmitting In Realtime...' : 'Send Direct Message'}</span>
-            </button>
-          </form>
-
-          {/* Social Links */}
-          <div className="flex items-center justify-center gap-3 pt-2">
-            <a
-              href={profile.linkedinUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-stone-200 text-stone-700 text-xs font-semibold shadow-xs hover:border-[#e11d48] transition-colors"
-            >
-              <Linkedin className="w-3.5 h-3.5 text-[#e11d48]" />
-              <span>LinkedIn</span>
-            </a>
-
-            <a
-              href={profile.githubUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-stone-200 text-stone-700 text-xs font-semibold shadow-xs hover:border-[#e11d48] transition-colors"
-            >
-              <Github className="w-3.5 h-3.5 text-stone-800" />
-              <span>GitHub</span>
-            </a>
-          </div>
-
-          <div className="text-center pt-3 pb-6 text-[11px] text-stone-400 font-mono">
-            © 2026 Sagar Singh · Built for Smooth Execution
           </div>
 
         </section>
@@ -1005,38 +706,56 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
       </main>
 
       {/* ========================================================================= */}
-      {/* 11. MOBILE STICKY BOTTOM DOCK (EXACT MATCH TO STITCH TEMPLATE)            */}
+      {/* 8. FOOTER BAR (IMAGE 4)                                                   */}
       {/* ========================================================================= */}
-      <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-lg border-t border-stone-200 px-6 py-2.5 flex items-center justify-around shadow-lg md:hidden">
-        <a href="#hero" className="flex flex-col items-center gap-0.5 text-stone-600 hover:text-[#e11d48] transition-colors">
-          <span className="text-xs">🏠</span>
-          <span className="text-[10px] font-bold">Home</span>
-        </a>
-        <a href="#skills" className="flex flex-col items-center gap-0.5 text-stone-600 hover:text-[#e11d48] transition-colors">
-          <span className="text-xs">⚡</span>
-          <span className="text-[10px] font-bold">Skills</span>
-        </a>
-        <a href="#projects" className="flex flex-col items-center gap-0.5 text-[#e11d48] font-bold">
-          <span className="text-xs">📁</span>
-          <span className="text-[10px] font-bold">Projects</span>
-        </a>
-        <a href="#resume" className="flex flex-col items-center gap-0.5 text-stone-600 hover:text-[#e11d48] transition-colors">
-          <span className="text-xs">📄</span>
-          <span className="text-[10px] font-bold">Resume</span>
-        </a>
-        <a href="#contact" className="flex flex-col items-center gap-0.5 text-stone-600 hover:text-[#e11d48] transition-colors">
-          <span className="text-xs">✉️</span>
-          <span className="text-[10px] font-bold">Contact</span>
-        </a>
-      </nav>
+      <footer className="border-t border-stone-200/80 bg-white/90 backdrop-blur-md py-6 px-4 sm:px-8 text-xs font-mono text-stone-500 relative z-10">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          
+          <div>
+            © 2025 Sagar Singh. Crafted with precision.
+          </div>
 
-      {/* Case Study Full Modal */}
-      <CaseStudyModal
-        project={selectedCaseStudy}
-        onClose={() => setSelectedCaseStudy(null)}
-      />
+          <div className="flex items-center gap-5">
+            <a
+              href="https://github.com/Sagar99-cmyk"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-stone-600 hover:text-stone-900 transition-colors"
+            >
+              <Github className="w-4 h-4" />
+              <span>GitHub</span>
+            </a>
+
+            <a
+              href="https://linkedin.com/in/sagarsingh2005"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-stone-600 hover:text-sky-600 transition-colors"
+            >
+              <Linkedin className="w-4 h-4" />
+              <span>LinkedIn</span>
+            </a>
+
+            <a
+              href="#contact"
+              className="flex items-center gap-1.5 text-stone-600 hover:text-[#e11d48] transition-colors"
+            >
+              <Mail className="w-4 h-4" />
+              <span>Contact</span>
+            </a>
+          </div>
+
+        </div>
+      </footer>
+
+      {/* Deep-Dive Case Study Modal */}
+      {selectedCaseStudy && (
+        <CaseStudyModal
+          project={selectedCaseStudy}
+          onClose={() => setSelectedCaseStudy(null)}
+        />
+      )}
 
     </div>
   );
 };
-

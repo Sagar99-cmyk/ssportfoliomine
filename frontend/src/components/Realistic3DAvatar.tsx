@@ -733,10 +733,12 @@ export const Realistic3DAvatar: React.FC<Realistic3DAvatarProps> = ({ className 
   };
 
   const expressions: { key: AvatarExpression; label: string; icon: string }[] = [
-    { key: 'confident', label: 'Confident', icon: '💼' },
-    { key: 'happy', label: 'Smile', icon: '✨' },
-    { key: 'thinking', label: 'Analytical', icon: '🧠' },
-    { key: 'winking', label: 'Charismatic', icon: '😉' },
+    { key: 'happy', label: 'Happy', icon: '🥰' },
+    { key: 'sad', label: 'Sad', icon: '😢' },
+    { key: 'confident', label: 'Confident', icon: '😎' },
+    { key: 'surprised', label: 'Surprised', icon: '😲' },
+    { key: 'thinking', label: 'Thinking', icon: '🤔' },
+    { key: 'winking', label: 'Winking', icon: '😉' },
   ];
 
   return (
@@ -779,3 +781,4 @@ export const Realistic3DAvatar: React.FC<Realistic3DAvatarProps> = ({ className 
     </div>
   );
 };
+

@@ -15,6 +15,7 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { LoginPage } from './components/LoginPage';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { StitchLightBackground } from './components/StitchLightBackground';
+import { ExecutiveLightPortfolio } from './components/ExecutiveLightPortfolio';
 import { api } from './services/api';
 import { Profile, Skill, Project, Education, Achievement } from './types';
 import {
@@ -290,23 +291,30 @@ const PortfolioContent: React.FC = () => {
     );
   }
 
+  // When Light Mode is active, render the dedicated Stitch Light Portfolio matching screen c46cca94309749f090e872abba44ee83
+  if (theme === 'light') {
+    return (
+      <ExecutiveLightPortfolio
+        profile={profile || DEFAULT_PROFILE}
+        skills={skills.length > 0 ? skills : DEFAULT_SKILLS}
+        projects={projects.length > 0 ? projects : DEFAULT_PROJECTS}
+        education={education.length > 0 ? education : DEFAULT_EDUCATION}
+        achievements={achievements.length > 0 ? achievements : DEFAULT_ACHIEVEMENTS}
+        onDownloadResume={handleDownloadResume}
+      />
+    );
+  }
+
   return (
     <div
       className="min-h-screen relative transition-colors duration-500"
       style={{
-        background: theme === 'light' ? '#faf9f6' : '#09090b',
-        color: theme === 'light' ? '#0f172a' : '#e2e8f0',
+        background: '#09090b',
+        color: '#e2e8f0',
       }}
     >
-      {/* 3D Animated Background:
-          - In Light Mode: StitchLightBackground (Diamond crystal & magnetic polyhedrons in slow motion)
-          - In Dark Mode: ThreeDataBackground isDark={true} (3D particle grid)
-      */}
-      {theme === 'light' ? (
-        <StitchLightBackground />
-      ) : (
-        <ThreeDataBackground isDark={true} />
-      )}
+      {/* 3D Animated Background in Dark Mode: ThreeDataBackground (3D particle grid) */}
+      <ThreeDataBackground isDark={true} />
 
       {/* Main Content */}
       <div className="relative z-10 flex flex-col min-h-screen">
@@ -347,13 +355,7 @@ const PortfolioContent: React.FC = () => {
         <Footer profile={profile} />
 
         {/* Mobile Sticky Bottom Navigation Dock (Exact match to mobile screenshot) */}
-        <nav
-          className={`fixed bottom-0 inset-x-0 z-40 px-4 py-2.5 flex items-center justify-around shadow-2xl md:hidden backdrop-blur-lg border-t transition-colors ${
-            theme === 'light'
-              ? 'bg-white/95 border-stone-200 text-stone-600'
-              : 'bg-[#09090b]/95 border-white/[0.08] text-stone-400'
-          }`}
-        >
+        <nav className="fixed bottom-0 inset-x-0 z-40 px-4 py-2.5 flex items-center justify-around shadow-2xl md:hidden backdrop-blur-lg border-t bg-[#09090b]/95 border-white/[0.08] text-stone-400">
           <a
             href="#hero"
             className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
