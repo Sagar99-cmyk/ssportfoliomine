@@ -6,6 +6,7 @@ import { CaseStudyModal } from './CaseStudyModal';
 import { getTechLogo } from './TechLogos';
 import { useTheme } from '../context/ThemeContext';
 import { FeaturedVideoDemo } from './FeaturedVideoDemo';
+import { ShakuroWorksGallery, WorksShot, SAGAR_WORKS_SHOTS } from './ShakuroWorksGallery';
 
 interface ProjectsGalleryProps {
   projects: Project[];
@@ -81,9 +82,27 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypeTab, setSelectedTypeTab] = useState<'All' | 'Major' | 'Minor' | 'Micro/Mini'>('All');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [viewMode, setViewMode] = useState<'flow' | 'grid'>('flow');
+  const [viewMode, setViewMode] = useState<'3d' | 'flow' | 'grid'>('3d');
   const [isHovered, setIsHovered] = useState(false);
   const [isPausedByUser, setIsPausedByUser] = useState(false);
+
+  // Map portfolio projects to high-fidelity 3D works shots
+  const worksShots: WorksShot[] = useMemo(() => {
+    if (!projects || projects.length === 0) return SAGAR_WORKS_SHOTS;
+    return projects.map((p, idx) => {
+      const fallbackRef = SAGAR_WORKS_SHOTS[idx % SAGAR_WORKS_SHOTS.length];
+      return {
+        title: p.title || fallbackRef.title,
+        category: p.category || (p.projectType || 'Data Analytics Capstone'),
+        description: p.shortDescription || fallbackRef.description,
+        metrics: (p as any).metrics || fallbackRef.metrics || 'Verified Portfolio Capstone',
+        url: p.liveDemoUrl || p.githubUrl || fallbackRef.url,
+        image: p.thumbnailUrl && p.thumbnailUrl.startsWith('http') ? p.thumbnailUrl : fallbackRef.image,
+        technologies: p.technologies || fallbackRef.technologies,
+        projectRef: p,
+      };
+    });
+  }, [projects]);
 
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const mouseRatioRef = React.useRef<number | null>(null); // -1 (far left) to +1 (far right)
@@ -231,10 +250,22 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
               </div>
             )}
 
-            {/* View Mode: Flow vs Grid */}
+            {/* View Mode: 3D Concave Strip vs Flow vs Grid */}
             <div className={`flex items-center p-1 rounded-xl border backdrop-blur-md ${
               isLight ? 'bg-stone-100 border-stone-200' : 'bg-stone-900/60 border-white/[0.08]'
             }`}>
+              <button
+                onClick={() => setViewMode('3d')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                  viewMode === '3d'
+                    ? (isLight ? 'bg-white text-stone-900 shadow-xs' : 'bg-rose-900/50 text-rose-300 border border-rose-500/40 shadow-sm')
+                    : (isLight ? 'text-stone-600 hover:text-stone-900' : 'text-stone-400 hover:text-stone-200')
+                }`}
+              >
+                <Sparkles className="w-3 h-3 text-rose-500" />
+                <span>3D Concave Strip</span>
+              </button>
+
               <button
                 onClick={() => setViewMode('flow')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
@@ -340,9 +371,27 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
         </div>
 
         {/* ========================================================================= */}
+        {/* VIEW 0: 3D CONCAVE SHAKURO STRIP GALLERY                                  */}
+        {/* ========================================================================= */}
+        {viewMode === '3d' && (
+          <div className="w-full my-2">
+            <ShakuroWorksGallery
+              customShots={worksShots}
+              onSelectProject={(shot) => {
+                if (shot.projectRef) {
+                  setSelectedProject(shot.projectRef);
+                } else if (shot.url) {
+                  window.open(shot.url, '_blank', 'noopener,noreferrer');
+                }
+              }}
+            />
+          </div>
+        )}
+
+        {/* ========================================================================= */}
         {/* VIEW 1: INTERACTIVE MOUSE-CONTROLLED FLOW + CONTINUOUS SLOW STREAM        */}
         {/* ========================================================================= */}
-        {viewMode === 'flow' ? (
+        {viewMode === 'flow' && (
           <div
             className="relative w-full overflow-hidden py-4"
             onMouseEnter={() => setIsHovered(true)}
@@ -593,10 +642,12 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
               </span>
             </div>
           </div>
-        ) : (
-          /* ========================================================================= */
-          /* VIEW 2: FILTERABLE MATRIX GRID VIEW                                      */
-          /* ========================================================================= */
+        )}
+
+        {/* ========================================================================= */}
+        {/* VIEW 2: FILTERABLE MATRIX GRID VIEW                                      */}
+        {/* ========================================================================= */}
+        {viewMode === 'grid' && (
           <motion.div
             layout
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"

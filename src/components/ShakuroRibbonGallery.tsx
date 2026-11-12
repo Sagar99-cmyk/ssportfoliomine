@@ -1027,3 +1027,4 @@ export const ShakuroRibbonGallery: React.FC<ShakuroRibbonGalleryProps> = ({
     </div>
   );
 };
+
