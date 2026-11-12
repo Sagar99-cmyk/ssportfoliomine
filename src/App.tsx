@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Home, Sparkles, FolderGit2, FileText, Send } from 'lucide-react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { ThreeDataBackground } from './components/ThreeDataBackground';
 import { Navbar } from './components/Navbar';
@@ -353,45 +352,6 @@ const PortfolioContent: React.FC = () => {
 
         {/* Footer with Newsletter and Live Links */}
         <Footer profile={profile} />
-
-        {/* Mobile Sticky Bottom Navigation Dock (Exact match to mobile screenshot) */}
-        <nav className="fixed bottom-0 inset-x-0 z-40 px-4 py-2.5 flex items-center justify-around shadow-2xl md:hidden backdrop-blur-lg border-t bg-[#09090b]/95 border-white/[0.08] text-stone-400">
-          <a
-            href="#hero"
-            className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
-          >
-            <Home className="w-4 h-4" />
-            <span className="text-[10px]">Home</span>
-          </a>
-          <a
-            href="#skills"
-            className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span className="text-[10px]">Skills</span>
-          </a>
-          <a
-            href="#projects"
-            className="flex flex-col items-center gap-0.5 text-xs font-semibold text-[#e11d48] transition-colors"
-          >
-            <FolderGit2 className="w-4 h-4" />
-            <span className="text-[10px]">Projects</span>
-          </a>
-          <a
-            href="#resume"
-            className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
-          >
-            <FileText className="w-4 h-4" />
-            <span className="text-[10px]">Resume</span>
-          </a>
-          <a
-            href="#contact"
-            className="flex flex-col items-center gap-0.5 text-xs font-semibold hover:text-[#e11d48] transition-colors"
-          >
-            <Send className="w-4 h-4" />
-            <span className="text-[10px]">Contact</span>
-          </a>
-        </nav>
       </div>
     </div>
   );
