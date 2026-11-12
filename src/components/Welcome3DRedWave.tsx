@@ -263,7 +263,7 @@ export const Welcome3DRedWave: React.FC = () => {
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 1.4; // Smooth, slow, cool motion
+    controls.autoRotateSpeed = 0.45; // Slow-motion, majestic, cool movement
     controls.maxDistance = 350;
     controls.minDistance = 150;
     controls.enablePan = false;
@@ -427,7 +427,7 @@ export const Welcome3DRedWave: React.FC = () => {
       // Slow, majestic auto-orbiting controls
       controls.update();
 
-      // A. Moving Stars Animation (Smooth Warp Glide)
+      // A. Moving Stars Animation (Smooth Slow-Motion Warp Glide)
       const starPosAttr = movingStarGeo.attributes.position as THREE.BufferAttribute;
       const starPosArr = starPosAttr.array as Float32Array;
 
@@ -435,11 +435,11 @@ export const Welcome3DRedWave: React.FC = () => {
         const i3 = i * 3;
         const vel = movingStarVelocities[i];
 
-        starPosArr[i3] += (0 - starPosArr[i3]) / vel;
-        starPosArr[i3 + 1] += (0 - starPosArr[i3 + 1]) / vel;
-        starPosArr[i3 + 2] += (0 - starPosArr[i3 + 2]) / vel;
+        starPosArr[i3] += (0 - starPosArr[i3]) / (vel * 2.2);
+        starPosArr[i3 + 1] += (0 - starPosArr[i3 + 1]) / (vel * 2.2);
+        starPosArr[i3 + 2] += (0 - starPosArr[i3 + 2]) / (vel * 2.2);
 
-        movingStarVelocities[i] -= 0.12;
+        movingStarVelocities[i] -= 0.035;
 
         if (
           Math.abs(starPosArr[i3]) <= 6 &&
@@ -449,14 +449,14 @@ export const Welcome3DRedWave: React.FC = () => {
           starPosArr[i3] = movingStarStartPos[i3];
           starPosArr[i3 + 1] = movingStarStartPos[i3 + 1];
           starPosArr[i3 + 2] = movingStarStartPos[i3 + 2];
-          movingStarVelocities[i] = Math.floor(Math.random() * 220) + 70;
+          movingStarVelocities[i] = Math.floor(Math.random() * 260) + 100;
         }
       }
       starPosAttr.needsUpdate = true;
 
-      // B. Organic Nucleus Simplex Noise Surface Morphing (Slow & Cool)
+      // B. Organic Nucleus Simplex Noise Surface Morphing (Slow & Serene)
       const nucleusPos = nucleusPosAttr.array as Float32Array;
-      const timeScale = elapsed * 0.45;
+      const timeScale = elapsed * 0.12; // 3x slower for serene organic motion
 
       for (let i = 0; i < vertexCount; i++) {
         const i3 = i * 3;
@@ -465,9 +465,9 @@ export const Welcome3DRedWave: React.FC = () => {
         const distance =
           baseRadius +
           noise.noise3D(
-            tempVec.x + timeScale * 0.5,
-            tempVec.y + timeScale * 0.35,
-            tempVec.z + timeScale * 0.4
+            tempVec.x + timeScale * 0.4,
+            tempVec.y + timeScale * 0.28,
+            tempVec.z + timeScale * 0.32
           ) *
             blobScale;
 
@@ -480,19 +480,19 @@ export const Welcome3DRedWave: React.FC = () => {
       nucleusPosAttr.needsUpdate = true;
       nucleusGeometry.computeVertexNormals();
 
-      // Gentle Nucleus Rotation
-      nucleus.rotation.y += 0.0018;
-      nucleus.rotation.x += 0.0008;
+      // Gentle Slow Nucleus Rotation
+      nucleus.rotation.y += 0.0006;
+      nucleus.rotation.x += 0.0003;
 
       // C. Celestial Background Sphere Slow Motion Rotation
-      sphereBg.rotation.x += 0.0006;
-      sphereBg.rotation.y += 0.0008;
-      sphereBg.rotation.z += 0.0006;
+      sphereBg.rotation.x += 0.0002;
+      sphereBg.rotation.y += 0.00025;
+      sphereBg.rotation.z += 0.0002;
 
       // D. Fixed Star Clusters Micro-Twinkle
-      starCluster1.rotation.y += 0.0004;
-      starCluster2.rotation.y -= 0.0006;
-      starCluster3.rotation.z += 0.0005;
+      starCluster1.rotation.y += 0.00015;
+      starCluster2.rotation.y -= 0.0002;
+      starCluster3.rotation.z += 0.00015;
 
       renderer.render(scene, camera);
     };

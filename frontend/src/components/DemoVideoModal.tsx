@@ -43,31 +43,33 @@ export const DemoVideoModal: React.FC<DemoVideoModalProps> = ({ isOpen, onClose 
       role="dialog"
       aria-modal="true"
       aria-label="Demo Video Player"
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md p-2 sm:p-4 md:p-6 animate-fadeIn"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-6 animate-fadeIn"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden bg-black shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/15 flex items-center justify-center"
+        className="relative max-w-[94vw] max-h-[92vh] flex flex-col items-center justify-center rounded-2xl overflow-hidden bg-black shadow-[0_0_60px_rgba(0,0,0,0.95)] border border-white/20"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Floating Close Button */}
         <button
           onClick={onClose}
           aria-label="Close Demo Video"
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 w-10 h-10 rounded-full bg-black/70 hover:bg-black text-white/90 hover:text-white border border-white/20 flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/80 hover:bg-black text-white border border-white/30 flex items-center justify-center transition-all cursor-pointer shadow-xl active:scale-90"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Video Player - Pure Video Only (No Text, No Clutter) */}
+        {/* Video Player - Adaptive Portrait/Vertical Video Container */}
         <video
           ref={videoRef}
           src="/videos/sagar-avatar-demo.mp4"
           controls
           autoPlay
+          muted
           playsInline
           loop
-          className="w-full h-full object-contain bg-black"
+          preload="auto"
+          className="max-h-[85vh] sm:max-h-[88vh] max-w-[90vw] sm:max-w-md md:max-w-lg w-auto h-auto object-contain rounded-xl bg-black"
         />
       </div>
     </div>

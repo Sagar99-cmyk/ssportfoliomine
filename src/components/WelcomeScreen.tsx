@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useCallback } from 'react';
+import { ArrowRight, Compass } from 'lucide-react';
+import { motion } from 'motion/react';
 import { SoundButton } from './BackgroundMusic';
 import { Welcome3DRedWave } from './Welcome3DRedWave';
 
@@ -40,7 +40,7 @@ const WelcomeTypewriter: React.FC<{
 }> = ({ text, speed = 60, className = '', style }) => {
   const [displayed, setDisplayed] = useState('');
 
-  useEffect(() => {
+  React.useEffect(() => {
     setDisplayed('');
     let idx = 0;
     const timer = setInterval(() => {
@@ -63,91 +63,11 @@ const WelcomeTypewriter: React.FC<{
   );
 };
 
-// High-Tech Circular Dots & Initializing Progress Bar
-const CircleDotsIndicator: React.FC<{ progressPercent: number }> = ({ progressPercent }) => {
-  const dotCount = 20;
-
-  return (
-    <div className="flex flex-col items-center justify-center my-3 select-none pointer-events-none">
-      {/* Circle Container with 20 Pulsing Dots */}
-      <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center">
-        {Array.from({ length: dotCount }).map((_, i) => {
-          const angle = (i / dotCount) * Math.PI * 2;
-          const radius = 50; // px
-          const x = Math.cos(angle) * radius;
-          const y = Math.sin(angle) * radius;
-          const isActive = (i / dotCount) * 100 <= progressPercent;
-
-          return (
-            <span
-              key={`dot-${i}`}
-              className="absolute w-1.5 h-1.5 rounded-full transition-all duration-300"
-              style={{
-                transform: `translate(${x}px, ${y}px)`,
-                backgroundColor: '#ffe600',
-                opacity: isActive ? 1 : 0.25,
-                boxShadow: isActive ? '0 0 10px #ffe600, 0 0 4px #ffe600' : 'none',
-              }}
-            />
-          );
-        })}
-
-        {/* Center Percentage Display */}
-        <div className="flex flex-col items-center justify-center text-center">
-          <span className="font-mono text-sm sm:text-base font-bold text-[#ffe600] tracking-widest drop-shadow">
-            {Math.round(progressPercent)}%
-          </span>
-        </div>
-      </div>
-
-      {/* Initializing Progress Bar with Difference Blend Text */}
-      <div className="relative overflow-hidden w-44 sm:w-52 h-6 rounded-xs bg-black/60 border border-white/15 flex items-center justify-center mt-3 shadow-lg">
-        <div
-          className="absolute top-0 left-0 h-full bg-[#ffe600] transition-all duration-500 ease-out"
-          style={{ width: `${progressPercent}%` }}
-        />
-        <span className="relative z-10 font-mono text-[10px] tracking-[3px] text-white mix-blend-difference font-bold uppercase select-none">
-          INITIALIZING
-        </span>
-      </div>
-    </div>
-  );
-};
-
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdmin }) => {
-  const [secondsRemaining, setSecondsRemaining] = useState(10);
-  const totalSeconds = 10;
-
-  // Handle instant entry transition directly without sluggish delay
+  // Manual Entry Only - No auto-redirect timer
   const handleEnter = useCallback(() => {
     onEnter();
   }, [onEnter]);
-
-  // Automatic transition countdown (10s auto-entry)
-  useEffect(() => {
-    if (secondsRemaining <= 0) {
-      handleEnter();
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setSecondsRemaining(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [secondsRemaining, handleEnter]);
-
-  const progressPercent = ((totalSeconds - secondsRemaining) / totalSeconds) * 100;
-
-  // Phase 1 (10s down to 4s): Exact "Welcome to my portfolio / • INTERACTIVE 3D EXPERIENCE"
-  // Phase 2 (last 3-4 seconds): "Let's see our portfolio"
-  const isLastSeconds = secondsRemaining <= 3;
 
   return (
     <div
@@ -157,18 +77,18 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
         color: '#f5f0eb',
       }}
     >
-      {/* Interactive 3D Red Wave Background - Converts Crimson Image into Dynamic 3D Waves with User-Click Ripples */}
+      {/* 3D Cosmic Nucleus & Starry Space Background */}
       <Welcome3DRedWave />
 
-      {/* Subtle warm atmospheric glow */}
+      {/* Subtle warm atmospheric radial glow */}
       <div
         className="absolute inset-0 pointer-events-none z-10"
         style={{
-          background: 'radial-gradient(circle at 50% 30%, rgba(225,29,72,0.14) 0%, transparent 65%)',
+          background: 'radial-gradient(circle at 50% 35%, rgba(225,29,72,0.12) 0%, transparent 70%)',
         }}
       />
 
-      {/* TOP HEADER - Minimalist Bar with Ambient Music Control & Admin Portal Access */}
+      {/* TOP HEADER - Minimalist Bar with Ambient Music Control */}
       <header className="relative z-30 w-full px-6 sm:px-12 pt-6 sm:pt-8 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-3">
           <span className="text-[11px] sm:text-xs font-mono uppercase tracking-[0.25em] text-stone-200 font-bold drop-shadow flex">
@@ -188,157 +108,89 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
         </div>
       </header>
 
-      {/* CENTER / UPPER HEADLINE - Exact Match to Reference Image */}
-      <div className="relative z-30 w-full flex-1 flex flex-col items-center justify-start pt-6 sm:pt-10 md:pt-12 px-6 text-center select-none pointer-events-none">
-        <AnimatePresence mode="wait">
-          {!isLastSeconds ? (
-            /* PHASE 1: Real-time Typewriter Headline "Welcome to our portfolio" */
-            <motion.div
-              key="phase-welcome"
-              initial={{ opacity: 0, y: -15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="space-y-3 tracking-tight max-w-4xl mx-auto flex flex-col items-center"
-            >
-              {/* Typewriter Header: "Welcome to our portfolio" */}
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-[#f8f5f0] leading-tight flex flex-wrap justify-center pointer-events-auto"
-                style={{
-                  letterSpacing: '-0.01em',
-                  textShadow: '0 4px 24px rgba(0, 0, 0, 0.9), 0 1px 4px rgba(0,0,0,0.8)',
-                }}
-              >
-                <WelcomeTypewriter text="Welcome to our portfolio" speed={55} />
-              </motion.div>
+      {/* CENTER HEADLINE */}
+      <div className="relative z-30 w-full flex-1 flex flex-col items-center justify-start pt-6 sm:pt-10 md:pt-14 px-6 text-center select-none pointer-events-none">
+        <motion.div
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="space-y-3 tracking-tight max-w-4xl mx-auto flex flex-col items-center"
+        >
+          {/* Typewriter Header: "Welcome to our portfolio" */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-[#f8f5f0] leading-tight flex flex-wrap justify-center pointer-events-auto"
+            style={{
+              letterSpacing: '-0.01em',
+              textShadow: '0 4px 24px rgba(0, 0, 0, 0.9), 0 1px 4px rgba(0,0,0,0.8)',
+            }}
+          >
+            <WelcomeTypewriter text="Welcome to our portfolio" speed={55} />
+          </motion.div>
 
-              {/* Interactive Bouncing Callout Subhead */}
-              <motion.h2
-                initial={{ opacity: 0, scale: 0.94, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 1.1, delay: 0.3, ease: 'easeOut' }}
-                className="font-serif-luxury italic text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal leading-none flex flex-wrap justify-center pointer-events-auto"
-                style={{
-                  background: 'linear-gradient(135deg, #fef08a 0%, #e2a850 40%, #caa040 70%, #b88628 100%)',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  filter: 'drop-shadow(0 4px 25px rgba(202, 160, 64, 0.35))',
-                }}
-              >
-                {'Data Analytics & BI Engineering'.split('').map((char, cIdx) => (
-                  <InteractiveLetter key={`mp-${cIdx}`} char={char} />
-                ))}
-              </motion.h2>
+          {/* Interactive Bouncing Callout Subhead */}
+          <motion.h2
+            initial={{ opacity: 0, scale: 0.94, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 1.1, delay: 0.25, ease: 'easeOut' }}
+            className="font-serif-luxury italic text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal leading-none flex flex-wrap justify-center pointer-events-auto"
+            style={{
+              background: 'linear-gradient(135deg, #fef08a 0%, #e2a850 40%, #caa040 70%, #b88628 100%)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              filter: 'drop-shadow(0 4px 25px rgba(202, 160, 64, 0.35))',
+            }}
+          >
+            {'Data Analytics & BI Engineering'.split('').map((char, cIdx) => (
+              <InteractiveLetter key={`mp-${cIdx}`} char={char} />
+            ))}
+          </motion.h2>
 
-              {/* Glowing Badge Pill */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.45, duration: 0.6 }}
-                className="mt-2 inline-flex items-center gap-2.5 px-4 sm:px-5 py-1 rounded-full border border-rose-900/60 bg-stone-950/75 backdrop-blur-md shadow-2xl pointer-events-auto"
-                style={{
-                  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.6)',
-                }}
-              >
-                <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse" />
-                <span className="text-[10px] sm:text-xs font-mono tracking-[0.25em] uppercase text-rose-200 font-semibold">
-                  INTERACTIVE 3D COSMIC DATA EXPERIENCE
-                </span>
-              </motion.div>
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.7 }}
+            className="text-stone-300 text-sm sm:text-base font-mono max-w-xl mx-auto pt-1"
+          >
+            Power BI · Sales Performance Analytics · MySQL · Python
+          </motion.p>
 
-              {/* High-Tech Preloader Dots & Initializing Bar */}
-              <CircleDotsIndicator progressPercent={progressPercent} />
-            </motion.div>
-          ) : (
-            /* PHASE 2 (Last 3-4 seconds): "Let's see our portfolio!" with Typewriter */
-            <motion.div
-              key="phase-portfolio-enter"
-              initial={{ opacity: 0, y: 25, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05, filter: 'blur(4px)' }}
-              transition={{ duration: 0.7, type: 'spring', damping: 16 }}
-              className="space-y-3 tracking-tight max-w-4xl mx-auto flex flex-col items-center"
-            >
-              {/* Executive Ready Badge */}
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1, duration: 0.5 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 backdrop-blur-md shadow-lg pointer-events-auto"
-              >
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-                <span className="text-xs sm:text-sm font-mono tracking-widest uppercase font-bold text-amber-300">
-                  Ready to Enter
-                </span>
-                <span className="text-stone-500">•</span>
-                <span className="text-xs font-mono text-stone-300">
-                  Launching Portfolio
-                </span>
-              </motion.div>
-
-              {/* Main Callout: "Let's see our portfolio" (Typewriter) */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.7 }}
-                className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight"
-                style={{
-                  background: 'linear-gradient(135deg, #ffffff 0%, #fef08a 30%, #f59e0b 70%, #d97706 100%)',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  filter: 'drop-shadow(0 6px 30px rgba(245,158,11,0.35))',
-                }}
-              >
-                <WelcomeTypewriter text="Let's see our portfolio" speed={60} />
-              </motion.div>
-
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.35 }}
-                className="text-stone-300 text-sm sm:text-base font-mono max-w-xl mx-auto"
-              >
-                Power BI · Sales Performance Analytics · MySQL · Python
-              </motion.p>
-
-              {/* High-Tech Preloader Dots & Initializing Bar */}
-              <CircleDotsIndicator progressPercent={progressPercent} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+          {/* Glowing Badge Pill */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+            className="mt-3 inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 rounded-full border border-rose-900/60 bg-stone-950/75 backdrop-blur-md shadow-2xl pointer-events-auto"
+            style={{
+              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.6)',
+            }}
+          >
+            <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse" />
+            <span className="text-[10px] sm:text-xs font-mono tracking-[0.25em] uppercase text-rose-200 font-semibold">
+              INTERACTIVE 3D COSMIC DATA EXPERIENCE
+            </span>
+          </motion.div>
+        </motion.div>
       </div>
 
-      {/* BOTTOM CONTROLS & AUTO-TIMER */}
+      {/* BOTTOM CONTROLS (Manual Enter Button Only - No Auto Transition) */}
       <footer className="relative z-30 w-full px-6 sm:px-12 pb-8 sm:pb-10 flex flex-col sm:flex-row items-center justify-between gap-6 max-w-6xl mx-auto">
-        {/* Auto Transition Countdown & Progress Bar */}
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <div className="space-y-1.5 min-w-[200px]">
-            <div className="flex items-center justify-between text-xs font-mono text-stone-300">
-              <span className="tracking-wide">
-                {isLastSeconds ? 'Launching Portal...' : 'Auto-Entering Portal'}
-              </span>
-              <span className="text-amber-400 font-bold">{secondsRemaining}s</span>
-            </div>
-            
-            {/* Smooth animated progress line */}
-            <div className="w-full h-1 bg-stone-800/90 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-amber-500 via-rose-500 to-amber-300 transition-all duration-1000 ease-linear rounded-full"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
+        {/* Exploration Status on Left */}
+        <div className="flex items-center gap-2 text-xs font-mono text-stone-300/90 bg-stone-900/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+          <Compass className="w-4 h-4 text-amber-400 animate-spin" style={{ animationDuration: '8s' }} />
+          <span className="tracking-wider uppercase text-[11px] font-semibold text-stone-200">
+            Drag space to orbit · Scroll to navigate
+          </span>
         </div>
 
         {/* Enter Portfolio Button */}
         <button
           onClick={handleEnter}
-          className="group relative px-8 py-3.5 rounded-full font-semibold text-sm tracking-wide overflow-hidden flex items-center gap-3 transition-all duration-300 cursor-pointer shadow-xl"
+          className="group relative px-8 py-3.5 rounded-full font-semibold text-sm tracking-wide overflow-hidden flex items-center gap-3 transition-all duration-300 cursor-pointer shadow-xl active:scale-95"
           style={{
             background: 'linear-gradient(135deg, #e2a850 0%, #b87b28 100%)',
             color: '#1a140e',
@@ -354,7 +206,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
           }}
         >
           <span className="font-bold tracking-wider">
-            {isLastSeconds ? "Let's Explore Now" : "Enter Portfolio"}
+            Enter Portfolio
           </span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
