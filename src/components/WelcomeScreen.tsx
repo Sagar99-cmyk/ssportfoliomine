@@ -31,35 +31,89 @@ const InteractiveLetter: React.FC<{ char: string; className?: string; style?: Re
   );
 };
 
-// Smooth Real-Time Typing Text Animator for Welcome Screen
+// Smooth Real-Time Typing Text Animator with Pre-Reserved Layout (Zero Reflow / Zero Vertical Shift)
 const WelcomeTypewriter: React.FC<{
-  text: string;
+  line1?: string;
+  line2?: string;
   speed?: number;
   className?: string;
   style?: React.CSSProperties;
-}> = ({ text, speed = 60, className = '', style }) => {
-  const [displayed, setDisplayed] = useState('');
+}> = ({
+  line1 = 'Welcome to our',
+  line2 = 'portfolio',
+  speed = 55,
+  className = '',
+  style,
+}) => {
+  const [ticks, setTicks] = useState(0);
+  const pauseTicks = 3;
+  const totalTicks = line1.length + pauseTicks + line2.length;
 
   React.useEffect(() => {
-    setDisplayed('');
-    let idx = 0;
+    setTicks(0);
+    let count = 0;
     const timer = setInterval(() => {
-      if (idx <= text.length) {
-        setDisplayed(text.slice(0, idx));
-        idx++;
-      } else {
+      count++;
+      setTicks(count);
+      if (count >= totalTicks) {
         clearInterval(timer);
       }
     }, speed);
 
     return () => clearInterval(timer);
-  }, [text, speed]);
+  }, [line1, line2, totalTicks, speed]);
+
+  const displayedLine1 = line1.slice(0, Math.min(ticks, line1.length));
+  const isLine1Active = ticks <= line1.length + pauseTicks;
+
+  const line2Chars = ticks > line1.length + pauseTicks
+    ? Math.min(ticks - (line1.length + pauseTicks), line2.length)
+    : 0;
+  const displayedLine2 = line2.slice(0, line2Chars);
+  const isLine2Active = !isLine1Active;
 
   return (
-    <span className={className} style={style}>
-      {displayed}
-      <span className="inline-block w-1 sm:w-1.5 h-[0.85em] ml-1 bg-amber-400 animate-pulse align-middle rounded-xs" />
-    </span>
+    <div
+      className={`relative inline-flex flex-col items-center justify-center text-center ${className}`}
+      style={style}
+    >
+      {/* 
+        PRE-EXISTING OCCUPIED LAYOUT (GHOST SIZER)
+        Renders both line 1 ("Welcome to our") and line 2 ("portfolio") in standard document flow
+        with invisible opacity. This reserves the complete 2-line height and spacing right from mount,
+        ensuring zero layout shift so 'Data Analytics & BI Engineering' below never moves down!
+      */}
+      <div
+        className="invisible pointer-events-none select-none flex flex-col items-center leading-[1.08] text-center"
+        aria-hidden="true"
+      >
+        <span className="block whitespace-nowrap">{line1}</span>
+        <span className="block whitespace-nowrap">{line2}</span>
+      </div>
+
+      {/* 
+        ACTIVE TYPEWRITER OVERLAY
+        Positioned absolutely over the ghost layout.
+        Line 1 types first with cursor, then Line 2 types on its dedicated second line.
+      */}
+      <div className="absolute inset-0 flex flex-col items-center justify-start leading-[1.08] pointer-events-auto text-center">
+        {/* Line 1: Welcome to our */}
+        <div className="h-1/2 flex items-center justify-center whitespace-nowrap">
+          <span>{displayedLine1}</span>
+          {isLine1Active && (
+            <span className="inline-block w-1 sm:w-1.5 h-[0.85em] ml-1.5 bg-amber-400 animate-pulse align-middle rounded-xs" />
+          )}
+        </div>
+
+        {/* Line 2: portfolio (Word goes second on its own line) */}
+        <div className="h-1/2 flex items-center justify-center whitespace-nowrap">
+          <span>{displayedLine2}</span>
+          {isLine2Active && (
+            <span className="inline-block w-1 sm:w-1.5 h-[0.85em] ml-1.5 bg-amber-400 animate-pulse align-middle rounded-xs" />
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -114,28 +168,29 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="space-y-3 tracking-tight max-w-4xl mx-auto flex flex-col items-center"
+          className="tracking-tight max-w-4xl mx-auto flex flex-col items-center"
         >
-          {/* Typewriter Header: "Welcome to our portfolio" */}
+          {/* Typewriter Header: "Welcome to our" (Line 1) and "portfolio" (Line 2) */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="font-serif-luxury text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-[#f8f5f0] leading-tight flex flex-wrap justify-center pointer-events-auto"
+            className="font-serif-luxury text-3xl xs:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-[#f8f5f0] leading-[1.08] flex justify-center pointer-events-auto"
             style={{
               letterSpacing: '-0.01em',
               textShadow: '0 4px 24px rgba(0, 0, 0, 0.9), 0 1px 4px rgba(0,0,0,0.8)',
             }}
           >
-            <WelcomeTypewriter text="Welcome to our portfolio" speed={55} />
+            <WelcomeTypewriter line1="Welcome to our" line2="portfolio" speed={50} />
           </motion.div>
 
-          {/* Interactive Bouncing Callout Subhead */}
+          {/* Interactive Bouncing Callout Subhead: "Data Analytics & BI Engineering" */}
+          {/* Pre-existing occupied space below with generous elegant spacing so it never shifts down */}
           <motion.h2
             initial={{ opacity: 0, scale: 0.94, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1.1, delay: 0.25, ease: 'easeOut' }}
-            className="font-serif-luxury italic text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal leading-none flex flex-wrap justify-center pointer-events-auto"
+            className="mt-5 sm:mt-7 md:mt-8 font-serif-luxury italic text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal leading-tight flex flex-wrap justify-center pointer-events-auto"
             style={{
               background: 'linear-gradient(135deg, #fef08a 0%, #e2a850 40%, #caa040 70%, #b88628 100%)',
               WebkitBackgroundClip: 'text',
@@ -154,7 +209,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.7 }}
-            className="text-stone-300 text-sm sm:text-base font-mono max-w-xl mx-auto pt-1"
+            className="text-stone-300 text-sm sm:text-base font-mono max-w-xl mx-auto mt-3 sm:mt-4"
           >
             Power BI · Sales Performance Analytics · MySQL · Python
           </motion.p>
@@ -164,7 +219,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.6 }}
-            className="mt-3 inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 rounded-full border border-rose-900/60 bg-stone-950/75 backdrop-blur-md shadow-2xl pointer-events-auto"
+            className="mt-4 sm:mt-5 inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 rounded-full border border-rose-900/60 bg-stone-950/75 backdrop-blur-md shadow-2xl pointer-events-auto"
             style={{
               boxShadow: '0 8px 30px rgba(0, 0, 0, 0.6)',
             }}
