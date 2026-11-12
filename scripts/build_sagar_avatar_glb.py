@@ -222,3 +222,4 @@ def create_sagar_avatar_glb(output_path):
 if __name__ == "__main__":
     create_sagar_avatar_glb("public/models/sagar-avatar.glb")
     create_sagar_avatar_glb("frontend/public/models/sagar-avatar.glb")
+

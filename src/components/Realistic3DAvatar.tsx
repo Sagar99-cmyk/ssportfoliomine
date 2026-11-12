@@ -7,6 +7,7 @@ interface Realistic3DAvatarProps {
   onExpressionChange?: (expr: string) => void;
   selectedExpression?: AvatarExpression;
   showChips?: boolean;
+  modelUrl?: string;
 }
 
 export type AvatarExpression = 'happy' | 'confident' | 'thinking' | 'surprised' | 'winking' | 'sad';
@@ -16,6 +17,7 @@ export const Realistic3DAvatar: React.FC<Realistic3DAvatarProps> = ({
   onExpressionChange,
   selectedExpression,
   showChips = true,
+  modelUrl = '/models/sagar-avatar.glb',
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [currentExpression, setCurrentExpression] = useState<AvatarExpression>(selectedExpression || 'confident');

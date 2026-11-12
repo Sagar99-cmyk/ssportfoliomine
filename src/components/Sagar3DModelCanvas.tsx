@@ -64,7 +64,7 @@ export const Sagar3DModelCanvas: React.FC<Sagar3DModelCanvasProps> = ({
       {/* Main Avatar View */}
       <div className="relative">
         {avatarMode === '3d' ? (
-          <Realistic3DAvatar showChips={true} />
+          <Realistic3DAvatar showChips={true} modelUrl={modelUrl} />
         ) : (
           <ProfessionalPhotoAvatar sizeClassName={sizeClassName} />
         )}

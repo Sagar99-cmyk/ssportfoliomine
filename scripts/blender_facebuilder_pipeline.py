@@ -96,3 +96,4 @@ if __name__ == "__main__":
         setup_sagar_avatar_scene()
     else:
         print("Blender 4.x automation pipeline verified. Run within Blender with: blender --python scripts/blender_facebuilder_pipeline.py")
+

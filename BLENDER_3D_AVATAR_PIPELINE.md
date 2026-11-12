@@ -118,3 +118,4 @@ Export via Blender:
 - [x] Restrained pointer/touch gaze tracking with natural clamp limits.
 - [x] Interactive expression chips and friendly click-to-nod gesture.
 - [x] Production build tested and verified without console errors or broken assets.
+
