@@ -174,6 +174,40 @@ export const StitchLightBackground: React.FC = () => {
             <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.45" />
             <stop offset="100%" stopColor="#D97706" stopOpacity="0" />
           </linearGradient>
+
+          {/* Polyhedral Shading Gradients (Image 2) */}
+          <linearGradient id="polyCyan1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#0284C7" stopOpacity="0.7" />
+          </linearGradient>
+          <linearGradient id="polyCyan2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#7DD3FC" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#0EA5E9" stopOpacity="0.75" />
+          </linearGradient>
+          <linearGradient id="polyRose1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FB7185" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#E11D48" stopOpacity="0.7" />
+          </linearGradient>
+          <linearGradient id="polyRose2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FDA4AF" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#F43F5E" stopOpacity="0.75" />
+          </linearGradient>
+          <linearGradient id="polyTeal1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#34D399" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#059669" stopOpacity="0.7" />
+          </linearGradient>
+          <linearGradient id="polyTeal2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#6EE7B7" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#10B981" stopOpacity="0.75" />
+          </linearGradient>
+          <linearGradient id="polyPurple1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#C084FC" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#7E22CE" stopOpacity="0.7" />
+          </linearGradient>
+          <linearGradient id="polyAmber1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FCD34D" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#D97706" stopOpacity="0.75" />
+          </linearGradient>
         </defs>
 
         {/* ── 1. CIRCUIT GRID & DATA BUS LINES ── */}
@@ -251,6 +285,57 @@ export const StitchLightBackground: React.FC = () => {
         <g className="tech-float-c" style={{ animationDuration: '16s' }} opacity="0.35">
           <ellipse cx="700" cy="450" rx="220" ry="70" fill="none" stroke="#8B5CF6" strokeWidth="1.2" strokeDasharray="10 8" />
           <ellipse cx="700" cy="450" rx="320" ry="100" fill="none" stroke="#E11D48" strokeWidth="1" strokeDasharray="14 12" />
+        </g>
+
+        {/* ── 10. FLOATING 3D POLYHEDRONS (IMAGE 2 STITCH GEOMETRIC CLUSTER) ── */}
+        {/* Cyan Prism */}
+        <g className="tech-float-a" style={{ transformOrigin: '320px 180px', animationDuration: '11s' }}>
+          <polygon points="320,130 360,190 280,180" fill="url(#polyCyan1)" stroke="#0284C7" strokeWidth="1" opacity="0.8" />
+          <polygon points="360,190 410,160 320,130" fill="url(#polyCyan2)" stroke="#38BDF8" strokeWidth="1" opacity="0.75" />
+          <polygon points="280,180 360,190 340,230" fill="#0369A1" opacity="0.65" stroke="#0284C7" strokeWidth="0.8" />
+        </g>
+
+        {/* Faceted Crimson / Rose Polyhedron */}
+        <g className="tech-float-b" style={{ transformOrigin: '480px 220px', animationDuration: '13s' }}>
+          <polygon points="480,170 530,200 480,240 430,200" fill="url(#polyRose1)" stroke="#BE123C" strokeWidth="1" opacity="0.82" />
+          <polygon points="480,170 430,200 460,250" fill="url(#polyRose2)" stroke="#FB7185" strokeWidth="0.9" opacity="0.75" />
+          <polygon points="530,200 480,240 540,250" fill="#9F1239" opacity="0.7" stroke="#881337" strokeWidth="0.8" />
+          <line x1="480" y1="170" x2="480" y2="240" stroke="#FFE4E6" strokeWidth="0.8" opacity="0.6" />
+        </g>
+
+        {/* Teal Hexagonal Crystal */}
+        <g className="tech-float-c" style={{ transformOrigin: '180px 480px', animationDuration: '15s' }}>
+          <polygon points="180,440 230,460 230,510 180,530 130,510 130,460" fill="url(#polyTeal1)" stroke="#059669" strokeWidth="1" opacity="0.78" />
+          <polygon points="180,440 230,460 180,485 130,460" fill="url(#polyTeal2)" opacity="0.8" />
+          <polygon points="130,460 180,485 180,530 130,510" fill="#047857" opacity="0.65" />
+          <line x1="180" y1="485" x2="230" y2="510" stroke="#A7F3D0" strokeWidth="0.8" opacity="0.5" />
+        </g>
+
+        {/* Purple Slanted Prism */}
+        <g className="tech-float-a" style={{ transformOrigin: '680px 480px', animationDuration: '14s' }}>
+          <polygon points="640,430 730,450 710,540 620,520" fill="url(#polyPurple1)" stroke="#7E22CE" strokeWidth="1" opacity="0.75" />
+          <polygon points="640,430 730,450 710,480 620,460" fill="#E9D5FF" opacity="0.55" />
+        </g>
+
+        {/* Amber Dodecahedron */}
+        <g className="tech-float-b" style={{ transformOrigin: '580px 600px', animationDuration: '12s' }}>
+          <polygon points="580,550 630,570 650,620 600,650 550,620 540,570" fill="url(#polyAmber1)" stroke="#B45309" strokeWidth="1" opacity="0.8" />
+          <polygon points="580,550 630,570 590,600" fill="#FDE68A" opacity="0.6" />
+          <polygon points="590,600 650,620 600,650" fill="#D97706" opacity="0.7" />
+        </g>
+
+        {/* Violet Inverted Pyramid */}
+        <g className="tech-float-c" style={{ transformOrigin: '1180px 380px', animationDuration: '10s' }}>
+          <polygon points="1130,340 1230,340 1180,420" fill="#A855F7" stroke="#7E22CE" strokeWidth="1" opacity="0.8" />
+          <polygon points="1130,340 1180,360 1180,420" fill="#C084FC" opacity="0.6" />
+          <polygon points="1230,340 1180,360 1180,420" fill="#6B21A8" opacity="0.7" />
+        </g>
+
+        {/* Ruby Octahedron Diamond */}
+        <g className="tech-float-a" style={{ transformOrigin: '1200px 580px', animationDuration: '13s' }}>
+          <polygon points="1200,530 1240,580 1200,640 1160,580" fill="url(#polyRose1)" stroke="#BE123C" strokeWidth="1" opacity="0.82" />
+          <polygon points="1200,530 1240,580 1200,590" fill="#FDA4AF" opacity="0.75" />
+          <polygon points="1160,580 1200,590 1200,640" fill="#9F1239" opacity="0.7" />
         </g>
       </svg>
     </div>
