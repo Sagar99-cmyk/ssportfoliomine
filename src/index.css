@@ -201,3 +201,68 @@
     width: 0%;
   }
 }
+
+/* Shakuro 3D Ribbon Conveyor Gallery Styles */
+.stage {
+  position: absolute;
+  width: var(--stage-width, 100vw);
+  height: 1080px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+  overflow: hidden;
+  background-color: #000;
+  isolation: isolate;
+}
+
+.glow {
+  position: absolute;
+  left: calc(50% - 542.19px);
+  top: -454.19px;
+  width: 1068.38px;
+  height: 1548.38px;
+  pointer-events: none;
+  background-color: #fff;
+  mask: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+  -webkit-mask: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  z-index: 11;
+  touch-action: none;
+}
+
+.conveyor {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.bottom-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 40%,
+    rgba(0, 0, 0, 0.04) 55%,
+    rgba(0, 0, 0, 0.12) 68%,
+    rgba(0, 0, 0, 0.26) 80%,
+    rgba(0, 0, 0, 0.46) 91%,
+    rgba(0, 0, 0, 0.75) 100%
+  );
+}
+
+.noise {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9;
+  pointer-events: none;
+  opacity: 0.22;
+  mix-blend-mode: soft-light;
+}
