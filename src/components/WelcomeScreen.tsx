@@ -63,6 +63,57 @@ const WelcomeTypewriter: React.FC<{
   );
 };
 
+// High-Tech Circular Dots & Initializing Progress Bar
+const CircleDotsIndicator: React.FC<{ progressPercent: number }> = ({ progressPercent }) => {
+  const dotCount = 20;
+
+  return (
+    <div className="flex flex-col items-center justify-center my-3 select-none pointer-events-none">
+      {/* Circle Container with 20 Pulsing Dots */}
+      <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center">
+        {Array.from({ length: dotCount }).map((_, i) => {
+          const angle = (i / dotCount) * Math.PI * 2;
+          const radius = 50; // px
+          const x = Math.cos(angle) * radius;
+          const y = Math.sin(angle) * radius;
+          const isActive = (i / dotCount) * 100 <= progressPercent;
+
+          return (
+            <span
+              key={`dot-${i}`}
+              className="absolute w-1.5 h-1.5 rounded-full transition-all duration-300"
+              style={{
+                transform: `translate(${x}px, ${y}px)`,
+                backgroundColor: '#ffe600',
+                opacity: isActive ? 1 : 0.25,
+                boxShadow: isActive ? '0 0 10px #ffe600, 0 0 4px #ffe600' : 'none',
+              }}
+            />
+          );
+        })}
+
+        {/* Center Percentage Display */}
+        <div className="flex flex-col items-center justify-center text-center">
+          <span className="font-mono text-sm sm:text-base font-bold text-[#ffe600] tracking-widest drop-shadow">
+            {Math.round(progressPercent)}%
+          </span>
+        </div>
+      </div>
+
+      {/* Initializing Progress Bar with Difference Blend Text */}
+      <div className="relative overflow-hidden w-44 sm:w-52 h-6 rounded-xs bg-black/60 border border-white/15 flex items-center justify-center mt-3 shadow-lg">
+        <div
+          className="absolute top-0 left-0 h-full bg-[#ffe600] transition-all duration-500 ease-out"
+          style={{ width: `${progressPercent}%` }}
+        />
+        <span className="relative z-10 font-mono text-[10px] tracking-[3px] text-white mix-blend-difference font-bold uppercase select-none">
+          INITIALIZING
+        </span>
+      </div>
+    </div>
+  );
+};
+
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdmin }) => {
   const [secondsRemaining, setSecondsRemaining] = useState(10);
   const totalSeconds = 10;
@@ -188,16 +239,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
                 initial={{ opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.45, duration: 0.6 }}
-                className="mt-3 sm:mt-4 inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 rounded-full border border-rose-900/60 bg-stone-950/75 backdrop-blur-md shadow-2xl pointer-events-auto"
+                className="mt-2 inline-flex items-center gap-2.5 px-4 sm:px-5 py-1 rounded-full border border-rose-900/60 bg-stone-950/75 backdrop-blur-md shadow-2xl pointer-events-auto"
                 style={{
                   boxShadow: '0 8px 30px rgba(0, 0, 0, 0.6)',
                 }}
               >
                 <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse" />
                 <span className="text-[10px] sm:text-xs font-mono tracking-[0.25em] uppercase text-rose-200 font-semibold">
-                  INTERACTIVE 3D DATA EXPERIENCE
+                  INTERACTIVE 3D COSMIC DATA EXPERIENCE
                 </span>
               </motion.div>
+
+              {/* High-Tech Preloader Dots & Initializing Bar */}
+              <CircleDotsIndicator progressPercent={progressPercent} />
             </motion.div>
           ) : (
             /* PHASE 2 (Last 3-4 seconds): "Let's see our portfolio!" with Typewriter */
@@ -251,6 +305,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
               >
                 Power BI · Sales Performance Analytics · MySQL · Python
               </motion.p>
+
+              {/* High-Tech Preloader Dots & Initializing Bar */}
+              <CircleDotsIndicator progressPercent={progressPercent} />
             </motion.div>
           )}
         </AnimatePresence>
