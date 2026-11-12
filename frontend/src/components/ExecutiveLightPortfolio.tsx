@@ -277,7 +277,14 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-5xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-10 md:pt-12 pb-24 space-y-14 sm:space-y-16 relative z-10">
+      <main className="max-w-5xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 pb-24 space-y-12 sm:space-y-14 relative z-10">
+
+        {/* ========================================================================= */}
+        {/* TOP HEADER FEATURED LIVE 3D AVATAR & SYSTEM DEMO SHOWCASE                 */}
+        {/* ========================================================================= */}
+        <section id="demo-showcase" className="pt-1">
+          <FeaturedVideoDemo isLight={true} />
+        </section>
 
         {/* ========================================================================= */}
         {/* 2. HERO SECTION - SAGAR SINGH WITH 3D BLINKING PROFILE & METRIC CARDS     */}
@@ -561,9 +568,6 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
         {/* ========================================================================= */}
         <section id="projects" className="space-y-6 pt-4">
           
-          {/* Featured Live 3D Avatar & System Video Demo */}
-          <FeaturedVideoDemo isLight={true} />
-
           {/* Header with Title, Controls, and Filter Tabs */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>

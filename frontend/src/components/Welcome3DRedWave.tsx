@@ -11,13 +11,12 @@ export const Welcome3DRedWave: React.FC = () => {
     let width = container.clientWidth || window.innerWidth;
     let height = container.clientHeight || window.innerHeight;
 
-    // 1. Scene, Camera, and Atmospheric Fog
+    // 1. Three.js Scene, Atmospheric Fog & Camera
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x09090b, 0.008);
+    scene.fog = new THREE.FogExp2(0x09090b, 0.015);
 
-    const camera = new THREE.PerspectiveCamera(46, width / height, 0.1, 1000);
-    // Tilted camera angle to showcase the majestic 3D depth of the spiral galaxy disk
-    camera.position.set(0, 22, 42);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 24);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({
@@ -28,165 +27,207 @@ export const Welcome3DRedWave: React.FC = () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.2;
     container.appendChild(renderer.domElement);
 
-    // 2. Galaxy Hierarchy Root
-    const galaxyRoot = new THREE.Group();
-    // Tilt the galactic disk slightly for a dynamic astronomical view
-    galaxyRoot.rotation.x = 0.48;
-    galaxyRoot.rotation.z = -0.15;
-    scene.add(galaxyRoot);
+    // =========================================================================
+    // 2. STUDIO 3-POINT VOLUMETRIC LIGHTING (Soft Key + Cyber Rim + Golden Glow)
+    // =========================================================================
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+
+    const keyLight = new THREE.DirectionalLight(0xf43f5e, 2.6);
+    keyLight.position.set(15, 20, 15);
+    scene.add(keyLight);
+
+    const goldLight = new THREE.DirectionalLight(0xf59e0b, 2.2);
+    goldLight.position.set(-15, -10, 15);
+    scene.add(goldLight);
+
+    const cyanLight = new THREE.PointLight(0x38bdf8, 1.8, 40);
+    cyanLight.position.set(0, -12, 10);
+    scene.add(cyanLight);
 
     // =========================================================================
-    // 3. MILKY WAY SPIRAL GALAXY SIMULATION (22,000+ LUMINOUS STAR PARTICLES)
-    // Inspired by ChatGPT Argon 4 cosmic particle design: serene, clean, zero zigzag
+    // 3. CENTRAL KINETIC DATA CORE HIERARCHY
     // =========================================================================
-    const particleCount = 24000;
-    const geometry = new THREE.BufferGeometry();
+    const masterGroup = new THREE.Group();
+    // Positioned slightly above center so it frames the central typography like a high-tech hologram
+    masterGroup.position.set(0, 1.2, 0);
+    scene.add(masterGroup);
 
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-    const scales = new Float32Array(particleCount);
-
-    // Spiral Parameters
-    const arms = 4;
-    const maxRadius = 32.0;
-    const coreRadius = 4.5;
-
-    // Galaxy Color Palette (Golden Nucleus, Violet Dust, Cyan Nebula, Rose Starbursts)
-    const colorCore = new THREE.Color(0xfef08a);    // Warm Golden Starlight Nucleus
-    const colorAmber = new THREE.Color(0xf59e0b);   // Inner Arm Amber
-    const colorRose = new THREE.Color(0xf43f5e);    // Hydrogen Nebular Pink/Rose
-    const colorViolet = new THREE.Color(0xa855f7);  // Interstellar Violet
-    const colorCyan = new THREE.Color(0x38bdf8);    // Outer Arm Cyan Starlight
-
-    for (let i = 0; i < particleCount; i++) {
-      const i3 = i * 3;
-
-      // Distance from galactic center with higher density towards the nucleus
-      const radiusRatio = Math.pow(Math.random(), 1.7);
-      const radius = radiusRatio * maxRadius;
-
-      // Spiral Arm Angle: Theta = ArmAngle + SpiralCurve
-      const armIndex = i % arms;
-      const spinAngle = (armIndex / arms) * Math.PI * 2;
-      const curveAngle = radius * 0.42; // Logarithmic spiral twist
-
-      // Natural random interstellar dispersion / thickness
-      const randomSpreadX = (Math.pow(Math.random(), 2.5) * (Math.random() < 0.5 ? 1 : -1)) * (radius * 0.16 + 0.3);
-      const randomSpreadZ = (Math.pow(Math.random(), 2.5) * (Math.random() < 0.5 ? 1 : -1)) * (radius * 0.16 + 0.3);
-      // Disk vertical thickness (thicker at core, razor-thin at spiral periphery)
-      const diskHeight = Math.max(0.2, (1 - radius / maxRadius) * 2.8);
-      const randomSpreadY = (Math.random() - 0.5) * diskHeight;
-
-      positions[i3] = Math.cos(spinAngle + curveAngle) * radius + randomSpreadX;
-      positions[i3 + 1] = randomSpreadY;
-      positions[i3 + 2] = Math.sin(spinAngle + curveAngle) * radius + randomSpreadZ;
-
-      // Color Mixing based on distance from galactic core
-      const mixedColor = new THREE.Color();
-      if (radius < coreRadius) {
-        // Deep luminous nucleus
-        mixedColor.lerpColors(colorCore, colorAmber, radius / coreRadius);
-      } else {
-        // Arms transition smoothly: Amber -> Rose -> Violet -> Cyan
-        const t = (radius - coreRadius) / (maxRadius - coreRadius);
-        if (t < 0.35) {
-          mixedColor.lerpColors(colorAmber, colorRose, t / 0.35);
-        } else if (t < 0.7) {
-          mixedColor.lerpColors(colorRose, colorViolet, (t - 0.35) / 0.35);
-        } else {
-          mixedColor.lerpColors(colorViolet, colorCyan, (t - 0.7) / 0.3);
-        }
-      }
-
-      // Add occasional pure diamond star brilliance
-      if (Math.random() < 0.08) {
-        mixedColor.addScalar(0.4);
-      }
-
-      colors[i3] = mixedColor.r;
-      colors[i3 + 1] = mixedColor.g;
-      colors[i3 + 2] = mixedColor.b;
-
-      // Variable particle scales for realistic depth
-      scales[i] = radius < coreRadius ? Math.random() * 1.8 + 1.2 : Math.random() * 1.2 + 0.6;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1));
-
-    // Particle Material with Soft Additive Glow
-    const galaxyMaterial = new THREE.PointsMaterial({
-      size: 0.95,
-      sizeAttenuation: true,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.88,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
+    // Inner Crystalline Data Octahedron
+    const coreGeo = new THREE.OctahedronGeometry(2.4, 0);
+    const coreMat = new THREE.MeshStandardMaterial({
+      color: 0x1f0e14,
+      emissive: 0xe11d48,
+      emissiveIntensity: 0.6,
+      roughness: 0.2,
+      metalness: 0.85,
+      wireframe: false,
     });
+    const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+    masterGroup.add(coreMesh);
 
-    const galaxyPoints = new THREE.Points(geometry, galaxyMaterial);
-    galaxyRoot.add(galaxyPoints);
+    // Faceted Outer Wireframe Cage with Glowing Vertices
+    const wireGeo = new THREE.IcosahedronGeometry(3.2, 1);
+    const wireMat = new THREE.MeshStandardMaterial({
+      color: 0xf59e0b,
+      emissive: 0xfbbf24,
+      emissiveIntensity: 0.8,
+      wireframe: true,
+      roughness: 0.1,
+      metalness: 0.9,
+    });
+    const wireMesh = new THREE.Mesh(wireGeo, wireMat);
+    masterGroup.add(wireMesh);
 
-    // =========================================================================
-    // 4. GALACTIC NUCLEUS AURA (Warm Golden Core Glow Sphere)
-    // =========================================================================
-    const coreGlowGeo = new THREE.SphereGeometry(3.2, 32, 32);
-    const coreGlowMat = new THREE.MeshBasicMaterial({
+    // Internal Glowing Core Orb
+    const orbGeo = new THREE.SphereGeometry(1.2, 32, 32);
+    const orbMat = new THREE.MeshBasicMaterial({
       color: 0xfef08a,
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.45,
       blending: THREE.AdditiveBlending,
     });
-    const coreGlow = new THREE.Mesh(coreGlowGeo, coreGlowMat);
-    galaxyRoot.add(coreGlow);
+    const orbMesh = new THREE.Mesh(orbGeo, orbMat);
+    masterGroup.add(orbMesh);
 
-    // Secondary Outer Core Corona
-    const coronaGeo = new THREE.SphereGeometry(5.8, 32, 32);
-    const coronaMat = new THREE.MeshBasicMaterial({
+    // =========================================================================
+    // 4. TRIPLE KINETIC GYROSCOPIC DATA RINGS (Analytical Coordinate System)
+    // =========================================================================
+    // Ring 1: Equatorial Torus (Crimson Holographic Ring)
+    const ring1Geo = new THREE.TorusGeometry(4.8, 0.05, 16, 100);
+    const ring1Mat = new THREE.MeshStandardMaterial({
       color: 0xf43f5e,
-      transparent: true,
-      opacity: 0.08,
-      blending: THREE.AdditiveBlending,
+      emissive: 0xe11d48,
+      emissiveIntensity: 1.2,
+      roughness: 0.15,
+      metalness: 0.8,
     });
-    const corona = new THREE.Mesh(coronaGeo, coronaMat);
-    galaxyRoot.add(corona);
+    const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
+    masterGroup.add(ring1);
+
+    // Ring 2: Polar Orbital Torus (Amber Gold Ring)
+    const ring2Geo = new THREE.TorusGeometry(6.0, 0.04, 16, 100);
+    const ring2Mat = new THREE.MeshStandardMaterial({
+      color: 0xfbbf24,
+      emissive: 0xf59e0b,
+      emissiveIntensity: 1.1,
+      roughness: 0.2,
+      metalness: 0.75,
+    });
+    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+    ring2.rotation.x = Math.PI * 0.38;
+    masterGroup.add(ring2);
+
+    // Ring 3: Deep Orbital Inclination Torus (Cyan Telemetry Ring)
+    const ring3Geo = new THREE.TorusGeometry(7.2, 0.035, 16, 100);
+    const ring3Mat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.9,
+      roughness: 0.25,
+      metalness: 0.7,
+    });
+    const ring3 = new THREE.Mesh(ring3Geo, ring3Mat);
+    ring3.rotation.y = Math.PI * 0.45;
+    masterGroup.add(ring3);
 
     // =========================================================================
-    // 5. DEEP BACKGROUND STARFIELD & CELESTIAL DUST (Calm, Non-Jittering)
+    // 5. ORBITING ANALYTICAL DATA NODES & DYNAMIC LASER SYNAPSE LINES
     // =========================================================================
-    const deepStarCount = 1200;
-    const deepStarGeo = new THREE.BufferGeometry();
-    const deepStarPos = new Float32Array(deepStarCount * 3);
+    const nodeCount = 20;
+    const nodeGroup = new THREE.Group();
+    masterGroup.add(nodeGroup);
 
-    for (let i = 0; i < deepStarCount; i++) {
-      deepStarPos[i * 3] = (Math.random() - 0.5) * 220;
-      deepStarPos[i * 3 + 1] = (Math.random() - 0.5) * 140;
-      deepStarPos[i * 3 + 2] = (Math.random() - 0.5) * 140 - 20;
+    const nodeMeshes: { mesh: THREE.Mesh; orbitRadius: number; speed: number; angle: number; yOffset: number }[] = [];
+    const nodeGeometry = new THREE.OctahedronGeometry(0.22, 0);
+
+    for (let i = 0; i < nodeCount; i++) {
+      const isCrimson = i % 2 === 0;
+      const nodeMaterial = new THREE.MeshStandardMaterial({
+        color: isCrimson ? 0xf43f5e : 0xf59e0b,
+        emissive: isCrimson ? 0xe11d48 : 0xd97706,
+        emissiveIntensity: 1.4,
+        roughness: 0.1,
+        metalness: 0.9,
+      });
+
+      const mesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
+      const orbitRadius = 4.2 + (i % 4) * 0.9;
+      const angle = (i / nodeCount) * Math.PI * 2;
+      const yOffset = ((i % 5) - 2) * 0.8;
+
+      mesh.position.set(Math.cos(angle) * orbitRadius, yOffset, Math.sin(angle) * orbitRadius);
+      nodeGroup.add(mesh);
+
+      nodeMeshes.push({
+        mesh,
+        orbitRadius,
+        speed: (0.3 + (i % 3) * 0.15) * (i % 2 === 0 ? 1 : -1),
+        angle,
+        yOffset,
+      });
     }
 
-    deepStarGeo.setAttribute('position', new THREE.BufferAttribute(deepStarPos, 3));
-    const deepStarMat = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 0.45,
+    // Dynamic Synapse Laser Lines connecting nodes to each other & the core
+    const lineCount = 14;
+    const linePositions = new Float32Array(lineCount * 2 * 3);
+    const lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+
+    const lineMat = new THREE.LineBasicMaterial({
+      color: 0xf43f5e,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.35,
       blending: THREE.AdditiveBlending,
     });
-    const deepStars = new THREE.Points(deepStarGeo, deepStarMat);
-    scene.add(deepStars);
+    const lineSegments = new THREE.LineSegments(lineGeo, lineMat);
+    masterGroup.add(lineSegments);
 
     // =========================================================================
-    // 6. INTERACTIVE PARALLAX & SERENE SLOW ROTATION
+    // 6. AMBIENT CELESTIAL BACKGROUND STAR PARTICLES (Subtle, Non-Jittering)
+    // =========================================================================
+    const starCount = 380;
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = new Float32Array(starCount * 3);
+    const starColors = new Float32Array(starCount * 3);
+
+    const cRose = new THREE.Color(0xf43f5e);
+    const cAmber = new THREE.Color(0xfbbf24);
+    const cWhite = new THREE.Color(0xffffff);
+
+    for (let i = 0; i < starCount; i++) {
+      starPos[i * 3] = (Math.random() - 0.5) * 110;
+      starPos[i * 3 + 1] = (Math.random() - 0.5) * 70;
+      starPos[i * 3 + 2] = (Math.random() - 0.5) * 60 - 8;
+
+      const pick = i % 3 === 0 ? cRose : i % 3 === 1 ? cAmber : cWhite;
+      starColors[i * 3] = pick.r;
+      starColors[i * 3 + 1] = pick.g;
+      starColors[i * 3 + 2] = pick.b;
+    }
+
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+    const starMat = new THREE.PointsMaterial({
+      size: 0.65,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.55,
+      blending: THREE.AdditiveBlending,
+    });
+    const starField = new THREE.Points(starGeo, starMat);
+    scene.add(starField);
+
+    // =========================================================================
+    // 7. SMOOTH INTERACTIVE MOUSE PARALLAX & FLUID 60 FPS ANIMATION LOOP
     // =========================================================================
     let mouseX = 0;
     let mouseY = 0;
-    let targetRotY = 0;
-    let targetRotX = 0;
+    let targetX = 0;
+    let targetY = 0;
 
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
       let clientX = 0;
@@ -211,25 +252,62 @@ export const Welcome3DRedWave: React.FC = () => {
     let animId: number;
 
     const animate = () => {
-      clock += 0.005;
+      clock += 0.012;
 
-      // Serene, tranquil galactic rotation (No zigzag, perfectly smooth cosmic spin)
-      galaxyRoot.rotation.y = clock * 0.12;
+      // 1. Crystalline Core & Cage Independent Rotations
+      coreMesh.rotation.y = clock * 0.45;
+      coreMesh.rotation.x = clock * 0.25;
 
-      // Gentle breathing pulse on the core corona
-      const pulse = 1.0 + Math.sin(clock * 1.8) * 0.06;
-      coreGlow.scale.set(pulse, pulse, pulse);
+      wireMesh.rotation.y = -clock * 0.32;
+      wireMesh.rotation.z = clock * 0.18;
 
-      // Deep stars very subtle drift
-      deepStars.rotation.y = clock * 0.015;
+      // Gentle Breathing Pulse on the Inner Energy Core
+      const pulse = 1.0 + Math.sin(clock * 2.2) * 0.09;
+      orbMesh.scale.set(pulse, pulse, pulse);
 
-      // Fluid damped pointer parallax (Subtle, luxurious camera response)
-      targetRotY += (mouseX * 0.28 - targetRotY) * 0.04;
-      targetRotX += (mouseY * 0.18 - targetRotX) * 0.04;
+      // 2. Gyroscopic Kinetic Ring Rotations (Three Distinct Spatial Axes)
+      ring1.rotation.z = clock * 0.35;
+      ring2.rotation.y = -clock * 0.28;
+      ring3.rotation.x = clock * 0.22;
 
-      camera.position.x = Math.sin(targetRotY) * 42;
-      camera.position.y = 22 + targetRotX * 6;
-      camera.lookAt(0, 0, 0);
+      // 3. Orbiting Analytical Data Nodes
+      for (let i = 0; i < nodeMeshes.length; i++) {
+        const item = nodeMeshes[i];
+        item.angle += item.speed * 0.015;
+        const x = Math.cos(item.angle) * item.orbitRadius;
+        const z = Math.sin(item.angle) * item.orbitRadius;
+        const y = item.yOffset + Math.sin(clock * 1.8 + i) * 0.25;
+        item.mesh.position.set(x, y, z);
+        item.mesh.rotation.y = clock * 1.5;
+      }
+
+      // 4. Update Laser Synapse Line Segments between nodes and core
+      const posAttr = lineGeo.attributes.position as THREE.BufferAttribute;
+      const positionsArr = posAttr.array as Float32Array;
+
+      for (let i = 0; i < lineCount; i++) {
+        const n1 = nodeMeshes[i % nodeMeshes.length];
+        const n2 = nodeMeshes[(i + 4) % nodeMeshes.length];
+
+        const idx = i * 6;
+        positionsArr[idx] = n1.mesh.position.x;
+        positionsArr[idx + 1] = n1.mesh.position.y;
+        positionsArr[idx + 2] = n1.mesh.position.z;
+
+        positionsArr[idx + 3] = n2.mesh.position.x;
+        positionsArr[idx + 4] = n2.mesh.position.y;
+        positionsArr[idx + 5] = n2.mesh.position.z;
+      }
+      posAttr.needsUpdate = true;
+
+      // 5. Smooth Damped Camera Perspective Tracking (No erratic jumping)
+      targetX += (mouseX * 0.32 - targetX) * 0.05;
+      targetY += (mouseY * 0.22 - targetY) * 0.05;
+
+      masterGroup.rotation.y = targetX * 0.8;
+      masterGroup.rotation.x = -targetY * 0.6;
+
+      starField.rotation.y = clock * 0.02;
 
       renderer.render(scene, camera);
       animId = requestAnimationFrame(animate);
@@ -257,14 +335,23 @@ export const Welcome3DRedWave: React.FC = () => {
         container.removeChild(renderer.domElement);
       }
       renderer.dispose();
-      geometry.dispose();
-      galaxyMaterial.dispose();
-      coreGlowGeo.dispose();
-      coreGlowMat.dispose();
-      coronaGeo.dispose();
-      coronaMat.dispose();
-      deepStarGeo.dispose();
-      deepStarMat.dispose();
+      coreGeo.dispose();
+      coreMat.dispose();
+      wireGeo.dispose();
+      wireMat.dispose();
+      orbGeo.dispose();
+      orbMat.dispose();
+      ring1Geo.dispose();
+      ring1Mat.dispose();
+      ring2Geo.dispose();
+      ring2Mat.dispose();
+      ring3Geo.dispose();
+      ring3Mat.dispose();
+      nodeGeometry.dispose();
+      lineGeo.dispose();
+      lineMat.dispose();
+      starGeo.dispose();
+      starMat.dispose();
     };
   }, []);
 
