@@ -1,5 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 export const Welcome3DRedWave: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -11,228 +16,225 @@ export const Welcome3DRedWave: React.FC = () => {
     let width = container.clientWidth || window.innerWidth;
     let height = container.clientHeight || window.innerHeight;
 
-    // 1. Three.js Scene, Atmospheric Fog & Camera
+    // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x09090b, 0.015);
-
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 24);
-    camera.lookAt(0, 0, 0);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    camera.position.z = 5;
 
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
       alpha: true,
+      antialias: true,
       powerPreference: 'high-performance',
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     container.appendChild(renderer.domElement);
 
-    // =========================================================================
-    // 2. STUDIO 3-POINT VOLUMETRIC LIGHTING (Soft Key + Cyber Rim + Golden Glow)
-    // =========================================================================
-    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    // 2. Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enableZoom = false; // Keep smooth perspective for background
+    controls.autoRotate = false;
 
-    const keyLight = new THREE.DirectionalLight(0xf43f5e, 2.6);
-    keyLight.position.set(15, 20, 15);
-    scene.add(keyLight);
+    // 3. Lighting
+    const light = new THREE.PointLight(0xffffff, 1.2);
+    light.position.set(5, 5, 5);
+    scene.add(light);
 
-    const goldLight = new THREE.DirectionalLight(0xf59e0b, 2.2);
-    goldLight.position.set(-15, -10, 15);
-    scene.add(goldLight);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
 
-    const cyanLight = new THREE.PointLight(0x38bdf8, 1.8, 40);
-    cyanLight.position.set(0, -12, 10);
-    scene.add(cyanLight);
+    // 4. Central Rotating Group
+    const rotatingGroup = new THREE.Group();
+    scene.add(rotatingGroup);
 
-    // =========================================================================
-    // 3. CENTRAL KINETIC DATA CORE HIERARCHY
-    // =========================================================================
-    const masterGroup = new THREE.Group();
-    // Positioned slightly above center so it frames the central typography like a high-tech hologram
-    masterGroup.position.set(0, 1.2, 0);
-    scene.add(masterGroup);
-
-    // Inner Crystalline Data Octahedron
-    const coreGeo = new THREE.OctahedronGeometry(2.4, 0);
-    const coreMat = new THREE.MeshStandardMaterial({
-      color: 0x1f0e14,
-      emissive: 0xe11d48,
-      emissiveIntensity: 0.6,
-      roughness: 0.2,
-      metalness: 0.85,
-      wireframe: false,
+    // 1000 Cyan Background Stars
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 1000;
+    const starsPositions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount * 3; i++) {
+      starsPositions[i] = (Math.random() - 0.5) * 200;
+    }
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({
+      color: 0x00ffff,
+      size: 0.1,
+      sizeAttenuation: true,
     });
-    const coreMesh = new THREE.Mesh(coreGeo, coreMat);
-    masterGroup.add(coreMesh);
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
 
-    // Faceted Outer Wireframe Cage with Glowing Vertices
-    const wireGeo = new THREE.IcosahedronGeometry(3.2, 1);
-    const wireMat = new THREE.MeshStandardMaterial({
-      color: 0xf59e0b,
-      emissive: 0xfbbf24,
-      emissiveIntensity: 0.8,
+    // Inner Metallic Flat-Shaded Icosahedron
+    const innerGeometry = new THREE.IcosahedronGeometry(1, 3);
+    const innerMaterial = new THREE.MeshStandardMaterial({
+      color: 0x222222,
+      roughness: 0.5,
+      metalness: 1,
+      flatShading: true,
+      transparent: true,
+      opacity: 0.7,
+    });
+    const innerMesh = new THREE.Mesh(innerGeometry, innerMaterial);
+    rotatingGroup.add(innerMesh);
+
+    // Outer Wireframe Icosahedron
+    const outerGeometry = new THREE.IcosahedronGeometry(1.15, 3);
+    const wireframeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
       wireframe: true,
-      roughness: 0.1,
-      metalness: 0.9,
-    });
-    const wireMesh = new THREE.Mesh(wireGeo, wireMat);
-    masterGroup.add(wireMesh);
-
-    // Internal Glowing Core Orb
-    const orbGeo = new THREE.SphereGeometry(1.2, 32, 32);
-    const orbMat = new THREE.MeshBasicMaterial({
-      color: 0xfef08a,
       transparent: true,
-      opacity: 0.45,
-      blending: THREE.AdditiveBlending,
+      opacity: 0.1,
     });
-    const orbMesh = new THREE.Mesh(orbGeo, orbMat);
-    masterGroup.add(orbMesh);
+    const wireframeMesh = new THREE.Mesh(outerGeometry, wireframeMaterial);
+    rotatingGroup.add(wireframeMesh);
 
-    // =========================================================================
-    // 4. TRIPLE KINETIC GYROSCOPIC DATA RINGS (Analytical Coordinate System)
-    // =========================================================================
-    // Ring 1: Equatorial Torus (Crimson Holographic Ring)
-    const ring1Geo = new THREE.TorusGeometry(4.8, 0.05, 16, 100);
-    const ring1Mat = new THREE.MeshStandardMaterial({
-      color: 0xf43f5e,
-      emissive: 0xe11d48,
-      emissiveIntensity: 1.2,
-      roughness: 0.15,
-      metalness: 0.8,
+    // Cyan Particles on Outer Vertices
+    const positions: number[] = [];
+    const posAttr = outerGeometry.attributes.position;
+    for (let i = 0; i < posAttr.count; i++) {
+      positions.push(posAttr.getX(i), posAttr.getY(i), posAttr.getZ(i));
+    }
+    const particleGeometry = new THREE.BufferGeometry();
+    particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    const particleMaterial = new THREE.PointsMaterial({
+      color: 0x00ffff,
+      size: 0.025,
     });
-    const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
-    masterGroup.add(ring1);
+    const particles = new THREE.Points(particleGeometry, particleMaterial);
+    rotatingGroup.add(particles);
 
-    // Ring 2: Polar Orbital Torus (Amber Gold Ring)
-    const ring2Geo = new THREE.TorusGeometry(6.0, 0.04, 16, 100);
-    const ring2Mat = new THREE.MeshStandardMaterial({
-      color: 0xfbbf24,
-      emissive: 0xf59e0b,
-      emissiveIntensity: 1.1,
-      roughness: 0.2,
-      metalness: 0.75,
-    });
-    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-    ring2.rotation.x = Math.PI * 0.38;
-    masterGroup.add(ring2);
+    // 5. Postprocessing: EffectComposer & UnrealBloomPass
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
 
-    // Ring 3: Deep Orbital Inclination Torus (Cyan Telemetry Ring)
-    const ring3Geo = new THREE.TorusGeometry(7.2, 0.035, 16, 100);
-    const ring3Mat = new THREE.MeshStandardMaterial({
-      color: 0x38bdf8,
-      emissive: 0x0284c7,
-      emissiveIntensity: 0.9,
-      roughness: 0.25,
-      metalness: 0.7,
-    });
-    const ring3 = new THREE.Mesh(ring3Geo, ring3Mat);
-    ring3.rotation.y = Math.PI * 0.45;
-    masterGroup.add(ring3);
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(width, height),
+      1.5,
+      0.4,
+      0.05
+    );
+    composer.addPass(bloomPass);
 
-    // =========================================================================
-    // 5. ORBITING ANALYTICAL DATA NODES & DYNAMIC LASER SYNAPSE LINES
-    // =========================================================================
-    const nodeCount = 20;
-    const nodeGroup = new THREE.Group();
-    masterGroup.add(nodeGroup);
+    // 6. ShockWave Ripple ShaderPass II
+    const maxRipples = 10;
+    const RippleShader = {
+      uniforms: {
+        tDiffuse: { value: null },
+        centers: { value: Array(maxRipples).fill(null).map(() => new THREE.Vector2(0.5, 0.5)) },
+        times: { value: Array(maxRipples).fill(0.0) },
+        rippleActive: { value: Array(maxRipples).fill(0.0) },
+        maxRadius: { value: 1.0 },
+        amplitude: { value: 0.03 },
+        secondaryAmplitude: { value: 0.01 },
+        speed: { value: 0.3 },
+        frequency: { value: 10.0 },
+        aspect: { value: width / height },
+        smoothing: { value: 0.95 },
+        sigma: { value: 0.6 },
+        fadeDuration: { value: 6.0 },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        #define PI 3.14159265359
+        #define MAX_RIPPLES 10
+        uniform sampler2D tDiffuse;
+        uniform vec2 centers[MAX_RIPPLES];
+        uniform float times[MAX_RIPPLES];
+        uniform float rippleActive[MAX_RIPPLES];
+        uniform float maxRadius;
+        uniform float amplitude;
+        uniform float secondaryAmplitude;
+        uniform float speed;
+        uniform float frequency;
+        uniform float aspect;
+        uniform float smoothing;
+        uniform float sigma;
+        uniform float fadeDuration;
+        varying vec2 vUv;
 
-    const nodeMeshes: { mesh: THREE.Mesh; orbitRadius: number; speed: number; angle: number; yOffset: number }[] = [];
-    const nodeGeometry = new THREE.OctahedronGeometry(0.22, 0);
+        void main() {
+          vec2 uv = vUv;
+          vec2 totalWave = vec2(0.0);
+          for (int i = 0; i < MAX_RIPPLES; i++) {
+            if (rippleActive[i] > 0.0) {
+              vec2 aspectUV = vec2((uv.x - centers[i].x) * aspect, uv.y - centers[i].y);
+              float dist = length(aspectUV);
+              float t = times[i] * speed;
+              if (dist < t) {
+                float normDist = dist / maxRadius;
+                float decay = 1.0 / (1.0 + sigma * normDist * normDist);
+                float timeFade = pow(smoothstep(fadeDuration, fadeDuration - 2.0, times[i]), 2.0);
+                float smoothFactor = smoothstep(1.0 - smoothing, 1.0, normDist);
+                float primaryWave = amplitude * sin(frequency * (t - dist)) * decay * (1.0 - smoothFactor) * timeFade;
+                float secondaryWave = secondaryAmplitude * sin(0.5 * frequency * (t - dist) + PI) * decay * (1.0 - smoothFactor) * timeFade;
+                totalWave += normalize(aspectUV) * (primaryWave + secondaryWave);
+              }
+            }
+          }
+          uv += totalWave;
+          gl_FragColor = texture2D(tDiffuse, clamp(uv, 0.0, 1.0));
+        }
+      `,
+    };
 
-    for (let i = 0; i < nodeCount; i++) {
-      const isCrimson = i % 2 === 0;
-      const nodeMaterial = new THREE.MeshStandardMaterial({
-        color: isCrimson ? 0xf43f5e : 0xf59e0b,
-        emissive: isCrimson ? 0xe11d48 : 0xd97706,
-        emissiveIntensity: 1.4,
-        roughness: 0.1,
-        metalness: 0.9,
-      });
+    const ripplePass = new ShaderPass(RippleShader);
+    ripplePass.renderToScreen = true;
+    composer.addPass(ripplePass);
 
-      const mesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
-      const orbitRadius = 4.2 + (i % 4) * 0.9;
-      const angle = (i / nodeCount) * Math.PI * 2;
-      const yOffset = ((i % 5) - 2) * 0.8;
-
-      mesh.position.set(Math.cos(angle) * orbitRadius, yOffset, Math.sin(angle) * orbitRadius);
-      nodeGroup.add(mesh);
-
-      nodeMeshes.push({
-        mesh,
-        orbitRadius,
-        speed: (0.3 + (i % 3) * 0.15) * (i % 2 === 0 ? 1 : -1),
-        angle,
-        yOffset,
-      });
+    interface RippleEvent {
+      center: THREE.Vector2;
+      startTime: number;
     }
 
-    // Dynamic Synapse Laser Lines connecting nodes to each other & the core
-    const lineCount = 14;
-    const linePositions = new Float32Array(lineCount * 2 * 3);
-    const lineGeo = new THREE.BufferGeometry();
-    lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+    let ripples: RippleEvent[] = [];
+    const rippleDuration = 25;
 
-    const lineMat = new THREE.LineBasicMaterial({
-      color: 0xf43f5e,
-      transparent: true,
-      opacity: 0.35,
-      blending: THREE.AdditiveBlending,
-    });
-    const lineSegments = new THREE.LineSegments(lineGeo, lineMat);
-    masterGroup.add(lineSegments);
+    const updateRippleUniforms = () => {
+      const centers = ripplePass.uniforms.centers.value as THREE.Vector2[];
+      const times = ripplePass.uniforms.times.value as number[];
+      const active = ripplePass.uniforms.rippleActive.value as number[];
+      const now = performance.now() / 1000;
 
-    // =========================================================================
-    // 6. AMBIENT CELESTIAL BACKGROUND STAR PARTICLES (Subtle, Non-Jittering)
-    // =========================================================================
-    const starCount = 380;
-    const starGeo = new THREE.BufferGeometry();
-    const starPos = new Float32Array(starCount * 3);
-    const starColors = new Float32Array(starCount * 3);
+      for (let i = 0; i < maxRipples; i++) {
+        if (i < ripples.length) {
+          centers[i].copy(ripples[i].center);
+          times[i] = now - ripples[i].startTime;
+          active[i] = times[i] < rippleDuration ? 1.0 : 0.0;
+        } else {
+          active[i] = 0.0;
+        }
+      }
+    };
 
-    const cRose = new THREE.Color(0xf43f5e);
-    const cAmber = new THREE.Color(0xfbbf24);
-    const cWhite = new THREE.Color(0xffffff);
+    const addRipple = (clientX: number, clientY: number) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const x = (clientX - rect.left) / rect.width;
+      const y = 1.0 - (clientY - rect.top) / rect.height; // UV Y inversion
+      const center = new THREE.Vector2(Math.max(0, Math.min(1, x)), Math.max(0, Math.min(1, y)));
+      const startTime = performance.now() / 1000;
 
-    for (let i = 0; i < starCount; i++) {
-      starPos[i * 3] = (Math.random() - 0.5) * 110;
-      starPos[i * 3 + 1] = (Math.random() - 0.5) * 70;
-      starPos[i * 3 + 2] = (Math.random() - 0.5) * 60 - 8;
+      ripples.push({ center, startTime });
+      if (ripples.length > maxRipples) {
+        ripples.shift();
+      }
+      updateRippleUniforms();
+    };
 
-      const pick = i % 3 === 0 ? cRose : i % 3 === 1 ? cAmber : cWhite;
-      starColors[i * 3] = pick.r;
-      starColors[i * 3 + 1] = pick.g;
-      starColors[i * 3 + 2] = pick.b;
-    }
+    // Trigger initial welcoming ripple
+    const initTimer = window.setTimeout(() => {
+      addRipple(width / 2, height / 2);
+    }, 400);
 
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
-
-    const starMat = new THREE.PointsMaterial({
-      size: 0.65,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.55,
-      blending: THREE.AdditiveBlending,
-    });
-    const starField = new THREE.Points(starGeo, starMat);
-    scene.add(starField);
-
-    // =========================================================================
-    // 7. SMOOTH INTERACTIVE MOUSE PARALLAX & FLUID 60 FPS ANIMATION LOOP
-    // =========================================================================
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetX = 0;
-    let targetY = 0;
-
-    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
-      let clientX = 0;
-      let clientY = 0;
-
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      let clientX = width / 2;
+      let clientY = height / 2;
       if ('touches' in e && e.touches[0]) {
         clientX = e.touches[0].clientX;
         clientY = e.touches[0].clientY;
@@ -240,124 +242,88 @@ export const Welcome3DRedWave: React.FC = () => {
         clientX = e.clientX;
         clientY = e.clientY;
       }
-
-      mouseX = (clientX / width - 0.5) * 2;
-      mouseY = -(clientY / height - 0.5) * 2;
+      addRipple(clientX, clientY);
     };
 
-    window.addEventListener('mousemove', handlePointerMove, { passive: true });
-    window.addEventListener('touchmove', handlePointerMove, { passive: true });
+    renderer.domElement.addEventListener('click', handlePointerDown);
+    renderer.domElement.addEventListener('dblclick', handlePointerDown);
+    renderer.domElement.addEventListener('touchstart', handlePointerDown, { passive: true });
 
-    let clock = 0;
-    let animId: number;
-
-    const animate = () => {
-      clock += 0.012;
-
-      // 1. Crystalline Core & Cage Independent Rotations
-      coreMesh.rotation.y = clock * 0.45;
-      coreMesh.rotation.x = clock * 0.25;
-
-      wireMesh.rotation.y = -clock * 0.32;
-      wireMesh.rotation.z = clock * 0.18;
-
-      // Gentle Breathing Pulse on the Inner Energy Core
-      const pulse = 1.0 + Math.sin(clock * 2.2) * 0.09;
-      orbMesh.scale.set(pulse, pulse, pulse);
-
-      // 2. Gyroscopic Kinetic Ring Rotations (Three Distinct Spatial Axes)
-      ring1.rotation.z = clock * 0.35;
-      ring2.rotation.y = -clock * 0.28;
-      ring3.rotation.x = clock * 0.22;
-
-      // 3. Orbiting Analytical Data Nodes
-      for (let i = 0; i < nodeMeshes.length; i++) {
-        const item = nodeMeshes[i];
-        item.angle += item.speed * 0.015;
-        const x = Math.cos(item.angle) * item.orbitRadius;
-        const z = Math.sin(item.angle) * item.orbitRadius;
-        const y = item.yOffset + Math.sin(clock * 1.8 + i) * 0.25;
-        item.mesh.position.set(x, y, z);
-        item.mesh.rotation.y = clock * 1.5;
-      }
-
-      // 4. Update Laser Synapse Line Segments between nodes and core
-      const posAttr = lineGeo.attributes.position as THREE.BufferAttribute;
-      const positionsArr = posAttr.array as Float32Array;
-
-      for (let i = 0; i < lineCount; i++) {
-        const n1 = nodeMeshes[i % nodeMeshes.length];
-        const n2 = nodeMeshes[(i + 4) % nodeMeshes.length];
-
-        const idx = i * 6;
-        positionsArr[idx] = n1.mesh.position.x;
-        positionsArr[idx + 1] = n1.mesh.position.y;
-        positionsArr[idx + 2] = n1.mesh.position.z;
-
-        positionsArr[idx + 3] = n2.mesh.position.x;
-        positionsArr[idx + 4] = n2.mesh.position.y;
-        positionsArr[idx + 5] = n2.mesh.position.z;
-      }
-      posAttr.needsUpdate = true;
-
-      // 5. Smooth Damped Camera Perspective Tracking (No erratic jumping)
-      targetX += (mouseX * 0.32 - targetX) * 0.05;
-      targetY += (mouseY * 0.22 - targetY) * 0.05;
-
-      masterGroup.rotation.y = targetX * 0.8;
-      masterGroup.rotation.x = -targetY * 0.6;
-
-      starField.rotation.y = clock * 0.02;
-
-      renderer.render(scene, camera);
-      animId = requestAnimationFrame(animate);
-    };
-
-    animate();
-
+    // Window Resize Handler
     const handleResize = () => {
       if (!container) return;
       width = container.clientWidth || window.innerWidth;
       height = container.clientHeight || window.innerHeight;
+
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+
       renderer.setSize(width, height);
+      composer.setSize(width, height);
+      bloomPass.setSize(width, height);
+      ripplePass.uniforms.aspect.value = width / height;
     };
 
     window.addEventListener('resize', handleResize);
 
+    // 7. Animation Loop
+    let animId: number;
+    const animate = () => {
+      animId = requestAnimationFrame(animate);
+      controls.update();
+
+      rotatingGroup.rotation.x += 0.002;
+      rotatingGroup.rotation.y += 0.003;
+
+      if (ripples.length > 0) {
+        updateRippleUniforms();
+        const now = performance.now() / 1000;
+        ripples = ripples.filter((r) => now - r.startTime < rippleDuration);
+      }
+
+      composer.render();
+    };
+
+    animate();
+
     return () => {
+      window.clearTimeout(initTimer);
       cancelAnimationFrame(animId);
-      window.removeEventListener('mousemove', handlePointerMove);
-      window.removeEventListener('touchmove', handlePointerMove);
       window.removeEventListener('resize', handleResize);
-      if (container && renderer.domElement) {
+
+      if (renderer.domElement) {
+        renderer.domElement.removeEventListener('click', handlePointerDown);
+        renderer.domElement.removeEventListener('dblclick', handlePointerDown);
+        renderer.domElement.removeEventListener('touchstart', handlePointerDown);
+      }
+
+      controls.dispose();
+      starGeometry.dispose();
+      starMaterial.dispose();
+      innerGeometry.dispose();
+      innerMaterial.dispose();
+      outerGeometry.dispose();
+      wireframeMaterial.dispose();
+      particleGeometry.dispose();
+      particleMaterial.dispose();
+      bloomPass.dispose();
+      composer.dispose();
+      renderer.dispose();
+
+      if (container && renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
-      renderer.dispose();
-      coreGeo.dispose();
-      coreMat.dispose();
-      wireGeo.dispose();
-      wireMat.dispose();
-      orbGeo.dispose();
-      orbMat.dispose();
-      ring1Geo.dispose();
-      ring1Mat.dispose();
-      ring2Geo.dispose();
-      ring2Mat.dispose();
-      ring3Geo.dispose();
-      ring3Mat.dispose();
-      nodeGeometry.dispose();
-      lineGeo.dispose();
-      lineMat.dispose();
-      starGeo.dispose();
-      starMat.dispose();
     };
   }, []);
 
   return (
-    <div className="absolute inset-0 w-full h-full pointer-events-none select-none overflow-hidden">
-      <div ref={mountRef} className="w-full h-full" />
+    <div className="absolute inset-0 w-full h-full pointer-events-auto overflow-hidden">
+      <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      {/* Discreet interactive badge at bottom left */}
+      <div className="absolute bottom-4 left-6 z-20 pointer-events-none hidden sm:flex items-center gap-2 text-[10px] font-mono tracking-wider uppercase text-cyan-400/70 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-cyan-500/20">
+        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+        <span>ShockWave ShaderPass II · Tap or Double-Click for Ripples · Drag to Orbit</span>
+      </div>
     </div>
   );
 };

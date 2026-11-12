@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Shield, Sun, Moon } from 'lucide-react';
+import { Menu, X, Shield, Sun, Moon, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SoundButton } from './BackgroundMusic';
+import { DemoVideoModal } from './DemoVideoModal';
 import { useTheme } from '../context/ThemeContext';
 
 interface NavbarProps {
@@ -21,6 +22,7 @@ const NAV_LINKS = [
 export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -103,7 +105,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
         </nav>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Demo Video Modal Trigger Button */}
+          <button
+            onClick={() => setIsDemoOpen(true)}
+            title="Watch 3D Avatar & System Video Demo"
+            className={`px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full text-xs font-mono font-medium transition-all duration-200 flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 border ${
+              theme === 'light'
+                ? 'border-rose-300/80 bg-rose-50/90 hover:bg-rose-100 text-rose-700 shadow-rose-200/40'
+                : 'border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 shadow-rose-950/40'
+            }`}
+            aria-label="Open Demo Video"
+          >
+            <Play className="w-3.5 h-3.5 fill-current text-rose-500 shrink-0" />
+            <span className="font-semibold text-[11px] tracking-wide">Demo</span>
+          </button>
+
           {/* Clean Executive Light / 3D Dark Theme Toggle */}
           <button
             onClick={toggleTheme}
@@ -247,6 +264,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
                   ))}
                 </nav>
 
+                {/* Mobile Demo Video Trigger */}
+                <div className="pt-2">
+                  <button
+                    onClick={() => {
+                      setIsDemoOpen(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
+                      theme === 'light'
+                        ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200'
+                        : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border-rose-500/30'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Play className="w-4 h-4 fill-current text-rose-500" />
+                      <span>Watch Live 3D & System Demo</span>
+                    </span>
+                    <span className="font-mono text-[10px] text-rose-400 font-bold uppercase tracking-wider">
+                      Demo
+                    </span>
+                  </button>
+                </div>
+
                 {/* Mobile Theme Toggle Button */}
                 <div className="pt-2">
                   <button
@@ -299,6 +339,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
           </>
         )}
       </AnimatePresence>
+
+      {/* Pure Video Demo Modal (No text, no clutter) */}
+      <DemoVideoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} />
     </motion.header>
   );
 };

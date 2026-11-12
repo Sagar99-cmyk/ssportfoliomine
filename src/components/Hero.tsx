@@ -4,7 +4,6 @@ import { motion } from 'motion/react';
 import { Profile, Skill, Project, Education } from '../types';
 import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
 import { Sagar3DModelCanvas } from './Sagar3DModelCanvas';
-import { FeaturedVideoDemo } from './FeaturedVideoDemo';
 import { getTechLogo } from './TechLogos';
 import { useTheme } from '../context/ThemeContext';
 
@@ -207,13 +206,6 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
   return (
     <section className="relative pt-6 pb-20 md:pt-10 md:pb-28 overflow-hidden select-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12">
-
-        {/* ===================================================================== */}
-        {/* TOP HEADER FEATURED LIVE 3D AVATAR & PLATFORM VIDEO DEMO              */}
-        {/* ===================================================================== */}
-        <div id="demo-showcase" className="w-full">
-          <FeaturedVideoDemo isLight={isLight} />
-        </div>
 
         {/* ===================================================================== */}
         {/* MOBILE & TABLET HEADER: Available Badge -> Name -> Dynamic Role Statement */}
