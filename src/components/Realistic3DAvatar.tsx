@@ -544,11 +544,11 @@ export const Realistic3DAvatar: React.FC<Realistic3DAvatarProps> = ({
     function triggerHeadNod() {
       isNodding = true;
       nodStartTime = clock;
-      clickHaloImpulse = 1.0;
-      keyLight.intensity = 3.2;
+      clickHaloImpulse = 0.4;
+      keyLight.intensity = 2.0;
       setIsNoddingUI(true);
       setTimeout(() => {
-        keyLight.intensity = 2.5;
+        keyLight.intensity = 1.85;
         setIsNoddingUI(false);
       }, 350);
     }

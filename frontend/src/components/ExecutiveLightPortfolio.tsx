@@ -13,6 +13,7 @@ import { Profile, Skill, Project, Education, Achievement } from '../types';
 import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
 import { CaseStudyModal } from './CaseStudyModal';
 import { StitchLightBackground } from './StitchLightBackground';
+import { FeaturedVideoDemo } from './FeaturedVideoDemo';
 import { globalAudioEngine } from './BackgroundMusic';
 import { useTheme } from '../context/ThemeContext';
 import { api } from '../services/api';
@@ -265,25 +266,11 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
             <button
               onClick={toggleTheme}
               title="Switch to 3D Dark Mode"
-              className="p-2 rounded-full bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 shadow-2xs transition-all cursor-pointer"
+              className="p-2 rounded-full bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 shadow-2xs transition-all cursor-pointer flex items-center gap-1.5"
             >
               <Moon className="w-4 h-4 text-stone-700 hover:text-amber-500 transition-colors" />
+              <span className="text-[11px] font-mono font-semibold text-stone-700 hidden sm:inline">3D Dark</span>
             </button>
-
-            {/* Profile Avatar Badge Button */}
-            <a
-              href="#hero"
-              className="w-9 h-9 rounded-full bg-[#e11d48] border-2 border-white shadow-xs flex items-center justify-center text-white overflow-hidden cursor-pointer active:scale-95 transition-transform"
-            >
-              <img
-                src="/profile-transparent-open.png"
-                alt="Sagar Singh"
-                className="w-full h-full object-cover object-top"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/profile2.png';
-                }}
-              />
-            </a>
           </div>
 
         </div>
@@ -352,37 +339,31 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
           </div>
 
           {/* ========================================================================= */}
-          {/* PROFILE CARD: SAGAR PHOTO AVATAR + 4 BENCHMARKS + SYNTHETIC ANALYTICS      */}
+          {/* 3. PERFORMANCE BENCHMARKS & SYNTHETIC ANALYTICS (CLEAN LIGHT MODE CARD)    */}
           {/* ========================================================================= */}
           <div className="p-5 sm:p-6 rounded-3xl bg-white border border-stone-200/90 shadow-sm space-y-5">
             
-            {/* Header: Avatar, Name, Availability, Phone Call Button */}
+            {/* Header: Title, Availability Status, Direct WhatsApp / Contact Button */}
             <div className="flex items-center justify-between gap-4 pb-4 border-b border-stone-100">
-              <div className="flex items-center gap-3.5">
-                {/* 3D Blinking Photo Avatar with Glowing Crimson Ring */}
-                <ProfessionalPhotoAvatar
-                  sizeClassName="w-14 h-14 sm:w-16 sm:h-16"
-                  showStatusIndicator={false}
-                />
-
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-sm sm:text-base font-bold text-stone-900 tracking-tight">
-                      Sagar Singh
-                    </h3>
-                    <span className="text-xs text-stone-500 font-medium">(Self-Employed)</span>
-                  </div>
-                  <p className="text-xs text-stone-500 font-mono">
-                    Available for Freelance & Full-time
-                  </p>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <h3 className="text-sm sm:text-base font-bold text-stone-900 tracking-tight">
+                    Verified Analytics Benchmarks
+                  </h3>
                 </div>
+                <p className="text-xs text-stone-500 font-mono">
+                  Enterprise Production Datasets & Automated ETL Pipelines
+                </p>
               </div>
 
               {/* Direct Phone / WhatsApp Button */}
               <div className="flex items-center gap-2">
                 <a
-                  href="tel:+919304987404"
-                  title="Direct Phone Call"
+                  href="https://wa.me/919304987404"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Direct WhatsApp Chat"
                   className="w-10 h-10 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 flex items-center justify-center transition-all cursor-pointer shadow-2xs active:scale-90"
                 >
                   <Phone className="w-4 h-4" />
@@ -392,19 +373,19 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
 
             {/* 4 Quick Stat Benchmarks */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-              <div className="p-2 rounded-xl bg-stone-50/70">
+              <div className="p-2.5 rounded-xl bg-stone-50/70 border border-stone-100">
                 <p className="text-lg sm:text-xl font-black text-[#e11d48]">15+</p>
                 <p className="text-[10px] sm:text-xs font-mono font-medium text-stone-500 uppercase">Capstones Built</p>
               </div>
-              <div className="p-2 rounded-xl bg-stone-50/70">
+              <div className="p-2.5 rounded-xl bg-stone-50/70 border border-stone-100">
                 <p className="text-lg sm:text-xl font-black text-emerald-600">98.5%</p>
                 <p className="text-[10px] sm:text-xs font-mono font-medium text-stone-500 uppercase">Model Accuracy</p>
               </div>
-              <div className="p-2 rounded-xl bg-stone-50/70">
+              <div className="p-2.5 rounded-xl bg-stone-50/70 border border-stone-100">
                 <p className="text-lg sm:text-xl font-black text-stone-900">150K+</p>
                 <p className="text-[10px] sm:text-xs font-mono font-medium text-stone-500 uppercase">Records Processed</p>
               </div>
-              <div className="p-2 rounded-xl bg-stone-50/70">
+              <div className="p-2.5 rounded-xl bg-stone-50/70 border border-stone-100">
                 <p className="text-lg sm:text-xl font-black text-amber-600">450+</p>
                 <p className="text-[10px] sm:text-xs font-mono font-medium text-stone-500 uppercase">Hours of Code</p>
               </div>
@@ -415,7 +396,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
               <div className="flex items-center justify-between text-xs text-stone-600 mb-1.5 font-mono">
                 <span className="flex items-center gap-1.5 font-semibold text-stone-800">
                   <Activity className="w-3.5 h-3.5 text-emerald-500" />
-                  Synthetic Analytics (CTR / KPI)
+                  Synthetic Analytics (CTR / KPI Precision)
                 </span>
                 <span className="text-emerald-600 font-bold flex items-center gap-0.5">
                   <TrendingUp className="w-3 h-3" />
@@ -580,6 +561,9 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
         {/* ========================================================================= */}
         <section id="projects" className="space-y-6 pt-4">
           
+          {/* Featured Live 3D Avatar & System Video Demo */}
+          <FeaturedVideoDemo isLight={true} />
+
           {/* Header with Title, Controls, and Filter Tabs */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>

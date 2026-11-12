@@ -180,11 +180,11 @@ export const ProfessionalPhotoAvatar: React.FC<ProfessionalPhotoAvatarProps> = (
           WebkitTouchCallout: 'none',
         }}
       >
-        {/* Subtle 3D dynamic specular reflection ring */}
+        {/* Soft, warm 3D dynamic specular reflection (Warm Cyber-Crimson/Amber - No harsh white glare) */}
         <div
-          className="absolute inset-0 rounded-full pointer-events-none opacity-25 group-hover:opacity-40 transition-opacity duration-300 z-20"
+          className="absolute inset-0 rounded-full pointer-events-none opacity-20 group-hover:opacity-35 transition-opacity duration-300 z-20"
           style={{
-            background: `radial-gradient(circle at ${tilt.glareX}% ${tilt.glareY}%, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 65%)`,
+            background: `radial-gradient(circle at ${tilt.glareX}% ${tilt.glareY}%, rgba(225, 29, 72, 0.22) 0%, rgba(245, 158, 11, 0.12) 35%, rgba(0, 0, 0, 0) 70%)`,
           }}
         />
 

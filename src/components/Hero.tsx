@@ -3,6 +3,7 @@ import { Download, ArrowRight, Linkedin, Github, Mail, Database, Award, Code2, C
 import { motion } from 'motion/react';
 import { Profile, Skill, Project, Education } from '../types';
 import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
+import { Sagar3DModelCanvas } from './Sagar3DModelCanvas';
 import { getTechLogo } from './TechLogos';
 import { useTheme } from '../context/ThemeContext';
 
@@ -245,8 +246,8 @@ export const Hero: React.FC<HeroProps> = ({ profile, skills = [], projects = [],
 
           {/* Photo Avatar + Quick Skills Card */}
           <div className="lg:col-span-5 flex flex-col items-center gap-5 lg:order-2">
-            {/* Professional Portrait with Natural Eye Blink Animation */}
-            <ProfessionalPhotoAvatar />
+            {/* 3D Digital Human Avatar (GLB 3D Model with Fallback to Living 3D Photo Twin) */}
+            <Sagar3DModelCanvas />
 
             {/* Quick Skills Summary Pill Card below photo */}
             <div

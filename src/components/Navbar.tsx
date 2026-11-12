@@ -104,25 +104,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, isAdminOpen }) => {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2.5 shrink-0">
-          {/* Executive Light Theme / 3D Dark Switcher */}
+          {/* Clean Executive Light / 3D Dark Theme Toggle */}
           <button
             onClick={toggleTheme}
-            title={theme === 'dark' ? 'Switch to Executive Light Theme' : 'Switch to 3D Dark Theme'}
-            className={`px-3 py-1.5 rounded-full text-xs font-mono font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 border ${
+            title={theme === 'dark' ? 'Switch to Executive Light Theme' : 'Switch to 3D Dark Space Theme'}
+            className={`px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-full text-xs font-mono font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-2xs active:scale-95 border ${
               theme === 'light'
-                ? 'border-stone-300 bg-stone-100 hover:bg-stone-200 text-stone-800'
-                : 'border-white/10 bg-white/5 hover:bg-white/10 text-stone-200'
+                ? 'border-stone-300/80 bg-white hover:bg-stone-100 text-stone-800 shadow-stone-200/50'
+                : 'border-white/15 bg-white/5 hover:bg-white/10 text-stone-200 shadow-black/40'
             }`}
+            aria-label="Toggle theme mode"
           >
             {theme === 'dark' ? (
               <>
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Light Theme</span>
+                <Sun className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+                <span className="hidden sm:inline font-semibold text-[11px] tracking-wide text-amber-300">Light Mode</span>
               </>
             ) : (
               <>
-                <Moon className="w-3.5 h-3.5 text-rose-500" />
-                <span className="hidden sm:inline">3D Dark</span>
+                <Moon className="w-4 h-4 text-rose-500 shrink-0" />
+                <span className="hidden sm:inline font-semibold text-[11px] tracking-wide text-stone-700">Dark Mode</span>
               </>
             )}
           </button>
