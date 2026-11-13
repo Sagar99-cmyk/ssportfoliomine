@@ -109,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
           {/* Demo Video Modal Trigger Button */}
           <button
             onClick={() => setIsDemoOpen(true)}
-            title="Watch 3D Avatar & System Video Demo"
+            title="Watch System & Portfolio Video Demo"
             className={`px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full text-xs font-mono font-medium transition-all duration-200 flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 border ${
               theme === 'light'
                 ? 'border-rose-300/80 bg-rose-50/90 hover:bg-rose-100 text-rose-700 shadow-rose-200/40'

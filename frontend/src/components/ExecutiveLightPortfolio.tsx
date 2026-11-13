@@ -10,7 +10,6 @@ import {
   GraduationCap, Award, Building2, Binary, Home, FolderGit2
 } from 'lucide-react';
 import { Profile, Skill, Project, Education, Achievement } from '../types';
-import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
 import { CaseStudyModal } from './CaseStudyModal';
 import { StitchLightBackground } from './StitchLightBackground';
 import { DemoVideoModal } from './DemoVideoModal';
@@ -255,7 +254,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
             {/* Demo Video Modal Trigger */}
             <button
               onClick={() => setIsDemoOpen(true)}
-              title="Watch Live 3D Avatar & System Video Demo"
+              title="Watch System & Portfolio Video Demo"
               className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/90 shadow-2xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 text-xs font-mono font-semibold"
               aria-label="Open Demo Video"
             >
@@ -279,11 +278,11 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
             {/* Dark Mode Switcher */}
             <button
               onClick={toggleTheme}
-              title="Switch to 3D Dark Mode"
+              title="Switch to Dark Mode"
               className="p-2 rounded-full bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 shadow-2xs transition-all cursor-pointer flex items-center gap-1.5"
             >
               <Moon className="w-4 h-4 text-stone-700 hover:text-amber-500 transition-colors" />
-              <span className="text-[11px] font-mono font-semibold text-stone-700 hidden sm:inline">3D Dark</span>
+              <span className="text-[11px] font-mono font-semibold text-stone-700 hidden sm:inline">Dark</span>
             </button>
           </div>
 
@@ -294,87 +293,62 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
       <main className="max-w-5xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 pb-24 space-y-12 sm:space-y-14 relative z-10">
 
         {/* ========================================================================= */}
-        {/* 2. HERO SECTION - SAGAR SINGH WITH 3D BLINKING PROFILE AVATAR             */}
+        {/* 2. HERO SECTION - SAGAR SINGH                                             */}
         {/* ========================================================================= */}
         <section id="hero" className="pt-2 space-y-7">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-            
-            {/* Left Column: Intro, Headline, Tags & Action Buttons */}
-            <div className="md:col-span-7 space-y-4 sm:space-y-5">
-              {/* Availability Pill */}
-              <div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs font-mono">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Available for Opportunities
-                </span>
-              </div>
+          
+          {/* Availability Pill */}
+          <div>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs font-mono">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Available for Opportunities
+            </span>
+          </div>
 
-              {/* Main Headline & Intro */}
-              <div className="space-y-3">
-                <h1 className="font-serif-luxury text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-bold text-stone-900 tracking-tight leading-[1.08]">
-                  Sagar <span className="text-[#e11d48]">Singh</span>
-                </h1>
+          {/* Main Headline & Intro */}
+          <div className="space-y-3">
+            <h1 className="font-serif-luxury text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-bold text-stone-900 tracking-tight leading-[1.08]">
+              Sagar <span className="text-[#e11d48]">Singh</span>
+            </h1>
 
-                <p className="text-sm xs:text-base sm:text-lg text-stone-600 font-medium leading-relaxed max-w-xl">
-                  BCA 2026 Graduate specializing in <strong>Data Analytics, Power BI, Advanced Excel, MySQL, and Python</strong>. 
-                  Turning complex data into clear execution.
-                </p>
-              </div>
+            <p className="text-sm xs:text-base sm:text-lg text-stone-600 font-medium leading-relaxed max-w-2xl">
+              BCA 2026 Graduate specializing in <strong>Data Analytics, Power BI, Advanced Excel, MySQL, and Python</strong>. 
+              Turning complex data into clear execution.
+            </p>
+          </div>
 
-              {/* Location & Credentials Tags */}
-              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-medium text-stone-600">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs">
-                  <MapPin className="w-3.5 h-3.5 text-[#e11d48]" />
-                  Bengaluru, IN
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs">
-                  <GraduationCap className="w-3.5 h-3.5 text-[#e11d48]" />
-                  Presidency College (2026)
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs font-mono font-bold text-stone-800">
-                  <Award className="w-3.5 h-3.5 text-[#e11d48]" />
-                  BCA
-                </span>
-              </div>
+          {/* Location & Credentials Tags */}
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-medium text-stone-600">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs">
+              <MapPin className="w-3.5 h-3.5 text-[#e11d48]" />
+              Bengaluru, IN
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs">
+              <GraduationCap className="w-3.5 h-3.5 text-[#e11d48]" />
+              Presidency College (2026)
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs font-mono font-bold text-stone-800">
+              <Award className="w-3.5 h-3.5 text-[#e11d48]" />
+              BCA
+            </span>
+          </div>
 
-              {/* CTA Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <a
-                  href="#projects"
-                  className="px-6 py-3 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs sm:text-sm tracking-wide shadow-md shadow-rose-500/25 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-                >
-                  <span>EXPLORE PROJECTS</span>
-                  <ArrowRight className="w-4 h-4" />
-                </a>
+          {/* CTA Action Buttons */}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <a
+              href="#projects"
+              className="px-6 py-3 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs sm:text-sm tracking-wide shadow-md shadow-rose-500/25 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+            >
+              <span>EXPLORE PROJECTS</span>
+              <ArrowRight className="w-4 h-4" />
+            </a>
 
-                <a
-                  href="#contact"
-                  className="px-6 py-3 rounded-full bg-white hover:bg-stone-50 text-stone-800 font-semibold text-xs sm:text-sm border border-stone-300 shadow-2xs transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-                >
-                  <span>GET IN TOUCH</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Right Column: 3D Living Profile Avatar */}
-            <div className="md:col-span-5 flex flex-col items-center justify-center pt-2 md:pt-0">
-              <div className="relative group">
-                {/* Soft executive light shadow ring backdrop */}
-                <div className="absolute inset-0 rounded-full bg-rose-500/10 blur-2xl transform group-hover:scale-105 transition-transform duration-500 pointer-events-none" />
-                
-                <ProfessionalPhotoAvatar
-                  sizeClassName="w-52 h-52 xs:w-60 xs:h-60 sm:w-68 sm:h-68 md:w-72 md:h-72"
-                  showStatusIndicator={true}
-                />
-              </div>
-
-              {/* Status pill under avatar */}
-              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-50 border border-stone-200 text-stone-600 text-[11px] font-mono shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>3D Interactive Digital Twin · Move to Tilt</span>
-              </div>
-            </div>
-
+            <a
+              href="#contact"
+              className="px-6 py-3 rounded-full bg-white hover:bg-stone-50 text-stone-800 font-semibold text-xs sm:text-sm border border-stone-300 shadow-2xs transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+            >
+              <span>GET IN TOUCH</span>
+            </a>
           </div>
 
           {/* ========================================================================= */}
@@ -522,7 +496,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
         </section>
 
         {/* ========================================================================= */}
-        {/* 4. FEATURED ANALYTICAL PROJECTS (INTERACTIVE 3D FLOW STREAM & GRID)       */}
+        {/* 4. FEATURED ANALYTICAL PROJECTS (INTERACTIVE FLOW STREAM & GRID)          */}
         {/* ========================================================================= */}
         <section id="projects" className="space-y-6 pt-4">
           
@@ -536,7 +510,7 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
                 Featured Projects
               </h2>
               <p className="text-xs font-mono text-stone-500 pt-1">
-                Continuous 3D flow • Hover to freeze • Drag or swipe left & right
+                Continuous interactive flow • Hover to freeze • Drag or swipe left & right
               </p>
             </div>
 
