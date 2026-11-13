@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Sun, Moon, Play } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { Sun, Moon, Play } from 'lucide-react';
+import { motion } from 'motion/react';
 import { SoundButton } from './BackgroundMusic';
 import { DemoVideoModal } from './DemoVideoModal';
 import { useTheme } from '../context/ThemeContext';
@@ -10,18 +10,8 @@ interface NavbarProps {
   isAdminOpen?: boolean;
 }
 
-const NAV_LINKS = [
-  { href: '#about', label: 'About' },
-  { href: '#skills', label: 'Skills' },
-  { href: '#projects', label: 'Projects' },
-  { href: '#education', label: 'Education' },
-  { href: '#resume', label: 'Resume' },
-  { href: '#contact', label: 'Contact' },
-];
-
 export const Navbar: React.FC<NavbarProps> = () => {
   const { theme, toggleTheme } = useTheme();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDemoOpen, setIsDemoOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -32,18 +22,6 @@ export const Navbar: React.FC<NavbarProps> = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Lock background body scroll when mobile menu / sidebar drawer is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [mobileMenuOpen]);
 
   return (
     <motion.header
@@ -62,49 +40,42 @@ export const Navbar: React.FC<NavbarProps> = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6">
 
-        {/* Brand: "Portfolio" */}
-        <a
-          href="#"
-          className="flex items-center gap-2.5 shrink-0 group"
-        >
-          <motion.div
-            className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #e11d48, #9f1239)' }}
-            whileHover={{ scale: 1.1, rotate: 5 }}
+        {/* Brand: Sagar Singh + Live Availability Status */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <a
+            href="#"
+            className="flex items-center gap-2.5 shrink-0 group"
           >
-            <span className="text-white font-bold text-xs font-mono">SS</span>
-          </motion.div>
-          <span
-            className="text-lg font-bold tracking-tight transition-colors"
-            style={{ color: theme === 'light' ? '#0f172a' : '#f1f5f9' }}
-          >
-            Portfolio
-          </span>
-        </a>
-
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map(link => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200"
-              style={{ color: theme === 'light' ? '#475569' : '#94a3b8' }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLAnchorElement).style.color = theme === 'light' ? '#0f172a' : '#f1f5f9';
-                (e.currentTarget as HTMLAnchorElement).style.background = theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.06)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLAnchorElement).style.color = theme === 'light' ? '#475569' : '#94a3b8';
-                (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
-              }}
+            <motion.div
+              className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
+              style={{ background: 'linear-gradient(135deg, #e11d48, #9f1239)' }}
+              whileHover={{ scale: 1.1, rotate: 5 }}
             >
-              {link.label}
-            </a>
-          ))}
-        </nav>
+              <span className="text-white font-bold text-xs font-mono">SS</span>
+            </motion.div>
+            <div className="flex items-center gap-1.5">
+              <span
+                className="text-base sm:text-lg font-bold tracking-tight transition-colors"
+                style={{ color: theme === 'light' ? '#0f172a' : '#f1f5f9' }}
+              >
+                Sagar Singh
+              </span>
+              <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></span>
+            </div>
+          </a>
 
-        {/* Right Actions */}
+          <span
+            className={`hidden xs:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border font-mono ${
+              theme === 'light'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                : 'bg-emerald-950/40 text-emerald-400 border-emerald-800/40'
+            }`}
+          >
+            Available for Opportunities
+          </span>
+        </div>
+
+        {/* Right Actions: Demo, Theme Switcher, Audio */}
         <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
           {/* Demo Video Modal Trigger Button */}
           <button
@@ -147,200 +118,10 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
           {/* Background Ambient Music (Guitar & Piano) */}
           <SoundButton />
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg transition-colors cursor-pointer"
-            style={{
-              color: theme === 'light' ? '#334155' : '#94a3b8',
-              background: theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',
-            }}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
       </div>
 
-      {/* Mobile Slide-Out Sidebar Drawer (Zero layout shift on page content) */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            {/* Backdrop Blur Overlay */}
-            <motion.div
-              key="mobile-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm md:hidden"
-            />
-
-            {/* Slide-in Right Sidebar Drawer */}
-            <motion.aside
-              key="mobile-sidebar"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className={`fixed inset-y-0 right-0 z-50 w-72 max-w-[85vw] shadow-2xl p-6 flex flex-col justify-between md:hidden select-none overscroll-contain border-l ${
-                theme === 'light'
-                  ? 'bg-white border-stone-200 text-stone-900'
-                  : 'bg-[#09090b] border-white/[0.08] text-stone-200'
-              }`}
-            >
-              <div className="space-y-6">
-                {/* Drawer Header */}
-                <div
-                  className={`flex items-center justify-between pb-4 border-b ${
-                    theme === 'light' ? 'border-stone-200' : 'border-white/[0.08]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md"
-                      style={{ background: 'linear-gradient(135deg, #e11d48, #9f1239)' }}
-                    >
-                      <span className="text-white font-bold text-xs font-mono">SS</span>
-                    </div>
-                    <div>
-                      <p
-                        className={`text-sm font-bold tracking-tight ${
-                          theme === 'light' ? 'text-stone-900' : 'text-white'
-                        }`}
-                      >
-                        Navigation
-                      </p>
-                      <p
-                        className={`text-[10px] font-mono ${
-                          theme === 'light' ? 'text-stone-500' : 'text-stone-400'
-                        }`}
-                      >
-                        Sagar Singh Portfolio
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                      theme === 'light'
-                        ? 'bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900'
-                        : 'bg-white/[0.05] hover:bg-white/[0.1] text-stone-400 hover:text-white'
-                    }`}
-                    aria-label="Close menu"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Nav Links */}
-                <nav className="space-y-1">
-                  {NAV_LINKS.map((link, i) => (
-                    <motion.a
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      initial={{ x: 20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: i * 0.04 }}
-                      className={`flex items-center justify-between px-3.5 py-2.5 text-sm font-medium rounded-xl border border-transparent transition-all cursor-pointer ${
-                        theme === 'light'
-                          ? 'text-stone-700 hover:text-[#e11d48] hover:bg-rose-50 hover:border-rose-200'
-                          : 'text-stone-300 hover:text-white hover:bg-rose-500/10 hover:border-rose-500/20'
-                      }`}
-                    >
-                      <span>{link.label}</span>
-                      <span
-                        className={`font-mono text-xs ${
-                          theme === 'light' ? 'text-stone-400' : 'text-stone-600'
-                        }`}
-                      >
-                        →
-                      </span>
-                    </motion.a>
-                  ))}
-                </nav>
-
-                {/* Mobile Demo Video Trigger */}
-                <div className="pt-2">
-                  <button
-                    onClick={() => {
-                      setIsDemoOpen(true);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
-                      theme === 'light'
-                        ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200'
-                        : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border-rose-500/30'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <Play className="w-4 h-4 fill-current text-rose-500" />
-                      <span>Watch Live 3D & System Demo</span>
-                    </span>
-                    <span className="font-mono text-[10px] text-rose-400 font-bold uppercase tracking-wider">
-                      Demo
-                    </span>
-                  </button>
-                </div>
-
-                {/* Mobile Theme Toggle Button */}
-                <div className="pt-2">
-                  <button
-                    onClick={() => {
-                      toggleTheme();
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
-                      theme === 'light'
-                        ? 'bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-200'
-                        : 'bg-white/[0.06] hover:bg-white/[0.1] text-stone-200 border-white/10'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      {theme === 'dark' ? (
-                        <Sun className="w-4 h-4 text-amber-400" />
-                      ) : (
-                        <Moon className="w-4 h-4 text-rose-500" />
-                      )}
-                      <span>
-                        {theme === 'dark' ? 'Switch to Light Theme' : 'Switch to 3D Dark Theme'}
-                      </span>
-                    </span>
-                    <span
-                      className={`font-mono text-[10px] ${
-                        theme === 'light' ? 'text-stone-500' : 'text-stone-400'
-                      }`}
-                    >
-                      Switch
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Drawer Bottom Status */}
-              <div
-                className={`pt-4 border-t ${
-                  theme === 'light' ? 'border-stone-200' : 'border-white/[0.08]'
-                }`}
-              >
-                <p
-                  className={`text-[11px] text-center font-mono ${
-                    theme === 'light' ? 'text-stone-500' : 'text-stone-400'
-                  }`}
-                >
-                  Sagar Singh · Data Analytics & BI
-                </p>
-              </div>
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Pure Video Demo Modal (No text, no clutter) */}
+      {/* Pure Video Demo Modal (No text, pure video only) */}
       <DemoVideoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} />
     </motion.header>
   );

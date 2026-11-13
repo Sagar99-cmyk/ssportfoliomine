@@ -10,6 +10,7 @@ import {
   GraduationCap, Award, Building2, Binary, Home, FolderGit2
 } from 'lucide-react';
 import { Profile, Skill, Project, Education, Achievement } from '../types';
+import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
 import { CaseStudyModal } from './CaseStudyModal';
 import { StitchLightBackground } from './StitchLightBackground';
 import { DemoVideoModal } from './DemoVideoModal';
@@ -293,62 +294,95 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
       <main className="max-w-5xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 pb-24 space-y-12 sm:space-y-14 relative z-10">
 
         {/* ========================================================================= */}
-        {/* 2. HERO SECTION - SAGAR SINGH                                             */}
+        {/* 2. HERO SECTION - SAGAR SINGH WITH LIVING EYE-BLINK PHOTO AVATAR          */}
         {/* ========================================================================= */}
         <section id="hero" className="pt-2 space-y-7">
-          
-          {/* Availability Pill */}
-          <div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs font-mono">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Available for Opportunities
-            </span>
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            
+            {/* Left Column: Intro, Headline, Tags & Action Buttons */}
+            <div className="md:col-span-7 space-y-4 sm:space-y-5">
+              {/* Availability Pill */}
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs font-mono">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Available for Opportunities
+                </span>
+              </div>
 
-          {/* Main Headline & Intro */}
-          <div className="space-y-3">
-            <h1 className="font-serif-luxury text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-bold text-stone-900 tracking-tight leading-[1.08]">
-              Sagar <span className="text-[#e11d48]">Singh</span>
-            </h1>
+              {/* Main Headline & Intro */}
+              <div className="space-y-3">
+                <h1 className="font-serif-luxury text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-bold text-stone-900 tracking-tight leading-[1.08]">
+                  Sagar <span className="text-[#e11d48]">Singh</span>
+                </h1>
 
-            <p className="text-sm xs:text-base sm:text-lg text-stone-600 font-medium leading-relaxed max-w-2xl">
-              BCA 2026 Graduate specializing in <strong>Data Analytics, Power BI, Advanced Excel, MySQL, and Python</strong>. 
-              Turning complex data into clear execution.
-            </p>
-          </div>
+                <p className="text-sm xs:text-base sm:text-lg text-stone-600 font-medium leading-relaxed max-w-xl">
+                  BCA 2026 Graduate specializing in <strong>Data Analytics, Power BI, Advanced Excel, MySQL, and Python</strong>. 
+                  Turning complex data into clear execution.
+                </p>
+              </div>
 
-          {/* Location & Credentials Tags */}
-          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-medium text-stone-600">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs">
-              <MapPin className="w-3.5 h-3.5 text-[#e11d48]" />
-              Bengaluru, IN
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs">
-              <GraduationCap className="w-3.5 h-3.5 text-[#e11d48]" />
-              Presidency College (2026)
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs font-mono font-bold text-stone-800">
-              <Award className="w-3.5 h-3.5 text-[#e11d48]" />
-              BCA
-            </span>
-          </div>
+              {/* Location & Credentials Tags */}
+              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-medium text-stone-600">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs">
+                  <MapPin className="w-3.5 h-3.5 text-[#e11d48]" />
+                  Bengaluru, IN
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs">
+                  <GraduationCap className="w-3.5 h-3.5 text-[#e11d48]" />
+                  Presidency College (2026)
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-stone-200 shadow-2xs font-mono font-bold text-stone-800">
+                  <Award className="w-3.5 h-3.5 text-[#e11d48]" />
+                  BCA
+                </span>
+              </div>
 
-          {/* CTA Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3 pt-1">
-            <a
-              href="#projects"
-              className="px-6 py-3 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs sm:text-sm tracking-wide shadow-md shadow-rose-500/25 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-            >
-              <span>EXPLORE PROJECTS</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
+              {/* CTA Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <a
+                  href="#projects"
+                  className="px-6 py-3 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs sm:text-sm tracking-wide shadow-md shadow-rose-500/25 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <span>EXPLORE PROJECTS</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
 
-            <a
-              href="#contact"
-              className="px-6 py-3 rounded-full bg-white hover:bg-stone-50 text-stone-800 font-semibold text-xs sm:text-sm border border-stone-300 shadow-2xs transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-            >
-              <span>GET IN TOUCH</span>
-            </a>
+                <a
+                  href="#contact"
+                  className="px-6 py-3 rounded-full bg-white hover:bg-stone-50 text-stone-800 font-semibold text-xs sm:text-sm border border-stone-300 shadow-2xs transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <span>GET IN TOUCH</span>
+                </a>
+
+                <button
+                  onClick={onDownloadResume}
+                  className="px-5 py-3 rounded-full bg-stone-50 hover:bg-stone-100 text-stone-700 font-semibold text-xs sm:text-sm border border-stone-200 shadow-2xs transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#e11d48]" />
+                  <span>RESUME</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Eye-Blinking Living Photo Avatar */}
+            <div className="md:col-span-5 flex flex-col items-center justify-center pt-2 md:pt-0">
+              <div className="relative group">
+                {/* Soft executive light shadow ring backdrop */}
+                <div className="absolute inset-0 rounded-full bg-rose-500/10 blur-2xl transform group-hover:scale-105 transition-transform duration-500 pointer-events-none" />
+                
+                <ProfessionalPhotoAvatar
+                  sizeClassName="w-52 h-52 xs:w-60 xs:h-60 sm:w-68 sm:h-68 md:w-72 md:h-72"
+                  showStatusIndicator={true}
+                />
+              </div>
+
+              {/* Status pill under avatar */}
+              <div className="mt-3 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-stone-200 text-stone-600 text-[11px] font-mono shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Verified · BCA Graduate 2026</span>
+              </div>
+            </div>
+
           </div>
 
           {/* ========================================================================= */}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { ThreeDataBackground } from './components/ThreeDataBackground';
 import { Navbar } from './components/Navbar';
@@ -293,19 +294,31 @@ const PortfolioContent: React.FC = () => {
   // When Light Mode is active, render the dedicated Stitch Light Portfolio matching screen c46cca94309749f090e872abba44ee83
   if (theme === 'light') {
     return (
-      <ExecutiveLightPortfolio
-        profile={profile || DEFAULT_PROFILE}
-        skills={skills.length > 0 ? skills : DEFAULT_SKILLS}
-        projects={projects.length > 0 ? projects : DEFAULT_PROJECTS}
-        education={education.length > 0 ? education : DEFAULT_EDUCATION}
-        achievements={achievements.length > 0 ? achievements : DEFAULT_ACHIEVEMENTS}
-        onDownloadResume={handleDownloadResume}
-      />
+      <motion.div
+        key="executive-light-root"
+        initial={{ opacity: 0, scale: 0.985, filter: 'blur(8px)' }}
+        animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+        transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full"
+      >
+        <ExecutiveLightPortfolio
+          profile={profile || DEFAULT_PROFILE}
+          skills={skills.length > 0 ? skills : DEFAULT_SKILLS}
+          projects={projects.length > 0 ? projects : DEFAULT_PROJECTS}
+          education={education.length > 0 ? education : DEFAULT_EDUCATION}
+          achievements={achievements.length > 0 ? achievements : DEFAULT_ACHIEVEMENTS}
+          onDownloadResume={handleDownloadResume}
+        />
+      </motion.div>
     );
   }
 
   return (
-    <div
+    <motion.div
+      key="executive-dark-root"
+      initial={{ opacity: 0, scale: 0.985, filter: 'blur(8px)' }}
+      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+      transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
       className="min-h-screen relative transition-colors duration-500"
       style={{
         background: '#09090b',
@@ -353,7 +366,7 @@ const PortfolioContent: React.FC = () => {
         {/* Footer with Newsletter and Live Links */}
         <Footer profile={profile} />
       </div>
-    </div>
+    </motion.div>
   );
 };
 

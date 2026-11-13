@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { ArrowRight, Compass } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { SoundButton } from './BackgroundMusic';
 import { Welcome3DRedWave } from './Welcome3DRedWave';
 
@@ -118,19 +118,50 @@ const WelcomeTypewriter: React.FC<{
 };
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdmin }) => {
-  // Manual Entry Only - No auto-redirect timer
+  const [isEntering, setIsEntering] = useState(false);
+
+  // Manual Entry Only with smooth cinematic portal transition into light/dark mode
   const handleEnter = useCallback(() => {
-    onEnter();
-  }, [onEnter]);
+    if (isEntering) return;
+    setIsEntering(true);
+    setTimeout(() => {
+      onEnter();
+    }, 650);
+  }, [onEnter, isEntering]);
 
   return (
-    <div
+    <motion.div
+      animate={isEntering ? { scale: 1.04, filter: 'blur(6px)', opacity: 0.85 } : { scale: 1, filter: 'blur(0px)', opacity: 1 }}
+      transition={{ duration: 0.65, ease: 'easeInOut' }}
       className="fixed inset-0 z-[100] flex flex-col justify-between overflow-hidden select-none"
       style={{
         background: '#09090b',
         color: '#f5f0eb',
       }}
     >
+      {/* Cinematic Golden Radiant Transition Bloom when entering Light/Dark Mode */}
+      <AnimatePresence>
+        {isEntering && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-[120] pointer-events-none flex items-center justify-center overflow-hidden"
+            style={{
+              background: 'radial-gradient(circle at center, rgba(255,255,255,0.98) 0%, rgba(254,243,199,0.7) 45%, rgba(9,9,11,0.95) 100%)',
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: [0.4, 3], opacity: [0, 0.8, 1] }}
+              transition={{ duration: 0.65, ease: 'easeOut' }}
+              className="w-96 h-96 rounded-full bg-gradient-to-tr from-rose-500/30 via-amber-200/60 to-white blur-3xl"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* 3D Cosmic Nucleus & Starry Space Background */}
       <Welcome3DRedWave />
 
@@ -266,6 +297,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onOpenAdm
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
       </footer>
-    </div>
+    </motion.div>
   );
 };
