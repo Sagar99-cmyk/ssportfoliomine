@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ExternalLink, Github, Linkedin, Youtube, FileText, Globe, Search, Layers, Pause, Play, Code2, Sparkles, Database, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Project } from '../types';
+import { resolveImageUrl } from '../services/api';
 import { CaseStudyModal } from './CaseStudyModal';
 import { getTechLogo } from './TechLogos';
 import { useTheme } from '../context/ThemeContext';
@@ -434,9 +435,12 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
                     <div className="relative w-full h-44 sm:h-48 overflow-hidden bg-stone-950 border-b border-white/5">
                       {project.thumbnailUrl ? (
                         <img
-                          src={project.thumbnailUrl}
+                          src={resolveImageUrl(project.thumbnailUrl)}
                           alt={project.title}
                           className="w-full h-full object-cover object-top group-hover:scale-106 transition-transform duration-500 ease-out"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/projects/sales-dashboard.png';
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-stone-900 to-stone-950 flex flex-col items-center justify-center gap-2 p-4 text-center">
@@ -631,9 +635,12 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
                     <div className="relative w-full h-44 sm:h-48 overflow-hidden bg-stone-950 border-b border-white/5">
                       {project.thumbnailUrl ? (
                         <img
-                          src={project.thumbnailUrl}
+                          src={resolveImageUrl(project.thumbnailUrl)}
                           alt={project.title}
                           className="w-full h-full object-cover object-top group-hover:scale-106 transition-transform duration-500 ease-out"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/projects/sales-dashboard.png';
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-stone-900 to-stone-950 flex flex-col items-center justify-center gap-2 p-4 text-center">

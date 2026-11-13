@@ -27,11 +27,12 @@ function processThumbnailUrl(url: string | null | undefined, title: string): str
         const fileName = `project-${Date.now()}-${safeTitle}.${ext}`;
         const filePath = path.join(uploadDir, fileName);
         fs.writeFileSync(filePath, buffer);
-        return `/uploads/${fileName}`;
       }
     } catch (e) {
-      console.warn('Failed to save base64 thumbnail to disk, storing directly:', e);
+      // Local caching failure is non-fatal
     }
+    // Store data URL directly in MySQL (LONGTEXT) so images are permanently preserved and never lost across restarts
+    return trimmed;
   }
   return trimmed;
 }

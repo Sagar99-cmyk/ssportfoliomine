@@ -17,8 +17,33 @@ import {
   DEFAULT_PROJECTS,
 } from '../data/defaultData';
 
+export function resolveImageUrl(url: string | null | undefined): string {
+  if (!url) return '/projects/sales-dashboard.png';
+  const trimmed = url.trim();
+  if (!trimmed) return '/projects/sales-dashboard.png';
+  if (
+    trimmed.startsWith('data:') ||
+    trimmed.startsWith('blob:') ||
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://')
+  ) {
+    return trimmed;
+  }
+  if (trimmed.startsWith('/uploads/')) {
+    if (
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname.includes('render.com'))
+    ) {
+      return trimmed;
+    }
+    return `https://ssportfoliomine.onrender.com${trimmed}`;
+  }
+  return trimmed;
+}
+
 export function normalizeProject(raw: any): Project {
   if (!raw) return DEFAULT_PROJECTS[0];
+  const rawThumb = raw.thumbnailUrl || raw.thumbnail_url || '/projects/sales-dashboard.png';
   return {
     id: raw.id || `proj-${Math.random().toString(36).substring(2, 7)}`,
     title: raw.title || 'Untitled Project',
@@ -27,7 +52,7 @@ export function normalizeProject(raw: any): Project {
     category: raw.category || 'Data Analytics',
     difficulty: raw.difficulty || 'Advanced',
     featured: raw.featured !== undefined ? Boolean(raw.featured) : true,
-    thumbnailUrl: raw.thumbnailUrl || raw.thumbnail_url || '/projects/sales-dashboard.png',
+    thumbnailUrl: resolveImageUrl(rawThumb),
     technologies: Array.isArray(raw.technologies)
       ? raw.technologies
       : (typeof raw.technologies === 'string'

@@ -216,6 +216,12 @@ app.use((req: Request, res: Response, next) => {
 });
 
 app.use(express.static(path.resolve(__dirname, 'public')));
+const publicUploads = path.resolve(__dirname, 'public', 'uploads');
+if (!fs.existsSync(publicUploads)) {
+  try { fs.mkdirSync(publicUploads, { recursive: true }); } catch {}
+}
+app.use('/uploads', express.static(publicUploads));
+app.use('/api/uploads', express.static(publicUploads));
 
 // ==============================================================================
 // 1. MySQL Database Health & Management Endpoints
@@ -797,8 +803,10 @@ const handleImageUpload = (req: Request, res: Response) => {
         url: publicUrl,
         filename: cleanOrigName,
         safeFilename: safeName,
+        dataUrl: imageBase64,
       },
       url: publicUrl,
+      dataUrl: imageBase64,
       filename: cleanOrigName,
       safeFilename: safeName,
       message: 'Image uploaded successfully.'

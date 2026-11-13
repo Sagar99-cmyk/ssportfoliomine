@@ -74,7 +74,7 @@ import {
   SystemMetrics,
   AppearanceSettings,
 } from '../../types';
-import { api } from '../../services/api';
+import { api, resolveImageUrl } from '../../services/api';
 import { getTechLogo } from '../TechLogos';
 import { ThreeDataBackground } from '../ThreeDataBackground';
 import { playNotificationChime } from '../../utils/soundAlert';
@@ -92,6 +92,43 @@ const PRESET_TECH_ICONS = [
   'Power BI', 'MySQL', 'Tableau', 'Pandas', 'Excel',
   'Git', 'Supabase', 'Node.js', 'TypeScript'
 ];
+
+const compressImage = (file: File, maxWidth = 1280, quality = 0.85): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(e.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const isPng = file.type === 'image/png';
+        const dataUrl = canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = () => resolve(e.target?.result as string);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => {
+      const r2 = new FileReader();
+      r2.onload = () => resolve(r2.result as string);
+      r2.readAsDataURL(file);
+    };
+    reader.readAsDataURL(file);
+  });
+};
 
 const getProjectThumbnailDisplayName = (url?: string, customName?: string): string => {
   if (customName) return customName;
@@ -1461,9 +1498,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, onDataC
                                 <div className="flex items-center gap-3">
                                   {p.thumbnailUrl ? (
                                     <img
-                                      src={p.thumbnailUrl}
+                                      src={resolveImageUrl(p.thumbnailUrl)}
                                       alt=""
                                       className="w-12 h-8 object-cover rounded-lg border border-white/[0.1] shrink-0 shadow-sm"
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).src = '/projects/sales-dashboard.png';
+                                      }}
                                     />
                                   ) : (
                                     <div className="w-12 h-8 rounded-lg bg-[#080a11] border border-white/[0.08] flex items-center justify-center text-stone-500 shrink-0">
@@ -1710,9 +1750,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, onDataC
                         <div className="md:col-span-4 h-32 rounded-xl overflow-hidden border border-white/[0.1] bg-[#05070c] flex items-center justify-center relative group">
                           {editingProject.thumbnailUrl ? (
                             <img
-                              src={editingProject.thumbnailUrl}
+                              src={resolveImageUrl(editingProject.thumbnailUrl)}
                               alt="Project Preview"
                               className="w-full h-full object-cover object-center"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/projects/sales-dashboard.png';
+                              }}
                             />
                           ) : (
                             <div className="text-center p-2 text-stone-500 space-y-1">
@@ -1736,23 +1779,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, onDataC
                                 if (!file) return;
                                 setProjectFileName(file.name);
                                 setIsUploadingThumbnail(true);
-                                const reader = new FileReader();
-                                reader.onload = async () => {
-                                  const base64 = reader.result as string;
+                                try {
+                                  // Compress/resize client-side for resilient data storage and instant preview
+                                  const dataUrl = await compressImage(file, 1280, 0.85);
+                                  setEditingProject((prev) => ({ ...prev, thumbnailUrl: dataUrl }));
+                                  setProjectFileName(file.name);
+
+                                  // Also upload to server in background
                                   try {
-                                    const res = await api.uploadImage(base64, file.name);
-                                    const finalUrl = res?.url || (res as any)?.data?.url || (res as any)?.data?.path || '/uploads/' + file.name;
-                                    setEditingProject({ ...editingProject, thumbnailUrl: finalUrl });
-                                    setProjectFileName(file.name);
-                                  } catch (err) {
-                                    console.warn('API upload fallback:', err);
-                                    setEditingProject({ ...editingProject, thumbnailUrl: base64 });
-                                    setProjectFileName(file.name);
-                                  } finally {
-                                    setIsUploadingThumbnail(false);
+                                    await api.uploadImage(dataUrl, file.name);
+                                  } catch (uploadErr) {
+                                    console.warn('Backend upload background notice:', uploadErr);
                                   }
-                                };
-                                reader.readAsDataURL(file);
+                                } catch (err: any) {
+                                  console.warn('Image processing fallback:', err);
+                                } finally {
+                                  setIsUploadingThumbnail(false);
+                                }
                               }}
                               className="block w-full text-xs text-stone-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500/20 file:text-amber-300 hover:file:bg-amber-500/30 cursor-pointer"
                             />
@@ -2486,21 +2529,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, onDataC
                                 if (!file) return;
                                 setSkillIconFileName(file.name);
                                 setIsUploadingSkillIcon(true);
-                                const reader = new FileReader();
-                                reader.onload = async () => {
+                                try {
+                                  const dataUrl = await compressImage(file, 512, 0.9);
+                                  setEditingSkill((prev) => ({ ...prev, iconUrl: dataUrl }));
+                                  setSkillIconFileName(file.name);
+
                                   try {
-                                    const res = await api.uploadImage(reader.result as string, file.name);
-                                    const finalUrl = res?.url || (res as any)?.data?.url || (reader.result as string);
-                                    setEditingSkill({ ...editingSkill, iconUrl: finalUrl });
-                                    setSkillIconFileName(file.name);
-                                  } catch {
-                                    setEditingSkill({ ...editingSkill, iconUrl: reader.result as string });
-                                    setSkillIconFileName(file.name);
-                                  } finally {
-                                    setIsUploadingSkillIcon(false);
+                                    await api.uploadImage(dataUrl, file.name);
+                                  } catch (uploadErr) {
+                                    console.warn('Skill icon upload background notice:', uploadErr);
                                   }
-                                };
-                                reader.readAsDataURL(file);
+                                } catch (err) {
+                                  console.warn('Skill icon processing fallback:', err);
+                                } finally {
+                                  setIsUploadingSkillIcon(false);
+                                }
                               }}
                               className="block w-full text-xs text-stone-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:bg-sky-500/20 file:text-sky-300 hover:file:bg-sky-500/30 cursor-pointer"
                             />
