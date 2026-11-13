@@ -1,13 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { ExternalLink, Github, Linkedin, Youtube, FileText, Globe, Search, Layers, Pause, Play, Code2, Sparkles, Database, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
+import { ExternalLink, Github, Linkedin, Youtube, FileText, Globe, Search, Layers, Pause, Play, Code2, Sparkles, Database, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Project } from '../types';
 import { CaseStudyModal } from './CaseStudyModal';
 import { getTechLogo } from './TechLogos';
 import { useTheme } from '../context/ThemeContext';
 import { FeaturedVideoDemo } from './FeaturedVideoDemo';
-import { ShakuroWorksGallery, WorksShot, SAGAR_WORKS_SHOTS } from './ShakuroWorksGallery';
-import { PopUpBookShowcase } from './PopUpBookShowcase';
 
 interface ProjectsGalleryProps {
   projects: Project[];
@@ -83,27 +81,9 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypeTab, setSelectedTypeTab] = useState<'All' | 'Major' | 'Minor' | 'Micro/Mini'>('All');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [viewMode, setViewMode] = useState<'book' | '3d' | 'flow' | 'grid'>('book');
+  const [viewMode, setViewMode] = useState<'grid' | 'flow'>('grid');
   const [isHovered, setIsHovered] = useState(false);
   const [isPausedByUser, setIsPausedByUser] = useState(false);
-
-  // Map portfolio projects to high-fidelity 3D works shots
-  const worksShots: WorksShot[] = useMemo(() => {
-    if (!projects || projects.length === 0) return SAGAR_WORKS_SHOTS;
-    return projects.map((p, idx) => {
-      const fallbackRef = SAGAR_WORKS_SHOTS[idx % SAGAR_WORKS_SHOTS.length];
-      return {
-        title: p.title || fallbackRef.title,
-        category: p.category || (p.projectType || 'Data Analytics Capstone'),
-        description: p.shortDescription || fallbackRef.description,
-        metrics: (p as any).metrics || fallbackRef.metrics || 'Verified Portfolio Capstone',
-        url: p.liveDemoUrl || p.githubUrl || fallbackRef.url,
-        image: p.thumbnailUrl && p.thumbnailUrl.startsWith('http') ? p.thumbnailUrl : fallbackRef.image,
-        technologies: p.technologies || fallbackRef.technologies,
-        projectRef: p,
-      };
-    });
-  }, [projects]);
 
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const mouseRatioRef = React.useRef<number | null>(null); // -1 (far left) to +1 (far right)
@@ -251,55 +231,31 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
               </div>
             )}
 
-            {/* View Mode: 3D Pop-Up Book vs 3D Concave Strip vs Flow vs Grid */}
+            {/* View Mode: Grid View vs Flow Stream */}
             <div className={`flex items-center p-1 rounded-xl border backdrop-blur-md ${
               isLight ? 'bg-stone-100 border-stone-200' : 'bg-stone-900/60 border-white/[0.08]'
             }`}>
               <button
-                onClick={() => setViewMode('book')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                  viewMode === 'book'
-                    ? (isLight ? 'bg-white text-stone-900 shadow-xs' : 'bg-rose-900/50 text-rose-300 border border-rose-500/40 shadow-sm')
-                    : (isLight ? 'text-stone-600 hover:text-stone-900' : 'text-stone-400 hover:text-stone-200')
-                }`}
-              >
-                <BookOpen className="w-3 h-3 text-rose-500" />
-                <span>3D Pop-Up Book</span>
-              </button>
-
-              <button
-                onClick={() => setViewMode('3d')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                  viewMode === '3d'
-                    ? (isLight ? 'bg-white text-stone-900 shadow-xs' : 'bg-rose-900/50 text-rose-300 border border-rose-500/40 shadow-sm')
-                    : (isLight ? 'text-stone-600 hover:text-stone-900' : 'text-stone-400 hover:text-stone-200')
-                }`}
-              >
-                <Sparkles className="w-3 h-3 text-rose-500" />
-                <span>3D Concave Strip</span>
-              </button>
-
-              <button
-                onClick={() => setViewMode('flow')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                  viewMode === 'flow'
-                    ? (isLight ? 'bg-white text-stone-900 shadow-xs' : 'bg-rose-900/50 text-rose-300 border border-rose-500/40 shadow-sm')
-                    : (isLight ? 'text-stone-600 hover:text-stone-900' : 'text-stone-400 hover:text-stone-200')
-                }`}
-              >
-                <Layers className="w-3 h-3 text-rose-500" />
-                <span>Flow Stream</span>
-              </button>
-
-              <button
                 onClick={() => setViewMode('grid')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                   viewMode === 'grid'
                     ? (isLight ? 'bg-white text-stone-900 shadow-xs' : 'bg-rose-900/50 text-rose-300 border border-rose-500/40 shadow-sm')
                     : (isLight ? 'text-stone-600 hover:text-stone-900' : 'text-stone-400 hover:text-stone-200')
                 }`}
               >
                 <span>Grid View</span>
+              </button>
+
+              <button
+                onClick={() => setViewMode('flow')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                  viewMode === 'flow'
+                    ? (isLight ? 'bg-white text-stone-900 shadow-xs' : 'bg-rose-900/50 text-rose-300 border border-rose-500/40 shadow-sm')
+                    : (isLight ? 'text-stone-600 hover:text-stone-900' : 'text-stone-400 hover:text-stone-200')
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5 text-rose-500" />
+                <span>Flow Stream</span>
               </button>
             </div>
 
@@ -382,36 +338,6 @@ export const ProjectsGallery: React.FC<ProjectsGalleryProps> = ({ projects }) =>
             ))}
           </div>
         </div>
-
-        {/* ========================================================================= */}
-        {/* VIEW 0: 3D INTERACTIVE POP-UP BOOK PROJECT SHOWCASE                       */}
-        {/* ========================================================================= */}
-        {viewMode === 'book' && (
-          <div className="w-full my-4">
-            <PopUpBookShowcase
-              projects={projects}
-              onOpenCaseStudy={(proj) => setSelectedProject(proj)}
-            />
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* VIEW 1: 3D CONCAVE SHAKURO STRIP GALLERY                                  */}
-        {/* ========================================================================= */}
-        {viewMode === '3d' && (
-          <div className="w-full my-2">
-            <ShakuroWorksGallery
-              customShots={worksShots}
-              onSelectProject={(shot) => {
-                if (shot.projectRef) {
-                  setSelectedProject(shot.projectRef);
-                } else if (shot.url) {
-                  window.open(shot.url, '_blank', 'noopener,noreferrer');
-                }
-              }}
-            />
-          </div>
-        )}
 
         {/* ========================================================================= */}
         {/* VIEW 1: INTERACTIVE MOUSE-CONTROLLED FLOW + CONTINUOUS SLOW STREAM        */}

@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { Profile, Skill, Project, Education, Achievement } from '../types';
 import { ProfessionalPhotoAvatar } from './ProfessionalPhotoAvatar';
-import { Sagar3DModelCanvas } from './Sagar3DModelCanvas';
 import { CaseStudyModal } from './CaseStudyModal';
 import { StitchLightBackground } from './StitchLightBackground';
 import { DemoVideoModal } from './DemoVideoModal';
@@ -363,8 +362,9 @@ export const ExecutiveLightPortfolio: React.FC<ExecutiveLightPortfolioProps> = (
                 {/* Soft executive light shadow ring backdrop */}
                 <div className="absolute inset-0 rounded-full bg-rose-500/10 blur-2xl transform group-hover:scale-105 transition-transform duration-500 pointer-events-none" />
                 
-                <Sagar3DModelCanvas
+                <ProfessionalPhotoAvatar
                   sizeClassName="w-52 h-52 xs:w-60 xs:h-60 sm:w-68 sm:h-68 md:w-72 md:h-72"
+                  showStatusIndicator={true}
                 />
               </div>
 
